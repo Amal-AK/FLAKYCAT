@@ -39,7 +39,7 @@ The code used is provided in notebooks form :
 
 The notebook `codeBERT-based` shows the classification experiments conducted using the source code transformation performed by the codeEBRT model. This notebook includes the main experiment of Flakycat,  and compares it to the baseline methods. The folder `model` contains the saved trained model. 
 
-#### Test-Smells based : 
+#### TestSmells-based experiments 
 
 In the notebook `smells-based`, we perform experiments based on the vectors produced by the [TsDetect](https://testsmells.org/pages/testsmelldetector.html) Tool. 
 We use the following command to detect test smells in each test : 
@@ -52,7 +52,7 @@ We use the following command to detect test smells in each test :
 
 The tool outputs a CSV file containing the results of the execution `data/vectors/results_ts_detect.csv`
 
-#### Vocabulary based 
+#### Vocabulary based experiments 
 
 contains the code for experiments based on the flakiness vocabulary.
 
