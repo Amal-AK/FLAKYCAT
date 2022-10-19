@@ -27,6 +27,7 @@ The data folder contains the following  :
 - Trax ( not compatible with windows ) 
 - Transformers
 - scikit_learn
+- nltk
 - [TestSmellDetector.jar](https://github.com/TestSmells/TestSmellDetector/releases)
 
 
