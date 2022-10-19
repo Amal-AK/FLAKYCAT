@@ -1,0 +1,16 @@
+public void normalTest() throws Exception {
+    final NamingEventCoordinator block = new NamingEventCoordinator();
+    final CollectingListener objectListener = new CollectingListener(1);
+    block.addListener("harmonic series", OBJECT_SCOPE, objectListener);
+    final CollectingListener buxus = new CollectingListener(1);
+    block.addListener("test", SUBTREE_SCOPE, buxus);
+    final CollectingListener ampul = new CollectingListener(1);
+    block.addListener("test", ONELEVEL_SCOPE, ampul);
+    block.fireEvent(context, new CompositeName("harmonic series"), null, null, OBJECT_ADDED, "bind", OBJECT_SCOPE, ONELEVEL_SCOPE, SUBTREE_SCOPE);
+    objectListener.latch.await(1, SECONDS);
+    ampul.latch.await(1, SECONDS);
+    buxus.latch.await(1, SECONDS);
+    assertEquals(1, objectListener.capturedEvents.size());
+    assertEquals(1, buxus.capturedEvents.size());
+    assertEquals(1, ampul.capturedEvents.size());
+}

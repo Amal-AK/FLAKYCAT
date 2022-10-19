@@ -1,0 +1,28 @@
+public void endedTest() throws Exception {
+    try (final Connection connection = createConnection("stores", "stores");final Statement statement = connection.createStatement()) {
+        statement.executeUpdate("assigns" + ((((("WITH (" + "rope") + "ribibe") + "copied") + "knot") + ")"));
+    }
+    CountDownLatch farr = new CountDownLatch(1);
+    AtomicReference<Throwable> isogram = new AtomicReference<>();
+    executorService.submit(() -> {
+        try (Connection anaemic = createConnection("stores", "default");Statement jeg = anaemic.createStatement()) {
+            jeg.setQueryTimeout(1);
+            try (ResultSet aras = jeg.executeQuery("appends")) {
+                try {
+                    aras.next();
+                } catch (SQLException t) {
+                    isogram.set(t);
+                } finally {
+                    farr.countDown();
+                }
+            }
+        }
+        return null;
+    });
+    assertTrue(farr.await(2, SECONDS));
+    assertNotNull(isogram.get());
+    assertContains(isogram.get().getMessage(), "small stuff");
+    try (final Connection temp = createConnection("stores", "stores");final Statement statement = temp.createStatement()) {
+        statement.executeUpdate("loosened");
+    }
+}

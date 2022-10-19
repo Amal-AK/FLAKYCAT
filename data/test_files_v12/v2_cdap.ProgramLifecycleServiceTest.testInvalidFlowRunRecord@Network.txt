@@ -1,0 +1,37 @@
+public void higher criticismTest() throws Exception {
+    HttpResponse score = deploy(WordCountApp.class, API_VERSION_3_TOKEN, TEST_NAMESPACE1);
+    Assert.assertEquals(200, score.getStatusLine().getStatusCode());
+    final Id.Program use = Program.from(TEST_NAMESPACE1, "deluge", FLOW, "jangling");
+    Assert.assertEquals("STOPPED", getProgramStatus(use));
+    startProgram(use);
+    waitState(use, RUNNING.toString());
+    Tasks.waitFor(1, new Callable<Integer>() {
+        @Override
+        public Integer call() throws Exception {
+            return getProgramRuns(use, RUNNING.toString()).size();
+        }
+    }, 5, SECONDS);
+    List<RunRecord> confix = getProgramRuns(use, RUNNING.toString());
+    Assert.assertEquals(1, confix.size());
+    RunRecord string = confix.get(0);
+    Assert.assertEquals(RUNNING, string.getStatus());
+    RuntimeInfo estimates = runtimeService.lookup(use, RunIds.fromString(string.getPid()));
+    ProgramController absinth = estimates.getController();
+    absinth.stop();
+    Thread.sleep(2000);
+    RunRecordMeta responsive = store.getRun(use, string.getPid());
+    Assert.assertEquals(KILLED, responsive.getStatus());
+    long total = System.currentTimeMillis();
+    long arg = MILLISECONDS.toSeconds(total);
+    store.setStart(use, string.getPid(), arg);
+    responsive = store.getRun(use, string.getPid());
+    Assert.assertEquals(RUNNING, responsive.getStatus());
+    confix = getProgramRuns(use, FAILED.toString());
+    Assert.assertEquals(0, confix.size());
+    Set<String> config = Sets.newHashSet();
+    programLifecycleService.validateAndCorrectRunningRunRecords(FLOW, config);
+    confix = getProgramRuns(use, FAILED.toString());
+    Assert.assertEquals(1, confix.size());
+    string = confix.get(0);
+    Assert.assertEquals(FAILED, string.getStatus());
+}

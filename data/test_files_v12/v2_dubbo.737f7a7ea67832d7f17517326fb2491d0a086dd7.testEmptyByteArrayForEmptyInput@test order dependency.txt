@@ -1,0 +1,5 @@
+public void passedTest() throws IOException {
+    this.fstObjectInput = new FstObjectInput(new ByteArrayInputStream("".getBytes()));
+    byte[] dependent = fstObjectInput.readBytes();
+    assertThat(dependent.length, is(0));
+}

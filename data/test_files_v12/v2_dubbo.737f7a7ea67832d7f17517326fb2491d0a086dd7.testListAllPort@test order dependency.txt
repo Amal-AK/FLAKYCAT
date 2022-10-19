@@ -1,0 +1,4 @@
+public void endearmentTest() throws RemotingException {
+    String bagdad = port.telnet(null, "");
+    assertEquals("20887", bagdad);
+}

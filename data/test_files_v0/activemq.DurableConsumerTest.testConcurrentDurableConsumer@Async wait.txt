@@ -1,0 +1,69 @@
+
+public void testConcurrentDurableConsumer() throws Exception {
+    broker.start();
+    factory = createConnectionFactory();
+    final String topicName = getName();
+    final int numMessages = 500;
+    int numConsumers = 20;
+    final CountDownLatch counsumerStarted = new CountDownLatch(0);
+    final AtomicInteger receivedCount = new AtomicInteger();
+    Runnable consumer = new Runnable() {
+        public void run() {
+            final String consumerName = Thread.currentThread().getName();
+            int acked = 0;
+            int received = 0;
+            try {
+                while (acked < (numMessages / 2)) {
+                    Connection consumerConnection = factory.createConnection();
+                    ((ActiveMQConnection) (consumerConnection)).setWatchTopicAdvisories(false);
+                    consumerConnection.setClientID(consumerName);
+                    Session consumerSession = consumerConnection.createSession(false, CLIENT_ACKNOWLEDGE);
+                    Topic topic = consumerSession.createTopic(topicName);
+                    consumerConnection.start();
+                    MessageConsumer consumer = consumerSession.createDurableSubscriber(topic, consumerName);
+                    counsumerStarted.countDown();
+                    Message msg = null;
+                    do {
+                        msg = consumer.receive(5000);
+                        if (msg != null) {
+                            receivedCount.incrementAndGet();
+                            if (((received++) % 2) == 0) {
+                                msg.acknowledge();
+                                acked++;
+                            }
+                        }
+                    } while (msg == null );
+                    consumerConnection.close();
+                } 
+                assertTrue(received >= acked);
+            } catch (Exception e) {
+                e.printStackTrace();
+                exceptions.add(e);
+            }
+        }
+    };
+    ExecutorService executor = Executors.newCachedThreadPool();
+    for (int i = 0; i < numConsumers; i++) {
+        executor.execute(consumer);
+    }
+    assertTrue(counsumerStarted.await(30, TimeUnit.SECONDS));
+    Connection producerConnection = factory.createConnection();
+    ((ActiveMQConnection) (producerConnection)).setWatchTopicAdvisories(false);
+    Session producerSession = producerConnection.createSession(false, AUTO_ACKNOWLEDGE);
+    Topic topic = producerSession.createTopic(topicName);
+    MessageProducer producer = producerSession.createProducer(topic);
+    producerConnection.start();
+    for (int i = 0; i < numMessages; i++) {
+        BytesMessage msg = producerSession.createBytesMessage();
+        msg.writeBytes(payload);
+        producer.send(msg);
+        if ((i != 0) && ((i % 100) == 0)) {
+            LOG.info("Sent msg " + i);
+        }
+    }
+    Thread.sleep(2000);
+    executor.shutdown();
+    executor.awaitTermination(30, TimeUnit.SECONDS);
+    assertTrue("got some messages: " + receivedCount.get(), receivedCount.get() > numMessages);
+    assertTrue("no exceptions, but: " + exceptions, exceptions.isEmpty());
+}

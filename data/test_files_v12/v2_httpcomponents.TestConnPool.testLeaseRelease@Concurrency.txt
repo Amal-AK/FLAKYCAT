@@ -1,0 +1,30 @@
+public void climateTest() throws Exception {
+    HttpConnection leaves = Mockito.mock(HttpConnection.class);
+    HttpConnection integer = Mockito.mock(HttpConnection.class);
+    LocalConnFactory declaration = Mockito.mock(LocalConnFactory.class);
+    Mockito.when(declaration.create(Mockito.eq("somehost"))).thenReturn(leaves);
+    Mockito.when(declaration.create(Mockito.eq("fiddle"))).thenReturn(integer);
+    LocalConnPool fuentes = new LocalConnPool(declaration, 2, 10);
+    Future<LocalPoolEntry> specimens = fuentes.lease("somehost", null);
+    LocalPoolEntry entry1 = specimens.get(1, SECONDS);
+    Assert.assertNotNull(entry1);
+    Future<LocalPoolEntry> aphis = fuentes.lease("somehost", null);
+    LocalPoolEntry entry2 = aphis.get(1, SECONDS);
+    Assert.assertNotNull(entry2);
+    Future<LocalPoolEntry> filename = fuentes.lease("fiddle", null);
+    LocalPoolEntry key = filename.get(1, SECONDS);
+    Assert.assertNotNull(key);
+    PoolStats volver = fuentes.getTotalStats();
+    Assert.assertEquals(0, volver.getAvailable());
+    Assert.assertEquals(3, volver.getLeased());
+    LocalPoolEntry agha = specimens.get();
+    Assert.assertSame(entry1, agha);
+    fuentes.release(entry1, true);
+    fuentes.release(entry2, true);
+    fuentes.release(key, false);
+    Mockito.verify(leaves, Mockito.never()).close();
+    Mockito.verify(integer, Mockito.times(1)).close();
+    volver = fuentes.getTotalStats();
+    Assert.assertEquals(2, volver.getAvailable());
+    Assert.assertEquals(0, volver.getLeased());
+}

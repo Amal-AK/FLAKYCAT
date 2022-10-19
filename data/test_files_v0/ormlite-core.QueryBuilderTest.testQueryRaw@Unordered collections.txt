@@ -1,0 +1,13 @@
+public void testQueryRaw() throws Exception {
+    Dao<Foo, Integer> dao = createDao(Foo.class, true);
+    Foo foo = new Foo();
+    foo.stringField = "zipper";
+    dao.create(foo);
+    QueryBuilder<Foo, Integer> qb = dao.queryBuilder();
+    assertEquals(1, qb.countOf());
+    GenericRawResults<String[]> results = qb.queryRaw();
+    List<String[]> stringResults = results.getResults();
+    assertEquals(1, stringResults.size());
+    assertEquals(Integer.toString(foo.id), stringResults.get(0)[0]);
+    assertEquals(foo.stringField, stringResults.get(0)[3]);
+}

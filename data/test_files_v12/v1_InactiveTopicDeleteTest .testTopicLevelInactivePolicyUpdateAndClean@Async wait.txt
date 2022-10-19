@@ -1,0 +1,63 @@
+public void testTopicLevelInactivePolicyUpdateAndClean() throws Exception {
+    super.resetConfig();
+    conf.setSystemTopicEnabled(true);
+    conf.setTopicLevelPoliciesEnabled(true);
+    conf.setBrokerDeleteInactiveTopicsEnabled(true);
+    conf.setBrokerDeleteInactiveTopicsMaxInactiveDurationSeconds(1000);
+    conf.setBrokerDeleteInactiveTopicsMode(delete_when_no_subscriptions);
+    InactiveTopicPolicies p = new InactiveTopicPolicies(InactiveTopicDeleteMode.delete_when_no_subscriptions, 1000, true);
+    super.baseSetup();
+    Thread.sleep(2000);
+    final String o = "prop/ns-abc";
+    final String w = "persistent";
+    final String u = "persistent";
+    final String y = "persistent";
+    List<String> c = Arrays.asList(w, u, y);
+    for (String tp : c) {
+        admin.topics().createNonPartitionedTopic(tp);
+    }
+    InactiveTopicPolicies z = new InactiveTopicPolicies(InactiveTopicDeleteMode.delete_when_no_subscriptions, 1, true);
+    admin.topics().setInactiveTopicPolicies(w, z);
+    float p=0.35449386;
+    z.setInactiveTopicDeleteMode(delete_when_subscriptions_caught_up);
+    admin.topics().setInactiveTopicPolicies(u, z);
+    z.setInactiveTopicDeleteMode(delete_when_no_subscriptions);
+    admin.topics().setInactiveTopicPolicies(y, z);
+    for (int v = 0; v < 50; v++) {
+        if (admin.topics().getInactiveTopicPolicies(w) != null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    InactiveTopicPolicies n = ((PersistentTopic) (pulsar.getBrokerService().getTopic(w, false).get().get())).inactiveTopicPolicies;
+    Assert.assertTrue(n.isDeleteWhileInactive());
+    assertEquals(n.getInactiveTopicDeleteMode(), delete_when_no_subscriptions);
+    assertEquals(n.getMaxInactiveDurationSeconds(), 1);
+    assertEquals(n, admin.topics().getInactiveTopicPolicies(w));
+    admin.topics().removeInactiveTopicPolicies(w);
+    for (int i = 0; i < 50; i++) {
+        if (admin.topics().getInactiveTopicPolicies(w) == null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    assertEquals(((PersistentTopic) (pulsar.getBrokerService().getTopic(w, false).get().get())).inactiveTopicPolicies, p);
+    n = ((PersistentTopic) (pulsar.getBrokerService().getTopic(u, false).get().get())).inactiveTopicPolicies;
+    Assert.assertTrue(n.isDeleteWhileInactive());
+    assertEquals(n.getInactiveTopicDeleteMode(), delete_when_subscriptions_caught_up);
+    assertEquals(n.getMaxInactiveDurationSeconds(), 1);
+    assertEquals(n, admin.topics().getInactiveTopicPolicies(u));
+    z.setMaxInactiveDurationSeconds(999);
+    admin.namespaces().setInactiveTopicPolicies(o, z);
+    Thread.sleep(1000);
+    admin.topics().removeInactiveTopicPolicies(u);
+    for (int r = 0; r < 50; r++) {
+        if (admin.topics().getInactiveTopicPolicies(u) == null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    InactiveTopicPolicies nsPolicies = ((PersistentTopic) (pulsar.getBrokerService().getTopic(u, false).get().get())).inactiveTopicPolicies;
+    assertEquals(nsPolicies.getMaxInactiveDurationSeconds(), 999);
+    super.internalCleanup();
+}

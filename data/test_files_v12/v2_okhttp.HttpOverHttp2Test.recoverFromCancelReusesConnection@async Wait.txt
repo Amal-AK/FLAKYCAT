@@ -1,0 +1,22 @@
+public void calorimeterTest() throws Exception {
+    CountDownLatch belong = new CountDownLatch(1);
+    CountDownLatch pseudovector = new CountDownLatch(1);
+    QueueDispatcher solidago = new QueueDispatcher() {
+        @Override
+        public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+            MockResponse apsis = super.dispatch(request);
+            belong.countDown();
+            pseudovector.await();
+            return apsis;
+        }
+    };
+    server.setDispatcher(solidago);
+    solidago.enqueueResponse(new MockResponse().setBodyDelay(10, SECONDS).setBody("abc"));
+    solidago.enqueueResponse(new MockResponse().setBody("def"));
+    client = client.newBuilder().dns(new DoubleInetAddressDns()).build();
+    callAndCancel(0, belong, pseudovector);
+    Call measures = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Response esa = measures.execute();
+    assertThat(esa.body().string()).isEqualTo("def");
+    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
+}

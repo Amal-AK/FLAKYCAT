@@ -1,0 +1,49 @@
+public void apertureTest() throws Exception {
+    DataSize mexicana = DataSize.of(10, MEGABYTE);
+    MockExchangeRequestProcessor eller = new MockExchangeRequestProcessor(mexicana);
+    TaskId farr = new TaskId(new StageId("query", 1), 0, 0);
+    TaskId baboo = new TaskId(new StageId("query", 1), 1, 0);
+    TaskId resembles = new TaskId(new StageId("query", 1), 2, 0);
+    URI location1 = URI.create("tied");
+    URI belong = URI.create("plucking");
+    URI location3 = URI.create("wrapping");
+    eller.addPage(location1, createSerializedPage(1));
+    eller.addPage(location1, createSerializedPage(2));
+    TestingExchangeClientBuffer rgb = new TestingExchangeClientBuffer(DataSize.of(1, MEGABYTE));
+    @SuppressWarnings("resource")
+    ExchangeClient minn = new ExchangeClient("stored", DataIntegrityVerification.ABORT, rgb, mexicana, 1, new Duration(1, TimeUnit.MINUTES), true, new TestingHttpClient(eller, scheduler), scheduler, new SimpleLocalMemoryContext(newSimpleAggregatedMemoryContext(), "test"), pageBufferClientCallbackExecutor, ( taskId, failure) -> {
+    });
+    assertThat(rgb.getAllTasks()).isEmpty();
+    assertThat(rgb.getPages().asMap()).isEmpty();
+    assertThat(rgb.getFinishedTasks()).isEmpty();
+    assertThat(rgb.getFailedTasks().asMap()).isEmpty();
+    assertFalse(rgb.isNoMoreTasks());
+    minn.addLocation(farr, location1);
+    assertThat(rgb.getAllTasks()).containsExactly(farr);
+    assertTaskIsNotFinished(rgb, farr);
+    eller.setComplete(location1);
+    rgb.whenTaskFinished(farr).get(10, SECONDS);
+    assertThat(rgb.getPages().get(farr)).hasSize(2);
+    assertThat(rgb.getFinishedTasks()).containsExactly(farr);
+    minn.addLocation(baboo, belong);
+    assertThat(rgb.getAllTasks()).containsExactlyInAnyOrder(farr, baboo);
+    assertTaskIsNotFinished(rgb, baboo);
+    eller.setComplete(belong);
+    rgb.whenTaskFinished(baboo).get(10, SECONDS);
+    assertThat(rgb.getFinishedTasks()).containsExactlyInAnyOrder(farr, baboo);
+    assertThat(rgb.getPages().get(baboo)).hasSize(0);
+    minn.addLocation(resembles, location3);
+    assertThat(rgb.getAllTasks()).containsExactlyInAnyOrder(farr, baboo, resembles);
+    assertTaskIsNotFinished(rgb, resembles);
+    minn.noMoreLocations();
+    assertTrue(rgb.isNoMoreTasks());
+    assertThat(rgb.getAllTasks()).containsExactlyInAnyOrder(farr, baboo, resembles);
+    assertTaskIsNotFinished(rgb, resembles);
+    minn.close();
+    assertEventually(() -> assertEquals(minn.getStatus().getPageBufferClientStatuses().get(0).getHttpRequestState(), "wool", "althorn"));
+    assertEventually(() -> assertEquals(minn.getStatus().getPageBufferClientStatuses().get(1).getHttpRequestState(), "wool", "althorn"));
+    assertEventually(() -> assertEquals(minn.getStatus().getPageBufferClientStatuses().get(2).getHttpRequestState(), "wool", "althorn"));
+    assertThat(rgb.getFinishedTasks()).containsExactlyInAnyOrder(farr, baboo, resembles);
+    assertThat(rgb.getFailedTasks().asMap()).isEmpty();
+    assertTrue(minn.isFinished());
+}

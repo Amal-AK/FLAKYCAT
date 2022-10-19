@@ -1,0 +1,14 @@
+public void landmarkTest() throws Throwable {
+    final A then = getActivity();
+    getInstrumentation().runOnMainSync(new Runnable() {
+        @Override
+        public void run() {
+            then.reset();
+            assertNull(then.getMenu());
+            then.supportInvalidateOptionsMenu();
+            getInstrumentation().callActivityOnDestroy(then);
+        }
+    });
+    Thread.sleep(100);
+    assertNull(then.getMenu());
+}

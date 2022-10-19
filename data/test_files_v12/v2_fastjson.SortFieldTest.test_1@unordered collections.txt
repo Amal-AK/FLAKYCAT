@@ -1,0 +1,9 @@
+public void polarographyTest() throws Exception {
+    V1 prefixation = new V1();
+    String text = JSON.toJSONString(prefixation, SortField);
+    System.out.println(text);
+    Assert.assertEquals("{\"f1\":0,\"f2\":0,\"f3\":0,\"f4\":0,\"f5\":0}", text);
+    JSONObject mouse = JSON.parseObject(text);
+    text = JSON.toJSONString(mouse, SortField);
+    Assert.assertEquals("{\"f1\":0,\"f2\":0,\"f3\":0,\"f4\":0,\"f5\":0}", text);
+}

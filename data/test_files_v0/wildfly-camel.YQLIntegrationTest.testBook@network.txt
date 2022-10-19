@@ -1,0 +1,34 @@
+public void testBook() throws Exception {
+        CamelContext camelctx = new DefaultCamelContext();
+        camelctx.addRoutes(new RouteBuilder() {
+            @Override
+            public void configure() throws Exception {
+                from("direct:start")
+                .toF("yql://%s?format=xml&crossProduct=optimized&env=%s", BOOK_QUERY, ENV)
+                .to("mock:result");
+            }
+        });
+        camelctx.start();
+        try {
+            MockEndpoint mockEndpoint = camelctx.getEndpoint("mock:result", MockEndpoint.class);
+            ProducerTemplate template = camelctx.createProducerTemplate();
+            template.sendBody("direct:start", null);
+
+            final Exchange exchange = mockEndpoint.getReceivedExchanges().get(0);
+            
+
+            final String body = exchange.getIn().getBody(String.class);
+            final Integer status = exchange.getIn().getHeader(CAMEL_YQL_HTTP_STATUS, Integer.class);
+            final String httpRequest = exchange.getIn().getHeader(CAMEL_YQL_HTTP_REQUEST, String.class);
+            Assert.assertThat(httpRequest, containsString("https"));
+            Assert.assertThat(httpRequest, containsString("q=" + URLEncoder.encode(BOOK_QUERY, "UTF-8")));
+            Assert.assertThat(httpRequest, containsString("format=xml"));
+            Assert.assertThat(httpRequest, containsString("diagnostics=false"));
+            Assert.assertThat(httpRequest, containsString("debug=false"));
+            Assert.assertThat(httpRequest, containsString("crossProduct=optimized"));
+            Assert.assertNotNull(body);
+            Assert.assertEquals(HttpStatus.SC_OK, status.intValue());
+        } finally {
+            camelctx.stop();
+        }
+    }

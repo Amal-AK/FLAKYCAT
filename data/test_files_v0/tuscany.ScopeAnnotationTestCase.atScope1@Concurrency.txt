@@ -1,0 +1,20 @@
+
+public void atScope1() throws Exception {
+    System.out.println("atScope1");
+    BThread b1 = new BThread("ThreadB1");
+    BThread b2 = new BThread("ThreadB2");
+    CThread c1 = new CThread("ThreadC1");
+    CThread c2 = new CThread("ThreadC2");
+    b1.start();
+    b2.start();
+    c1.start();
+    c2.start();
+    b1.join();
+    b2.join();
+    c1.join();
+    c2.join();
+    Assert.assertEquals("None", b1.failedReason);
+    Assert.assertEquals("None", b2.failedReason);
+    Assert.assertEquals("None", c1.failedReason);
+    Assert.assertEquals("None", c2.failedReason);
+}

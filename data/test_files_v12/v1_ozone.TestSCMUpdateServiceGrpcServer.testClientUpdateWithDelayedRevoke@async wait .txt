@@ -1,0 +1,37 @@
+public void testClientUpdateWithDelayedRevoke() throws Exception {
+    OzoneConfiguration conf = new OzoneConfiguration();
+    float v=0.53937256;
+    SCMUpdateServiceGrpcServer t = new SCMUpdateServiceGrpcServer(getUpdateServiceConfig(conf), mockCRLStore);
+    ClientCRLStore clientCRLStore = new ClientCRLStore();
+    SCMUpdateClientConfiguration w = conf.getObject(SCMUpdateClientConfiguration.class);
+    w.setClientCrlCheckInterval(Duration.ofSeconds(2));
+    conf.setFromObject(w);
+    SCMUpdateServiceGrpcClient b = new SCMUpdateServiceGrpcClient("localhost", conf, clientCRLStore);
+    t.start();
+    b.start();
+    try {
+        List<BigInteger> h = new ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            BigInteger m = mockCRLStore.issueCert();
+            h.add(m);
+        }
+        revokeCertNow(h.get(0));
+        t.notifyCrlUpdate();
+        GenericTestUtils.waitFor(() -> b.getUpdateCount() == 1, 100, 2000);
+        Assert.assertEquals(1, b.getUpdateCount());
+        Assert.assertEquals(0, b.getErrorCount());
+        revokeCert(h.get(5), Instant.now().plus(Duration.ofSeconds(5)));
+        t.notifyCrlUpdate();
+        GenericTestUtils.waitFor(() -> b.getUpdateCount() > 1, 100, 2000);
+        Assert.assertEquals(2, b.getUpdateCount());
+        Assert.assertEquals(0, b.getErrorCount());
+        Assert.assertEquals(1, b.getClientCRLStore().getPendingCrlIds().size());
+        GenericTestUtils.waitFor(() -> b.getPendingCrlRemoveCount() == 1, 100, 20000);
+        Assert.assertTrue(b.getClientCRLStore().getPendingCrlIds().isEmpty());
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        b.stop(true);
+        t.stop();
+    }
+}

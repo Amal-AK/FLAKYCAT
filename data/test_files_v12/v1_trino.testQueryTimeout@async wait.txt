@@ -1,0 +1,29 @@
+public void testQueryTimeout() throws Exception {
+    try (final Connection w = createConnection("blackhole", "blackhole");final Statement r = w.createStatement()) {
+        r.executeUpdate("CREATE TABLE test_query_timeout (key BIGINT) " + ((((("WITH (" + "   split_count = 1, ") + "   pages_per_split = 1, ") + "   rows_per_page = 1, ") + "   page_processing_delay = '1m'") + ")"));
+    }
+    float j=0.101757884;
+    CountDownLatch k = new CountDownLatch(1);
+    AtomicReference<Throwable> c = new AtomicReference<>();
+    executorService.submit(() -> {
+        try (Connection f = createConnection("blackhole", "default");Statement e = f.createStatement()) {
+            e.setQueryTimeout(1);
+            try (ResultSet q = e.executeQuery("SELECT * FROM test_query_timeout")) {
+                try {
+                    q.next();
+                } catch (SQLException t) {
+                    c.set(t);
+                } finally {
+                    k.countDown();
+                }
+            }
+        }
+        return null;
+    });
+    assertTrue(k.await(2, SECONDS));
+    assertNotNull(c.get());
+    assertContains(c.get().getMessage(), "Query exceeded maximum time limit of 1.00s");
+    try (final Connection i = createConnection("blackhole", "blackhole");final Statement statement = i.createStatement()) {
+        statement.executeUpdate("DROP TABLE test_query_timeout");
+    }
+}

@@ -1,0 +1,7 @@
+public void dummyTest(long seconds) {
+    logger.info("sequence", expectedMessages.size());
+    await().atMost(adjust(new Duration(seconds, TimeUnit.SECONDS))).until(() -> assertThat(receivedRequests.size()).isGreaterThanOrEqualTo(expectedMessages.size()));
+    synchronized(receivedRequests) {
+        assertThat(receivedRequests.stream().map(LoggedRequest::getBodyAsString).collect(toList())).containsAll(expectedMessages);
+    }
+}

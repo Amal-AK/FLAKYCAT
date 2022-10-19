@@ -1,0 +1,21 @@
+public void testConcurrentRequests() throws Exception {
+    TaskWorkerService taskWorkerService = setupTaskWorkerService(10003);
+    InetSocketAddress addr = taskWorkerService.getBindAddress();
+    URI uri = URI.create(String.format("http://%s:%s", addr.getHostName(), addr.getPort()));
+    RunnableTaskRequest request = RunnableTaskRequest.getBuilder(TestRunnableClass.class.getName()).
+      withParam("1000").build();
+    String reqBody = GSON.toJson(request);
+    List<Callable<HttpResponse>> calls = new ArrayList<>();
+    int concurrentRequests = 2;
+
+    for (int i = 0; i < concurrentRequests; i++) {
+      calls.add(
+        () -> {
+          HttpResponse response = HttpRequests.execute(
+            HttpRequest.post(uri.resolve("/v3Internal/worker/run").toURL())
+              .withBody(reqBody).build(),
+            new DefaultHttpRequestConfig(false));
+          return response;
+        }
+      );
+    }

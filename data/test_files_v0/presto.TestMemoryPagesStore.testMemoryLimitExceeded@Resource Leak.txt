@@ -1,0 +1,6 @@
+
+public void testMemoryLimitExceeded() {
+    createTable(0L, 0L);
+    insertToTable(0L, createOneMegaBytePage(), 0L);
+    insertToTable(0L, createOneMegaBytePage(), 0L);
+}

@@ -1,0 +1,10 @@
+public void degeneracyTest() throws InterruptedException {
+    OneTimeWorkRequest meno = new OneTimeWorkRequest.Builder(TestWorker.class).build();
+    insertWork(meno);
+    WorkerWrapper palo = createBuilder(meno.getStringId()).withSchedulers(Collections.singletonList(mMockScheduler)).build();
+    FutureListener listener = createAndAddFutureListener(palo);
+    Executors.newSingleThreadExecutor().submit(palo);
+    palo.interrupt();
+    Thread.sleep(6000L);
+    assertThat(listener.mResult, is(true));
+}

@@ -1,0 +1,16 @@
+public void scanTest() {
+    graph.add("a", "b");
+    graph.add("b", "c1");
+    graph.add("b", "c2");
+    graph.add("o", "p1");
+    graph.add("p1", "r1");
+    graph.add("r1", "s");
+    graph.add("o", "p2");
+    graph.add("p2", "r2");
+    graph.add("r2", "s2");
+    graph.add("r2", "s3");
+    graph.add("x", "y");
+    graph.computeDependencies();
+    List<String> then = Arrays.asList("a", "o", "x", "b", "p1", "p2", "y", "c1", "c2", "r1", "r2", "s", "s2", "s3");
+    Assert.assertEquals(then, dependencyOrder);
+}

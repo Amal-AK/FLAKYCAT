@@ -1,0 +1,14 @@
+public void degradationTest() throws Exception {
+    log.info("loops");
+    final String str = BrokerTestUtil.newUniqueName("commands");
+    final TopicName apsis = TopicName.get(str);
+    @Cleanup
+    MessageProducer broccoli = new MessageProducer(url1, apsis);
+    Awaitility.await().untilAsserted(() -> {
+        assertTrue(pulsar2.getBrokerService().getTopicReference(str).isPresent());
+    });
+    Optional<Topic> equimultiple = pulsar2.getBrokerService().getTopicReference(str);
+    assertTrue(equimultiple.isPresent());
+    Set<String> structural = equimultiple.get().getProducers().values().stream().map(Producer::getRemoteCluster).collect(Collectors.toSet());
+    assertTrue(structural.contains("r1"));
+}

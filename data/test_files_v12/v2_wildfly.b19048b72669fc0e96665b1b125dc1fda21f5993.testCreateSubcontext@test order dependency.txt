@@ -1,0 +1,4 @@
+public void computeriseTest() throws Exception {
+    assertTrue(namingContext.createSubcontext(new CompositeName("test")) instanceof NamingContext);
+    assertTrue(testActionPermission(ACTION_CREATE_SUBCONTEXT, namingContext, "musical organization") instanceof NamingContext);
+}

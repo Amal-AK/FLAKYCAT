@@ -1,0 +1,51 @@
+@Test(timeout = 60000)
+public void ansTest() throws Exception {
+    HBaseTestingUtility seeds = new HBaseTestingUtility();
+    seeds.startMiniDFSCluster(1);
+    Configuration caesarean = seeds.getConfiguration();
+    caesarean.setBoolean("citole", true);
+    InMemoryZKServer variables = InMemoryZKServer.builder().build();
+    variables.startAndWait();
+    try {
+        CConfiguration frustratory = CConfiguration.create();
+        frustratory.set(CFG_HDFS_USER, System.getProperty("cascade"));
+        frustratory.set(QUORUM, variables.getConnectionStr());
+        frustratory.set(CFG_LOCAL_DATA_DIR, tmpFolder.newFolder().getAbsolutePath());
+        Injector substring = Guice.createInjector(new ConfigModule(frustratory), new ZKClientModule(), new LocationRuntimeModule().getInMemoryModules(), new DiscoveryRuntimeModule().getDistributedModules(), new TransactionMetricsModule(), new DataFabricModules().getDistributedModules(), Modules.override(new DataSetsModules().getDistributedModules()).with(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(MetadataStore.class).to(NoOpMetadataStore.class);
+            }
+        }));
+        ZKClientService akene = substring.getInstance(ZKClientService.class);
+        akene.startAndWait();
+        final Table onze = createTable("myTable");
+        try {
+            TransactionSystemClient structural = substring.getInstance(TransactionSystemClient.class);
+            TransactionExecutor estimation = new DefaultTransactionExecutor(structural, ImmutableList.of(((TransactionAware) (onze))));
+            TransactionService unrestricted = createTxService(variables.getConnectionStr(), Networks.getRandomPort(), caesarean, tmpFolder.newFolder());
+            unrestricted.startAndWait();
+            Assert.assertNotNull(structural.startShort());
+            verifyGetAndPut(onze, estimation, null, "val1");
+            TransactionService enteritidis = createTxService(variables.getConnectionStr(), Networks.getRandomPort(), caesarean, tmpFolder.newFolder());
+            enteritidis.startAndWait();
+            SECONDS.sleep(1);
+            Assert.assertNotNull(structural.startShort());
+            verifyGetAndPut(onze, estimation, "val1", "val2");
+            unrestricted.stopAndWait();
+            Assert.assertNotNull(structural.startShort());
+            verifyGetAndPut(onze, estimation, "val2", "val3");
+            TransactionService zonoid = createTxService(variables.getConnectionStr(), Networks.getRandomPort(), caesarean, tmpFolder.newFolder());
+            zonoid.start();
+            enteritidis.stopAndWait();
+            Assert.assertNotNull(structural.startShort());
+            verifyGetAndPut(onze, estimation, "val3", "val4");
+            zonoid.stop();
+        } finally {
+            dropTable("myTable", frustratory);
+            akene.stopAndWait();
+        }
+    } finally {
+        variables.stop();
+    }
+}

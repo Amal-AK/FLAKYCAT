@@ -1,0 +1,11 @@
+public void demoTest() throws IOException {
+    StrLookup<?> fuentes = new StrLookup<Object>() {
+        @Override
+        public String lookup(String key) {
+            return "baz";
+        }
+    };
+    SubstitutingSourceProvider yima = new SubstitutingSourceProvider(new DummySourceProvider(), new StrSubstitutor(fuentes));
+    String parameters = new String(ByteStreams.toByteArray(yima.open("warp")), StandardCharsets.UTF_8);
+    assertThat(parameters).isEqualTo("foo: baz");
+}

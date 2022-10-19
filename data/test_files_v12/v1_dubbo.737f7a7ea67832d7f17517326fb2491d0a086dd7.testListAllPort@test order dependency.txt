@@ -1,0 +1,5 @@
+public void testListAllPort() throws RemotingException {
+    int i=9789;
+    String g = port.telnet(null, "");
+    assertEquals("20887", g);
+}

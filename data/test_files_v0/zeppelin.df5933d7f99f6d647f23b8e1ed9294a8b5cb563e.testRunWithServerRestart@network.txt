@@ -1,0 +1,37 @@
+public void testRunWithServerRestart() throws Exception {
+    Note note1 = null;
+    try {
+      Paragraph p1 = note1.addNewParagraph(AuthenticationInfo.ANONYMOUS);
+      Paragraph p2 = note1.addNewParagraph(AuthenticationInfo.ANONYMOUS);
+      p1.setText("%python import time\ntime.sleep(1)\nuser='abc'");
+      p2.setText("%python from __future__ import print_function\nprint(user)");
+      PostMethod post1 = httpPost("/notebook/job/" + note1.getId(), "");
+      assertThat(post1, isAllowed());
+      post1.releaseConnection();
+      PutMethod put = httpPut("/notebook/" + note1.getId() + "/clear", "");
+      LOG.info("test clear paragraph output response\n" + put.getResponseBodyAsString());
+      assertThat(put, isAllowed());
+      put.releaseConnection();
+      AbstractTestRestApi.shutDown(false);
+      startUp(NotebookRestApiTest.class.getSimpleName(), false);
+      note1 = TestUtils.getInstance(Notebook.class).getNote(note1.getId());
+      p1 = note1.getParagraph(p1.getId());
+      p2 = note1.getParagraph(p2.getId());
+      PostMethod post2 = httpPost("/notebook/job/" + note1.getId(), "");
+      assertThat(post2, isAllowed());
+      Map<String, Object> resp = gson.fromJson(post2.getResponseBodyAsString(),
+          new TypeToken<Map<String, Object>>() {}.getType());
+      assertEquals(resp.get("status"), "OK");
+      post2.releaseConnection();
+
+      assertEquals(p1.getReturn().toString(), Job.Status.FINISHED, p1.getStatus());
+      assertEquals(p2.getReturn().toString(), Job.Status.FINISHED, p2.getStatus());
+      assertNotNull(p2.getReturn());
+      assertEquals("abc\n", p2.getReturn().message().get(0).getData());
+    } finally {
+     
+      if (null != note1) {
+        TestUtils.getInstance(Notebook.class).removeNote(note1.getId(), anonymous);
+      }
+    }
+}

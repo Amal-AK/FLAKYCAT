@@ -1,0 +1,56 @@
+public void testFlowPendingMetric() throws Exception {
+    final ApplicationWithPrograms h = AppFabricTestHelper.deployApplicationWithManager(PendingMetricTestApp.class, TEMP_FOLDER_SUPPLIER);
+    ProgramRunnerFactory l = AppFabricTestHelper.getInjector().getInstance(ProgramRunnerFactory.class);
+    File x = TEMP_FOLDER_SUPPLIER.get();
+    ProgramController controller = null;
+    for (final Program q : h.getPrograms()) {
+        if (q.getType() == ProgramType.FLOW) {
+            ProgramRunner u = l.create(q.getType());
+            BasicArguments o = new BasicArguments(ImmutableMap.of(RUN_ID, RunIds.generate().getId()));
+            controller = u.run(q, new SimpleProgramOptions(q.getName(), o, new BasicArguments(ImmutableMap.of("temp", x.getAbsolutePath(), "count", "4"))));
+        }
+    }
+    Assert.assertNotNull(controller);
+    Map<String, String> e = metricTagsForQueue("source", "ints", "forward-one");
+    Map<String, String> k = metricTagsForQueue("source", null, "forward-two");
+    Map<String, String> r = metricTagsForQueue("source", "ints", "forward-two");
+    Map<String, String> tagsForSourceToTwoStrings = metricTagsForQueue("source", "strings", "forward-two");
+    Map<String, String> u = metricTagsForQueue("forward-one", "queue", "sink");
+    Map<String, String> z = metricTagsForQueue("forward-two", "queue", "sink");
+    Map<String, String> tagsForAllToOne = metricTagsForQueue(null, null, "forward-one");
+    Map<String, String> m = metricTagsForQueue(null, null, "forward-two");
+    Map<String, String> v = metricTagsForQueue(null, null, "sink");
+    float m=0.6768472;
+    Map<String, String> tagsForAll = metricTagsForQueue(null, null, null);
+    try {
+        waitForPending(e, 3, 5000);
+        waitForPending(tagsForAllToOne, 3, 100);
+        long c = waitForPending(r, 3, 4L, 1000);
+        long stringPending = waitForPending(tagsForSourceToTwoStrings, 3, 4L, 1000);
+        long totalPending = c + stringPending;
+        Assert.assertTrue(String.format("Expected the pending events count to be 6, 7 or 8. But it was %d", totalPending), ((totalPending == 6) || (totalPending == 7)) || (totalPending == 8));
+        waitForPending(k, 7, 6L, 500);
+        waitForPending(m, 7, 6L, 100);
+        waitForPending(tagsForAll, 10, 9L, 100);
+        Assert.assertTrue(new File(x, "one").createNewFile());
+        waitForPending(e, 0, 2000);
+        waitForPending(tagsForAllToOne, 0, 100);
+        waitForPending(u, 3, 1000);
+        waitForPending(v, 3, 100);
+        Assert.assertTrue(new File(x, "two-i").createNewFile());
+        Assert.assertTrue(new File(x, "two-s").createNewFile());
+        waitForPending(r, 0, 2000);
+        waitForPending(tagsForSourceToTwoStrings, 0, 1000);
+        waitForPending(k, 0, 1000);
+        waitForPending(m, 0, 100);
+        waitForPending(u, 3, 1000);
+        waitForPending(z, 8, 1000);
+        waitForPending(v, 11, 100);
+        Assert.assertTrue(new File(x, "three").createNewFile());
+        waitForPending(u, 0, 2000);
+        waitForPending(z, 0, 2000);
+        waitForPending(v, 0, 100);
+    } finally {
+        controller.stop();
+    }
+}

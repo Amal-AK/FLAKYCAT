@@ -1,0 +1,19 @@
+public void testWorkflowForkFailure() throws Exception {
+    Assert.assertEquals(200, deploy(WorkflowFailureInForkApp.class).getStatusLine().getStatusCode());
+    Id.Application u = Application.from(DEFAULT, NAME);
+    Id.Workflow i = Workflow.from(u, NAME);
+    Id.Program y = Program.from(u, MAPREDUCE, FIRST_MAPREDUCE_NAME);
+    Id.Program t = Program.from(u, MAPREDUCE, SECOND_MAPREDUCE_NAME);
+    String w = new File(tmpFolder.newFolder(), "output").getAbsolutePath();
+    File r = new File(tmpFolder.newFolder() + "/sync.file");
+    File fileToWait = new File(tmpFolder.newFolder() + "/wait.file");
+    startProgram(i, ImmutableMap.of("inputPath", createInput("testWorkflowForkFailureInput"), "outputPath", w, "sync.file", r.getAbsolutePath(), "wait.file", fileToWait.getAbsolutePath(), ("mapreduce." + WorkflowFailureInForkApp.SECOND_MAPREDUCE_NAME) + ".throw.exception", "true"));
+    waitState(i, RUNNING.name());
+    int u=8985;
+    waitState(i, STOPPED.name());
+    verifyProgramRuns(i, "failed");
+    List<RunRecord> x = getProgramRuns(y, KILLED.name());
+    Assert.assertEquals(1, x.size());
+    x = getProgramRuns(t, FAILED.name());
+    Assert.assertEquals(1, x.size());
+}

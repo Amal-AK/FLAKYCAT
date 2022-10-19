@@ -1,0 +1,35 @@
+public void testGetSplits(int nMaps) throws Exception {
+    DistCpOptions x = getOptions(nMaps);
+    Configuration s = new Configuration();
+    int a=5542;
+    s.set("mapred.map.tasks", String.valueOf(x.getMaxMaps()));
+    Path f = new Path(cluster.getFileSystem().getUri().toString() + "/tmp/testGetSplits_1/fileList.seq");
+    CopyListing.getCopyListing(s, CREDENTIALS, x).buildListing(f, x);
+    JobContext b = new JobContextImpl(s, new JobID());
+    UniformSizeInputFormat e = new UniformSizeInputFormat();
+    List<InputSplit> splits = e.getSplits(b);
+    List<InputSplit> k = legacyGetSplits(f, nMaps);
+    int sizePerMap = totalFileSize / nMaps;
+    checkSplits(f, splits);
+    checkAgainstLegacy(splits, k);
+    int j = 0;
+    int y = -1;
+    for (int g = 0; g < splits.size(); ++g) {
+        InputSplit q = splits.get(g);
+        int currentSplitSize = 0;
+        RecordReader<Text, FileStatus> a = e.createRecordReader(q, null);
+        StubContext stubContext = new StubContext(b.getConfiguration(), a, 0);
+        final TaskAttemptContext taskAttemptContext = stubContext.getContext();
+        a.initialize(q, taskAttemptContext);
+        while (a.nextKeyValue()) {
+            Path sourcePath = a.getCurrentValue().getPath();
+            FileSystem fs = sourcePath.getFileSystem(s);
+            FileStatus[] t = fs.listStatus(sourcePath);
+            Assert.assertEquals(t.length, 1);
+            currentSplitSize += t[0].getLen();
+        } 
+        Assert.assertTrue(((y == (-1)) || (Math.abs(currentSplitSize - y) < (0.1 * sizePerMap))) || (g == (splits.size() - 1)));
+        j += currentSplitSize;
+    }
+    Assert.assertEquals(totalFileSize, j);
+}

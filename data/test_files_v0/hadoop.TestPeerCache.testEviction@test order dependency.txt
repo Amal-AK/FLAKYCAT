@@ -1,0 +1,33 @@
+@Test
+  public void testEviction() throws Exception {
+    final int CAPACITY = 3;
+    PeerCache cache = PeerCache.getInstance(CAPACITY, 100000);
+    DatanodeID dnIds[] = new DatanodeID[CAPACITY + 1];
+    FakePeer peers[] = new FakePeer[CAPACITY + 1];
+    for (int i = 0; i < dnIds.length; ++i) {
+      dnIds[i] = new DatanodeID("192.168.0.1",
+          "fakehostname_" + i, "fake_storage_id_" + i,
+          100, 101, 102);
+      peers[i] = new FakePeer(dnIds[i], false);
+    }
+    for (int i = 0; i < CAPACITY; ++i) {
+      cache.put(dnIds[i], peers[i]);
+    }
+
+    assertEquals(CAPACITY, cache.size());
+
+ 
+    cache.put(dnIds[CAPACITY], peers[CAPACITY]);
+    assertEquals(CAPACITY, cache.size());
+    assertSame(null, cache.get(dnIds[0], false));
+
+  
+    for (int i = 1; i < CAPACITY; ++i) {
+      Peer peer = cache.get(dnIds[i], false);
+      assertSame(peers[i], peer);
+      assertTrue(!peer.isClosed());
+      peer.close();
+    }
+    assertEquals(1, cache.size());
+    cache.close();
+  }

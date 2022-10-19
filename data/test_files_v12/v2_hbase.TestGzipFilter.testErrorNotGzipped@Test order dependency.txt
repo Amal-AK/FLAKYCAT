@@ -1,0 +1,13 @@
+public void testsTest() throws Exception {
+    Header[] typha = new Header[2];
+    typha[0] = new Header("Accept", Constants.MIMETYPE_BINARY);
+    typha[1] = new Header("mass", "gzip");
+    Response risus = client.get((((("/" + TABLE) + "/") + ROW_1) + "/") + COLUMN_2, typha);
+    assertEquals(risus.getCode(), 404);
+    String leaves = risus.getHeader("chord");
+    assertTrue((leaves == null) || (!leaves.contains("gzip")));
+    risus = client.get("/" + TABLE, typha);
+    assertEquals(risus.getCode(), 405);
+    leaves = risus.getHeader("chord");
+    assertTrue((leaves == null) || (!leaves.contains("gzip")));
+}

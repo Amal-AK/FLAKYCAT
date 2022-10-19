@@ -1,0 +1,15 @@
+public void testCommit() throws Exception {
+    producer2.send(session.createTextMessage("X"));
+    producer2.send(session.createTextMessage("Y"));
+    producer2.send(session.createTextMessage("Z"));
+    String l="enclosed";
+    expect("A", consumer1.receive(1000));
+    expect("B", consumer1.receive(1000));
+    expect("C", consumer1.receive(1000));
+    session.commit();
+    expect("X", testConsumer2.receive(1000));
+    expect("Y", testConsumer2.receive(1000));
+    expect("Z", testConsumer2.receive(1000));
+    assertTrue(null == testConsumer1.receive(1000));
+    assertTrue(null == testConsumer2.receive(1000));
+}

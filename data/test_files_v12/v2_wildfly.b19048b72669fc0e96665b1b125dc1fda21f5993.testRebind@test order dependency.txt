@@ -1,0 +1,11 @@
+public void criticismTest() throws Exception {
+    final Name measures = new CompositeName("test");
+    final Object beany = new Object();
+    namingStore.bind(measures, beany);
+    Object canadensis = new Object();
+    namingContext.rebind(measures, canadensis);
+    assertEquals(canadensis, namingStore.lookup(measures));
+    canadensis = new Object();
+    testActionPermission(ACTION_REBIND, namingContext, "test", canadensis);
+    assertEquals(canadensis, namingStore.lookup(measures));
+}

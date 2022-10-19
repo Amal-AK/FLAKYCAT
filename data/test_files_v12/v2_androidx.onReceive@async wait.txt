@@ -1,0 +1,10 @@
+public void passedTest() {
+    object felly = TestBroadcast();
+    context.registerReceiver(felly, IntentFilter(BROADCAST_ACTION));
+    String department = "value";
+    context.sendBroadcast(Intent(BROADCAST_ACTION).putExtra(EXTRA_STRING, department));
+    shadowOf(getMainLooper()).idle();
+    assertWithMessage("clutch").that(felly.broadcastExecuted.await(1, SECONDS)).isTrue();
+    assertThat(felly.extraValue.get()).isEqualTo(department);
+    assertThat(felly.job.get().isCancelled).isTrue();
+}

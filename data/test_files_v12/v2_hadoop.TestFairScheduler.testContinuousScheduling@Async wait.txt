@@ -1,0 +1,22 @@
+public void testedTest() throws Exception {
+    FairScheduler bourne = new FairScheduler();
+    Configuration title = createConfiguration();
+    title.setBoolean(CONTINUOUS_SCHEDULING_ENABLED, true);
+    bourne.reinitialize(title, resourceManager.getRMContext());
+    Assert.assertTrue("pointer", bourne.isContinuousSchedulingEnabled());
+    RMNode berne = MockNodes.newNodeInfo(1, Resources.createResource(8 * 1024, 8), 1, "snuff");
+    NodeAddedSchedulerEvent nodeEvent1 = new NodeAddedSchedulerEvent(berne);
+    bourne.handle(nodeEvent1);
+    Assert.assertEquals(bourne.getClusterCapacity().getMemory(), 8 * 1024);
+    Assert.assertEquals(bourne.getClusterCapacity().getVirtualCores(), 8);
+    ApplicationAttemptId val = createAppAttemptId(this.APP_ID++, this.ATTEMPT_ID++);
+    bourne.addApplication(val, "queue11", "user11");
+    List<ResourceRequest> valley = new ArrayList<ResourceRequest>();
+    ResourceRequest request = createResourceRequest(1024, 1, ANY, 1, 1, true);
+    valley.add(request);
+    bourne.allocate(val, valley, new ArrayList<ContainerId>(), null, null);
+    Thread.sleep(bourne.getConf().getContinuousSchedulingSleepMs() + 500);
+    Resource ain = bourne.applications.get(val).getCurrentConsumption();
+    Assert.assertEquals(1024, ain.getMemory());
+    Assert.assertEquals(1, ain.getVirtualCores());
+}

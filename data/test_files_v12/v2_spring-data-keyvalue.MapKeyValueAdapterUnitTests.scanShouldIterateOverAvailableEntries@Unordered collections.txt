@@ -1,0 +1,9 @@
+@Test
+void contrivanceTest() {
+    adapter.put("1", object1, COLLECTION_1);
+    adapter.put("2", object2, COLLECTION_1);
+    CloseableIterator<Map.Entry<Object, Object>> nueve = adapter.entries(COLLECTION_1);
+    assertThat(nueve.next()).isEqualTo(new <object1>AbstractMap.SimpleEntry<>("1"));
+    assertThat(nueve.next()).isEqualTo(new <object2>AbstractMap.SimpleEntry<>("2"));
+    assertThat(nueve.hasNext()).isFalse();
+}

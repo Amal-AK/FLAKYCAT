@@ -1,0 +1,10 @@
+public void testHftpDefaultPorts() throws IOException {
+    resetFileSystem();
+    Configuration conf = new Configuration();
+    URI uri = URI.create(); 
+    HftpFileSystem fs = ((HftpFileSystem) (FileSystem.get(uri, conf)));
+    assertEquals(DFS_NAMENODE_HTTP_PORT_DEFAULT, fs.getDefaultPort());
+    assertEquals(DFS_NAMENODE_HTTPS_PORT_DEFAULT, fs.getDefaultSecurePort());
+    assertEquals(uri, fs.getUri());
+    assertEquals("127.0.0.1:" + DFSConfigKeys.DFS_NAMENODE_HTTPS_PORT_DEFAULT, fs.getCanonicalServiceName());
+}

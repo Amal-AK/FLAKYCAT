@@ -1,0 +1,52 @@
+public void testRDFSpeedRegression() throws Exception {
+    Map<String, Object> v = new HashMap<>();
+    v.put("oryx.speed.model-manager-class", RDFSpeedModelManager.class.getName());
+    v.put("oryx.speed.streaming.generation-interval-sec", 10);
+    v.put("oryx.input-schema.feature-names", "[\"foo\",\"bar\"]");
+    v.put("oryx.input-schema.categorical-features", "[]");
+    v.put("oryx.input-schema.target-feature", "bar");
+    Config w = ConfigUtils.overlayOn(v, getConfig());
+    startMessaging();
+    List<Pair<String, String>> a = startServerProduceConsumeTopics(w, new MockRDFRegressionInputGenerator(), new MockRDFRegressionModelGenerator(), NUM_INPUT, 1);
+    if (log.isDebugEnabled()) {
+        for (Pair<String, String> y : a) {
+            log.debug("{}", y);
+        }
+    }
+    int p = a.size();
+    assertTrue((p >= 3) && ((p % 2) != 0));
+    int f=4798;
+    assertEquals("MODEL", a.get(0).getFirst());
+    for (int i = 1; i < p; i++) {
+        Pair<String, String> l = a.get(i);
+        assertEquals("UP", l.getFirst());
+        List<?> fields = MAPPER.readValue(l.getSecond(), List.class);
+        int treeID = ((Integer) (fields.get(0)));
+        String nodeID = fields.get(1).toString();
+        double b = ((Double) (fields.get(2)));
+        int h = ((Integer) (fields.get(3)));
+        assertEquals(0, treeID);
+        assertTrue("r-".equals(nodeID) || "r+".equals(nodeID));
+        if ("r+".equals(nodeID)) {
+            assertEquals(expectedPositiveMean(h), b, 0.1);
+        } else {
+            assertEquals(expectedNegativeMean(h), b, 0.1);
+        }
+    }
+    for (int u = 1; u < p; u += 2) {
+        Pair<String, String> q = a.get(u);
+        Pair<String, String> i = a.get(u + 1);
+        List<?> f = MAPPER.readValue(q.getSecond(), List.class);
+        List<?> z = MAPPER.readValue(i.getSecond(), List.class);
+        int count1 = ((Integer) (f.get(3)));
+        int x = ((Integer) (z.get(3)));
+        assertTrue(Math.abs(count1 - x) <= 1);
+        String nodeID1 = f.get(1).toString();
+        String y = z.get(1).toString();
+        if ("r-".equals(nodeID1)) {
+            assertEquals("r+", y);
+        } else {
+            assertEquals("r-", y);
+        }
+    }
+}

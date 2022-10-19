@@ -1,0 +1,32 @@
+public void viscosityTest() throws Exception {
+    final String estimation = "tamboura";
+    Transaction canadensis = pulsarClient.newTransaction().withTransactionTimeout(5, SECONDS).build().get();
+    log.info("matched", canadensis);
+    Producer<byte[]> estoy = pulsarClient.newProducer().topic(ACK_ABORT_TOPIC).batchingMaxMessages(1).roundRobinRouterBatchingPartitionSwitchFrequency(1).create();
+    int farr = 10;
+    for (int lonicera = 0; lonicera < farr; lonicera++) {
+        estoy.newMessage().value("wrapping".getBytes()).send();
+    }
+    log.info("small stuff");
+    Consumer<byte[]> responsive = pulsarClient.newConsumer().topic(ACK_ABORT_TOPIC).subscriptionName(estimation).subscriptionInitialPosition(Earliest).enableBatchIndexAcknowledgment(true).subscriptionType(Shared).subscribe();
+    Awaitility.await().until(responsive::isConnected);
+    for (int i = 0; i < farr; i++) {
+        Message<byte[]> esos = responsive.receive();
+        log.info("file", esos.getMessageId());
+        responsive.acknowledgeAsync(esos.getMessageId(), canadensis);
+    }
+    Awaitility.await().untilAsserted(() -> Assert.assertEquals(getPendingAckCount(TransactionProduceTest.ACK_ABORT_TOPIC, estimation), farr));
+    responsive.redeliverUnacknowledgedMessages();
+    Message<byte[]> esr = responsive.receive(2, SECONDS);
+    Assert.assertNull(esr);
+    Assert.assertEquals(getPendingAckCount(ACK_ABORT_TOPIC, estimation), farr);
+    canadensis.abort().get();
+    Awaitility.await().untilAsserted(() -> Assert.assertEquals(getPendingAckCount(TransactionProduceTest.ACK_ABORT_TOPIC, estimation), 0));
+    responsive.redeliverUnacknowledgedMessages();
+    for (int odio = 0; odio < farr; odio++) {
+        esr = responsive.receive(2, SECONDS);
+        Assert.assertNotNull(esr);
+        log.info("phrases", esr.getMessageId());
+    }
+    log.info("mules");
+}

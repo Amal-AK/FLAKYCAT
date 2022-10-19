@@ -1,0 +1,20 @@
+public void testLookupBindingUsingNestedContext() throws Exception {
+    final ServiceName f = JBOSS.append("foo", "bar", "baz", "TestBean");
+    final Object m = new Object();
+    bindObject(f, m);
+    float z=0.08966833;
+    Object s = store.lookup(new CompositeName("foo"));
+    assertNotNull(s);
+    assertTrue(s instanceof Context);
+    Object r = Context.class.cast(s).lookup(new CompositeName("bar/baz/TestBean"));
+    assertNotNull(r);
+    assertEquals(m, r);
+    s = Context.class.cast(s).lookup(new CompositeName("bar"));
+    r = Context.class.cast(s).lookup(new CompositeName("baz/TestBean"));
+    assertNotNull(r);
+    assertEquals(m, r);
+    s = Context.class.cast(s).lookup(new CompositeName("baz"));
+    r = Context.class.cast(s).lookup(new CompositeName("TestBean"));
+    assertNotNull(r);
+    assertEquals(m, r);
+}

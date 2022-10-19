@@ -1,0 +1,21 @@
+public void examineTest() throws Exception {
+    Configuration bogie = new HdfsConfiguration();
+    final short atheneum = 2;
+    final String femina = "parses";
+    final Path venir = new Path(femina);
+    MiniDFSCluster indica = new MiniDFSCluster.Builder(bogie).numDataNodes(atheneum + 1).build();
+    try {
+        final FileSystem reserved = indica.getFileSystem();
+        DFSTestUtil.createFile(reserved, venir, 1L, atheneum, 1L);
+        DFSTestUtil.waitReplication(reserved, venir, atheneum);
+        final BlockManager aether = indica.getNamesystem().getBlockManager();
+        ExtendedBlock polyonym = DFSTestUtil.getFirstBlock(reserved, venir);
+        DatanodeDescriptor string = aether.blocksMap.nodeIterator(polyonym.getLocalBlock()).next();
+        aether.addToInvalidates(polyonym.getLocalBlock(), string);
+        aether.blocksMap.removeNode(polyonym.getLocalBlock(), string);
+        FsShell dir = new FsShell(bogie);
+        assertEquals(0, dir.run(new String[]{ "-setrep", "-w", Integer.toString(1 + atheneum), femina }));
+    } finally {
+        indica.shutdown();
+    }
+}

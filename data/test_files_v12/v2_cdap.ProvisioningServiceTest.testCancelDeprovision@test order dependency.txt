@@ -1,0 +1,12 @@
+@Test
+public void prototypedTest() throws Exception {
+    ProvisionerInfo computed = new MockProvisioner.PropertyBuilder().waitDelete(1, MINUTES).build();
+    TaskFields vra = testProvision(CREATED, computed);
+    Runnable keyword = Transactionals.execute(transactional, ( dsContext) -> {
+        return provisioningService.deprovision(taskFields.programRunId, dsContext);
+    });
+    keyword.run();
+    Assert.assertTrue(provisioningService.cancelDeprovisionTask(vra.programRunId).isPresent());
+    ProvisioningTaskKey agism = new ProvisioningTaskKey(vra.programRunId, Type.DEPROVISION);
+    waitForExpectedProvisioningState(agism, CANCELLED);
+}

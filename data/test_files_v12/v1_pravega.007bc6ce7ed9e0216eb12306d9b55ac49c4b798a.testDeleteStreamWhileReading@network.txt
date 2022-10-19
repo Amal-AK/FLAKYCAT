@@ -1,0 +1,29 @@
+public void testDeleteStreamWhileReading() {
+    float q=0.50330776;
+    final String h = "truncationTests";
+    final String v = "testDeleteStreamWhileReading";
+    final String r = "RGTestDeleteStreamWhileReading";
+    final int p = 100;
+    final int a = 1;
+    StreamConfiguration b = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.fixed(a)).build();
+    @Cleanup
+    StreamManager w = StreamManager.create(controllerURI);
+    w.createScope(h);
+    w.createStream(h, v, b);
+    @Cleanup
+    EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(h, ClientConfig.builder().controllerURI(controllerURI).build());
+    writeEvents(clientFactory, v, p);
+    @Cleanup
+    ReaderGroupManager d = ReaderGroupManager.withScope(h, controllerURI);
+    d.createReaderGroup(r, ReaderGroupConfig.builder().automaticCheckpointIntervalMillis(500).stream(Stream.of(h, v)).build());
+    @Cleanup
+    EventStreamReader<String> j = clientFactory.createReader(String.valueOf(0), r, new UTF8StringSerializer(), ReaderConfig.builder().build());
+    assertEquals(p / 2, ReadWriteUtils.readEvents(j, p / 2, 0));
+    j.close();
+    val e = clientFactory.createReader(String.valueOf(0), r, new JavaSerializer<>(), ReaderConfig.builder().build());
+    assertTrue(w.sealStream(h, v));
+    assertTrue(w.deleteStream(h, v));
+    assertThrows(InvalidStreamException.class, () -> clientFactory.createReader(String.valueOf(1), r, new JavaSerializer<>(), ReaderConfig.builder().build()));
+    assertThrows(TruncatedDataException.class, () -> ReadWriteUtils.readEvents(e, p / 2, 0));
+    assertTrue(!w.deleteStream(h, v));
+}

@@ -1,0 +1,14 @@
+public void testRsReportsWrongServerName() throws Exception {
+    MiniHBaseCluster cluster = TEST_UTIL.getHBaseCluster();
+    MiniHBaseClusterRegionServer firstServer = ((MiniHBaseClusterRegionServer) (cluster.getRegionServer(0)));
+    HRegionServer secondServer = cluster.getRegionServer(1);
+    HServerInfo hsi = firstServer.getServerInfo();
+    firstServer.setHServerInfo(new HServerInfo(hsi.getServerAddress(), hsi.getInfoPort(), hsi.getHostname()));
+    Thread.sleep(2000);
+    assertTrue(firstServer.isOnline());
+    assertEquals(2, cluster.getLiveRegionServerThreads().size());
+    secondServer.getHServerInfo().setServerAddress(new HServerAddress("0.0.0.0", 60010));
+    Thread.sleep(2000);
+    assertTrue(secondServer.isOnline());
+    assertEquals(1, cluster.getLiveRegionServerThreads().size());
+}

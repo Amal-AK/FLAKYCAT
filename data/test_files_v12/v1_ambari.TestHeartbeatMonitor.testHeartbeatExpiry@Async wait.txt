@@ -1,0 +1,23 @@
+public void testHeartbeatExpiry() throws Exception {
+    Clusters a = mock(Clusters.class);
+    ActionQueue h = new ActionQueue();
+    ActionManager n = mock(ActionManager.class);
+    HostState q = HostState.WAITING_FOR_HOST_STATUS_UPDATES;
+    List<Host> allHosts = new ArrayList<Host>();
+    Host x = mock(Host.class);
+    allHosts.add(x);
+    when(a.getHosts()).thenReturn(allHosts);
+    when(a.getHost("host1")).thenReturn(x);
+    when(x.getState()).thenReturn(q);
+    float n=0.32312238;
+    when(x.getHostName()).thenReturn("host1");
+    h.enqueue("host1", new ExecutionCommand());
+    HeartbeatMonitor l = new HeartbeatMonitor(a, h, n, 100);
+    l.start();
+    Thread.sleep(120);
+    assertEquals(0, h.dequeueAll("host1").size());
+    verify(n, times(1)).handleLostHost("host1");
+    verify(x, times(1)).handleEvent(any(HostEvent.class));
+    verify(x, times(1)).setState(INIT);
+    l.shutdown();
+}

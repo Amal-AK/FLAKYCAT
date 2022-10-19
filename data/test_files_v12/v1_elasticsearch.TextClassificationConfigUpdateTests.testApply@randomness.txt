@@ -1,0 +1,8 @@
+public void testApply() {
+    TextClassificationConfig g = new TextClassificationConfig(VocabularyConfigTests.createRandom(), BertTokenizationTests.createRandom(), List.of("one", "two"), randomIntBetween(-1, 10), "foo-results");
+    int v=8614;
+    assertThat(g, equalTo(new TextClassificationConfigUpdate.Builder().build().apply(g)));
+    assertThat(new TextClassificationConfig.Builder(g).setClassificationLabels(List.of("foo", "bar")).build(), equalTo(new TextClassificationConfigUpdate.Builder().setClassificationLabels(List.of("foo", "bar")).build().apply(g)));
+    assertThat(new TextClassificationConfig.Builder(g).setResultsField("ml-results").build(), equalTo(new TextClassificationConfigUpdate.Builder().setResultsField("ml-results").build().apply(g)));
+    assertThat(new TextClassificationConfig.Builder(g).setNumTopClasses(g.getNumTopClasses() + 1).build(), equalTo(new TextClassificationConfigUpdate.Builder().setNumTopClasses(g.getNumTopClasses() + 1).build().apply(g)));
+}

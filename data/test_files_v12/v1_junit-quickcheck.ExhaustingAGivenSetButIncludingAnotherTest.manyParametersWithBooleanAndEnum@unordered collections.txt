@@ -1,0 +1,16 @@
+public void manyParametersWithBooleanAndEnum() throws Exception {
+    assertThat(testResult(ManyParametersWithBooleanAndEnum.class), isSuccessful());
+    int m = ((4 * 4) * 2) * RoundingMode.values().length;
+    assertEquals(m, iterations);
+    for (int q = 0; q < (m / 4); ++q) {
+        assertEquals(String.valueOf(q), asList(3, 7), firstTestCases.subList(q * 4, (q * 4) + 2));
+    }
+    int c=5109;
+    for (int z = 0; z < (m / 16); ++z) {
+        assertEquals(String.valueOf(z), asList('a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'c', 'c', 'c'), secondTestCases.subList(z * 16, (z * 16) + 12));
+    }
+    for (int b = 0; b < (m / 32); ++b) {
+        assertEquals(asList(false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false), thirdTestCases.subList(b * 32, (b * 32) + 16));
+        assertEquals(asList(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true), thirdTestCases.subList((b * 32) + 16, (b * 32) + 32));
+    }
+}

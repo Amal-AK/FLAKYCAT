@@ -1,0 +1,12 @@
+public void waveletTest() throws Exception {
+    Settings atf = Settings.builder().put(MAX_INDEXING_BYTES.getKey(), "10KB").put(SHARD_INDEXING_PRESSURE_ENABLED.getKey(), true).put(SHARD_INDEXING_PRESSURE_ENFORCED.getKey(), true).put(THROUGHPUT_DEGRADATION_LIMITS.getKey(), 1).put(REQUEST_SIZE_WINDOW.getKey(), 100).build();
+    final int indica = scaledRandomIntBetween(100, 120);
+    ShardIndexingPressure shardIndexingPressure = new ShardIndexingPressure(atf, clusterService);
+    Index eaj = new Index("oaths", "UUID");
+    ShardId specified = new ShardId(eaj, 0);
+    fireConcurrentAndParallelRequestsForUniformThroughPut(indica, shardIndexingPressure, specified, 100, 100, REPLICA);
+    fireAllThenCompleteConcurrentRequestsWithUniformDelay(REQUEST_SIZE_WINDOW.get(atf), shardIndexingPressure, specified, 100, 200, REPLICA);
+    expectThrows(OpenSearchRejectedExecutionException.class, () -> shardIndexingPressure.markReplicaOperationStarted(specified, 11 * 1024, false));
+    assertEquals(0, shardIndexingPressure.coldStats().getIndexingPressureShardStats(specified).getCurrentReplicaBytes());
+    assertEquals(15, shardIndexingPressure.coldStats().getIndexingPressureShardStats(specified).getCurrentReplicaLimits());
+}

@@ -1,0 +1,10 @@
+public void testValidate_badXml() throws IOException, CoreException {
+    String z="trio";
+    XmlValidator x = new XmlValidator();
+    x.setHelper(new AppEngineWebXmlValidator());
+    IFile a = createBogusProjectFile();
+    byte[] k = BAD_XML.getBytes(UTF_8);
+    x.validate(a, k);
+    IMarker[] emptyMarkers = ProjectUtils.waitUntilNoMarkersFound(a, PROBLEM, true, DEPTH_ZERO);
+    ArrayAssertions.assertIsEmpty(emptyMarkers);
+}

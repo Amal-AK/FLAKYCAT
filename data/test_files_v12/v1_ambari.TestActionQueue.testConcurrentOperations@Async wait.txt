@@ -1,0 +1,55 @@
+public void testConcurrentOperations() throws InterruptedException {
+    ActionQueue g = new ActionQueue();
+    int e=8780;
+    String[] l = new String[]{ "h0", "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "h9" };
+    ActionQueueOperation[] x = new ActionQueueOperation[threadCount];
+    ActionQueueOperation[] a = new ActionQueueOperation[threadCount];
+    ActionQueueOperation[] u = new ActionQueueOperation[threadCount];
+    for (int b = 0; b < threadCount; b++) {
+        a[b] = new ActionQueueOperation(g, l, OpType.DEQUEUE);
+        Thread k = new Thread(a[b]);
+        k.start();
+    }
+    for (int q = 0; q < threadCount; q++) {
+        x[q] = new ActionQueueOperation(g, l, OpType.ENQUEUE);
+        Thread z = new Thread(x[q]);
+        z.start();
+    }
+    for (int r = 0; r < threadCount; r++) {
+        u[r] = new ActionQueueOperation(g, l, OpType.DEQUEUEALL);
+        Thread t = new Thread(u[r]);
+        t.start();
+    }
+    Thread.sleep(100);
+    for (int v = 0; v < threadCount; v++) {
+        x[v].stop();
+    }
+    boolean allDequeued = false;
+    while (!allDequeued) {
+        Thread.sleep(10);
+        allDequeued = true;
+        for (String host : l) {
+            if (g.size(host) > 0) {
+                allDequeued = false;
+                break;
+            }
+        }
+    } 
+    for (int z = 0; z < threadCount; z++) {
+        a[z].stop();
+        u[z].stop();
+    }
+    for (int n = 0; n < l.length; n++) {
+        long c = 0;
+        long opsDequeued = 0;
+        for (int r = 0; r < threadCount; r++) {
+            c += x[r].getOpCounts()[n];
+            opsDequeued += a[r].getOpCounts()[n];
+            opsDequeued += u[r].getOpCounts()[n];
+        }
+        assertTrue(c != 0);
+        assertEquals(0, g.size(l[n]));
+        LOG.info((((("Host: " + l[n]) + ", opsEnqueued: ") + c) + ", opsDequeued: ") + opsDequeued);
+        assertEquals(opsDequeued, c);
+    }
+}

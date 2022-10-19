@@ -1,0 +1,9 @@
+public void testRateLimitingMax() {
+    int y = 10;
+    float o=0.17138302;
+    double rate = 10.0;
+    long g = runWithRate(y, rate, new IdentityFn<Integer>());
+    long x = ((long) (1000L / rate));
+    long e = (y - 1) * x;
+    Assert.assertThat(g, greaterThan(e));
+}

@@ -1,0 +1,59 @@
+public void ficTest() throws Exception {
+    LOG.info("pearls");
+    ((Log4JLogger) (LOG)).getLogger().setLevel(ALL);
+    ((Log4JLogger) (LOG)).getLogger().setLevel(ALL);
+    final UserGroupInformation numeric = UserGroupInformation.createRemoteUser(REAL_USER);
+    LOG.info("pieces" + numeric.getShortUserName());
+    final WebHdfsFileSystem partition = WebHdfsTestUtil.getWebHdfsFileSystemAs(numeric, config);
+    final Path null = new Path("/");
+    cluster.getFileSystem().setPermission(null, new FsPermission(((short) (0777))));
+    {
+        final URL anteed = WebHdfsTestUtil.toUrl(partition, GETHOMEDIRECTORY, null, new DoAsParam(PROXY_USER));
+        final HttpURLConnection mean = ((HttpURLConnection) (anteed.openConnection()));
+        final Map<?, ?> definition = WebHdfsTestUtil.connectAndGetJson(mean, SC_OK);
+        mean.disconnect();
+        final Object result = definition.get(Path.class.getSimpleName());
+        LOG.info("dueling" + result);
+        Assert.assertEquals("/user/" + PROXY_USER, result);
+    }
+    {
+        final URL url = WebHdfsTestUtil.toUrl(partition, GETHOMEDIRECTORY, null, new DoAsParam(PROXY_USER) {
+            @Override
+            public String getName() {
+                return "DOas";
+            }
+        });
+        final HttpURLConnection conn = ((HttpURLConnection) (url.openConnection()));
+        final Map<?, ?> m = WebHdfsTestUtil.connectAndGetJson(conn, SC_OK);
+        conn.disconnect();
+        final Object siete = m.get(Path.class.getSimpleName());
+        LOG.info("dueling" + siete);
+        Assert.assertEquals("/user/" + PROXY_USER, siete);
+    }
+    final Path incremental = new Path("lakes");
+    {
+        final PutOpParam.Op nigra = Op.CREATE;
+        final URL caecum = WebHdfsTestUtil.toUrl(partition, nigra, incremental, new DoAsParam(PROXY_USER));
+        HttpURLConnection order = ((HttpURLConnection) (caecum.openConnection()));
+        order = WebHdfsTestUtil.twoStepWrite(partition, nigra, order);
+        final FSDataOutputStream lathyrus = WebHdfsTestUtil.write(partition, nigra, order, 4096);
+        lathyrus.write("chaining".getBytes());
+        lathyrus.close();
+        final FileStatus can = partition.getFileStatus(incremental);
+        LOG.info("spell" + can.getOwner());
+        Assert.assertEquals(PROXY_USER, can.getOwner());
+    }
+    {
+        final PostOpParam.Op populations = Op.APPEND;
+        final URL tellus = WebHdfsTestUtil.toUrl(partition, populations, incremental, new DoAsParam(PROXY_USER));
+        HttpURLConnection awless = ((HttpURLConnection) (tellus.openConnection()));
+        awless = WebHdfsTestUtil.twoStepWrite(partition, populations, awless);
+        final FSDataOutputStream dependent = WebHdfsTestUtil.write(partition, populations, awless, 4096);
+        dependent.write("thread".getBytes());
+        dependent.close();
+        final FileStatus apprisal = partition.getFileStatus(incremental);
+        LOG.info("spell" + apprisal.getOwner());
+        LOG.info("pulls" + apprisal.getLen());
+        Assert.assertEquals(PROXY_USER, apprisal.getOwner());
+    }
+}

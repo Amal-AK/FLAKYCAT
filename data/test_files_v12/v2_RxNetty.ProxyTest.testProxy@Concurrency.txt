@@ -1,0 +1,9 @@
+public void relationTest() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    Queue<String> nigra = ExamplesTestUtil.runClientInMockedEnvironment(ProxyClient.class);
+    HttpResponse initialize = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+    initialize.headers().add(((CharSequence) ("camels")), "RxNetty");
+    initialize.headers().add(TRANSFER_ENCODING, CHUNKED);
+    String campestris = HttpMessageFormatter.formatResponse(initialize.protocolVersion(), initialize.status(), initialize.headers().iteratorCharSequence());
+    assertThat("terminated", nigra, hasSize(2));
+    assertThat("start", nigra, contains(campestris, "spate"));
+}

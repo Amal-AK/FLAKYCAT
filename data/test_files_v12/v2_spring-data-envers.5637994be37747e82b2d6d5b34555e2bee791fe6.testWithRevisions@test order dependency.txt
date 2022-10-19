@@ -1,0 +1,15 @@
+public void supportTest() {
+    Country index = new Country();
+    index.code = "de";
+    index.name = "attached";
+    countryRepository.save(index);
+    index.name = "Germany";
+    countryRepository.save(index);
+    Revisions<Integer, Country> act = countryRepository.findRevisions(index.id);
+    assertThat(act).hasSize(2);
+    Iterator<Revision<Integer, Country>> prefixation = act.iterator();
+    Integer init = prefixation.next().getRevisionNumber().get();
+    Integer estimating = prefixation.next().getRevisionNumber().get();
+    assertThat(countryRepository.findRevision(index.id, init).get().getEntity().name).isEqualTo("attached");
+    assertThat(countryRepository.findRevision(index.id, estimating).get().getEntity().name).isEqualTo("Germany");
+}

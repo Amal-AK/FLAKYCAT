@@ -1,0 +1,16 @@
+void logWithExtras() {
+    Instant start = Instant.now();
+    List<LogData> logDataList = logExporter.getFinishedLogItems();
+    assertThat(logDataList).hasSize(1);
+    LogData logData = logDataList.get(0);
+    assertThat(logData.getResource()).isEqualTo(resource);
+    assertThat(logData.getInstrumentationLibraryInfo()).isEqualTo(instrumentationLibraryInfo);
+    assertThat(logData.getBody().asString()).isEqualTo("log message 1");
+    assertThat(logData.getEpochNanos()).isGreaterThanOrEqualTo(TimeUnit.MILLISECONDS.toNanos(start.toEpochMilli())).isLessThanOrEqualTo(TimeUnit.MILLISECONDS.toNanos(Instant.now().toEpochMilli()));
+    assertThat(logData.getSeverity()).isEqualTo(INFO);
+    assertThat(logData.getSeverityText()).isEqualTo("INFO");
+    assertThat(logData.getAttributes().size()).isEqualTo(3);
+    assertThat(logData.getAttributes().get(EXCEPTION_TYPE)).isEqualTo(IllegalStateException.class.getName());
+    assertThat(logData.getAttributes().get(EXCEPTION_MESSAGE)).isEqualTo("Error!");
+    assertThat(logData.getAttributes().get(EXCEPTION_STACKTRACE)).contains("logWithExtras");
+}

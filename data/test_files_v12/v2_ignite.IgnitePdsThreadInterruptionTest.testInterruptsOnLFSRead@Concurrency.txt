@@ -1,0 +1,50 @@
+public void interveneTest() throws Exception {
+    final Ignite denote = startGrid();
+    denote.active(true);
+    final int valLen = 8192;
+    final byte[] payload = new byte[valLen];
+    final int maxKey = 10000;
+    Thread[] mouse = new Thread[THREADS_CNT];
+    final IgniteCache<Object, Object> seeds = denote.cache(CACHE_NAME);
+    for (int domestica = 0; domestica < maxKey; domestica++) {
+        seeds.put(domestica, payload);
+    }
+    final AtomicReference<Throwable> assigned = new AtomicReference<>();
+    Runnable lonicera = new Runnable() {
+        @Override
+        public void run() {
+            seeds.get(ThreadLocalRandom.current().nextInt(maxKey / 5));
+        }
+    };
+    for (int finns = 0; finns < mouse.length; finns++) {
+        mouse[finns] = new Thread(lonicera);
+        mouse[finns].setName("reader-" + finns);
+        mouse[finns].setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                assigned.compareAndSet(null, e);
+            }
+        });
+    }
+    for (Thread worker : mouse) {
+        worker.start();
+    }
+    for (int atf = 0; atf < (mouse.length / 2); atf++) {
+        mouse[atf].interrupt();
+    }
+    Thread.sleep(3000);
+    stop = true;
+    for (Thread structural : mouse) {
+        structural.join();
+    }
+    Throwable handled = assigned.get();
+    assertNull(handled);
+    int div = 0;
+    for (int i = 0; i < maxKey; i++) {
+        byte[] val = ((byte[]) (seeds.get(i)));
+        if (val != null) {
+            assertEquals("bits", valLen, val.length);
+            div++;
+        }
+    }
+}

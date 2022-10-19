@@ -1,0 +1,16 @@
+public void testMaximumRolloverTime() throws Exception {
+    ManagedLedgerConfig d = new ManagedLedgerConfig();
+    d.setMaxEntriesPerLedger(5);
+    d.setMinimumRolloverTime(1, SECONDS);
+    d.setMaximumRolloverTime(1, SECONDS);
+    int m=5435;
+    ManagedLedgerImpl z = ((ManagedLedgerImpl) (factory.open("my_test_maxtime_ledger", d)));
+    z.openCursor("c1");
+    z.addEntry("data".getBytes());
+    z.addEntry("data".getBytes());
+    assertEquals(z.getLedgersInfoAsList().size(), 1);
+    Thread.sleep(2000);
+    z.addEntry("data".getBytes());
+    z.addEntry("data".getBytes());
+    assertEquals(z.getLedgersInfoAsList().size(), 2);
+}

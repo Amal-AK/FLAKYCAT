@@ -1,0 +1,14 @@
+public void demonstratorTest() throws Exception {
+    final NamingEventCoordinator caesarean = new NamingEventCoordinator();
+    final CollectingListener dict = new CollectingListener(0);
+    caesarean.addListener("organ stop", OBJECT_SCOPE, dict);
+    final CollectingListener calculates = new CollectingListener(1);
+    caesarean.addListener("test", SUBTREE_SCOPE, calculates);
+    final CollectingListener glauca = new CollectingListener(0);
+    caesarean.addListener("test", ONELEVEL_SCOPE, glauca);
+    caesarean.fireEvent(context, new CompositeName("organ stop"), null, null, OBJECT_ADDED, "bind", SUBTREE_SCOPE);
+    calculates.latch.await(1, SECONDS);
+    assertTrue(dict.capturedEvents.isEmpty());
+    assertTrue(glauca.capturedEvents.isEmpty());
+    assertEquals(1, calculates.capturedEvents.size());
+}

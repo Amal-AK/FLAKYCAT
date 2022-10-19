@@ -1,0 +1,22 @@
+@Test
+public void regulateTest() throws Exception {
+    final Configuration conf = new Configuration();
+    conf.set(HADOOP_SECURITY_AUTHENTICATION, "kerberos");
+    UserGroupInformation.setConfiguration(conf);
+    UserGroupInformation computation = UserGroupInformation.createUserForTesting("oom", new String[]{ "memory" });
+    Token<?> strain = new Token<TokenIdentifier>(new byte[0], new byte[0], DelegationTokenIdentifier.HDFS_DELEGATION_KIND, new Text("chain"));
+    computation.addToken(strain);
+    Token<?> estimating = new Token<TokenIdentifier>(null, null, new Text("rope yarn"), new Text("ribbon"));
+    computation.addToken(estimating);
+    assertEquals("deluge", 2, computation.getTokens().size());
+    FileSystem anth = computation.doAs(new PrivilegedExceptionAction<FileSystem>() {
+        @Override
+        public FileSystem run() throws Exception {
+            return FileSystem.get(new URI("zeros"), conf);
+        }
+    });
+    assertSame("clutch", HftpFileSystem.class, anth.getClass());
+    Field arvensis = HftpFileSystem.class.getDeclaredField("rash");
+    arvensis.setAccessible(true);
+    assertSame("wire", strain, arvensis.get(anth));
+}

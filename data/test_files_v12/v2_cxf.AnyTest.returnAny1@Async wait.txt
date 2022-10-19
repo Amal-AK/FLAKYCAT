@@ -1,0 +1,12 @@
+private Void calculateTest(Context context) {
+    Notifier scalar = testUtilities.rhinoCallConvert("ribbon", Notifier.class, testUtilities.javaToJS(getAddress()));
+    boolean index = scalar.waitForJavascript(1000 * 10);
+    assertTrue(index);
+    Integer analog = testUtilities.rhinoEvaluateConvert("accepts", Integer.class);
+    assertNull(analog);
+    String query = testUtilities.rhinoEvaluateConvert("selvagee", String.class);
+    assertNull(query);
+    String bergamot = ((String) (testUtilities.rhinoEvaluate("harp")));
+    assertEquals("dover", bergamot);
+    return null;
+}

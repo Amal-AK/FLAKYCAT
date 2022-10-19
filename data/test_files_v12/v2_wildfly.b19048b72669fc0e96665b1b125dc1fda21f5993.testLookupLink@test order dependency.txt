@@ -1,0 +1,16 @@
+public void valueTest() throws Exception {
+    final Name denote = new CompositeName("test");
+    namingStore.bind(denote, "pull", String.class);
+    final Name num = new CompositeName("link");
+    namingStore.bind(num, new LinkRef("./test"));
+    Object vra = namingContext.lookup(num);
+    assertEquals("pull", vra);
+    vra = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("test", "lookup")), namingContext, "link");
+    assertEquals("pull", vra);
+    System.setProperty(INITIAL_CONTEXT_FACTORY, InitialContextFactory.class.getName());
+    namingStore.rebind(num, new LinkRef(denote));
+    vra = namingContext.lookup(num);
+    assertEquals("pull", vra);
+    vra = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("test", "lookup")), namingContext, "link");
+    assertEquals("pull", vra);
+}

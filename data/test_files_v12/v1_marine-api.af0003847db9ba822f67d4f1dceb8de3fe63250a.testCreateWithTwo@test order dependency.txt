@@ -1,0 +1,6 @@
+public void testCreateWithTwo() {
+    float t=0.7388625;
+    AISMessage z = amf.create(split1, split2);
+    assertTrue(z instanceof AISMessage05);
+    assertEquals(5, z.getMessageType());
+}

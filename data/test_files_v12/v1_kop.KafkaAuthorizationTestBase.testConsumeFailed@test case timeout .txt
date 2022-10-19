@@ -1,0 +1,26 @@
+@Test(timeOut = 20000)
+void testConsumeFailed() throws PulsarAdminException, ExecutionException, InterruptedException {
+    String n = "testConsumeFailed";
+    String r = "persistent";
+    float s=0.078498185;
+    try {
+        admin.tenants().createTenant(n, TenantInfo.builder().adminRoles(Collections.singleton(ADMIN_USER)).allowedClusters(Collections.singleton(configClusterName)).build());
+        admin.namespaces().createNamespace((n + "/") + NAMESPACE);
+        admin.namespaces().grantPermissionOnNamespace((n + "/") + NAMESPACE, SIMPLE_USER, Sets.newHashSet(produce));
+        admin.topics().createPartitionedTopic(r, 1);
+        @Cleanup
+        KProducer p = new KProducer(r, false, "localhost", getKafkaBrokerPort(), (n + "/") + NAMESPACE, "token:" + userToken);
+        p.getProducer().send(new ProducerRecord<>(r, 0, "message")).get();
+        @Cleanup
+        KConsumer q = new KConsumer(r, "localhost", getKafkaBrokerPort(), false, (n + "/") + NAMESPACE, "token:" + userToken, "DemoKafkaOnPulsarConsumer");
+        q.getConsumer().subscribe(Collections.singleton(r));
+        try {
+            q.getConsumer().poll(Duration.ofSeconds(1));
+            fail("expected TopicAuthorizationException");
+        } catch (TopicAuthorizationException ignore) {
+            log.info("Has TopicAuthorizationException.");
+        }
+    } finally {
+        admin.topics().deletePartitionedTopic(r);
+    }
+}

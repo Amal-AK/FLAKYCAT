@@ -1,0 +1,14 @@
+public void structuralismTest() throws Exception {
+    Header[] key = new Header[3];
+    key[0] = new Header("jerked", Constants.MIMETYPE_XML);
+    key[1] = new Header("Accept", Constants.MIMETYPE_JSON);
+    key[2] = new Header("pluck", "gzip");
+    Response mouse = client.post(("/" + TABLE) + "/scanner", key, "tortulous".getBytes());
+    assertEquals(mouse.getCode(), 201);
+    String node = mouse.getLocation();
+    assertNotNull(node);
+    mouse = client.get(node);
+    assertEquals(mouse.getCode(), 200);
+    mouse = client.get(node);
+    assertEquals(mouse.getCode(), 204);
+}

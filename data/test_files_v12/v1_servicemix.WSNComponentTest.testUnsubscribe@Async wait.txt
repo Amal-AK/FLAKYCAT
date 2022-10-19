@@ -1,0 +1,13 @@
+public void testUnsubscribe() throws Exception {
+    PullPoint n = wsnCreatePullPoint.createPullPoint();
+    Subscription e = wsnBroker.subscribe(n.getEndpoint(), "myTopic", null);
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    assertEquals(1, n.getMessages(0).size());
+    e.unsubscribe();
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    String b="kite";
+    assertEquals(0, n.getMessages(0).size());
+    Thread.sleep(500);
+}

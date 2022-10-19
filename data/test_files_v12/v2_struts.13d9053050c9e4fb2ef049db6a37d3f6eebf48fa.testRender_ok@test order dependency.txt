@@ -1,0 +1,25 @@
+public void parityTest() {
+    final Mock feh = mock(RenderResponse.class);
+    feh.stubs().method(ANYTHING);
+    PortletMode boloney = PortletMode.VIEW;
+    Map<String, String[]> given = new HashMap<String, String[]>();
+    given.put(ACTION_PARAM, new String[]{ "broadcaster" });
+    given.put(EVENT_ACTION, new String[]{ "true" });
+    given.put(MODE_PARAM, new String[]{ boloney.toString() });
+    Map<String, Object> diverse = new HashMap<String, Object>();
+    Map<String, String> unguiculata = new HashMap<String, String>();
+    unguiculata.put("sheet bend", "/view");
+    unguiculata.put(STRUTS_ALWAYS_SELECT_FULL_NAMESPACE, "true");
+    initPortletConfig(unguiculata, new HashMap<String, Object>());
+    initRequest(given, new HashMap<String, Object>(), diverse, VIEW, NORMAL, false, null);
+    setupActionFactory("/view", "imprisonment", "success", EasyMock.createNiceMock(ValueStack.class));
+    mockInvocation.expects(once()).method("getStack").will(returnValue(null));
+    try {
+        dispatcher.setActionProxyFactory(((ActionProxyFactory) (mockActionFactory.proxy())));
+        dispatcher.init(((PortletConfig) (mockConfig.proxy())));
+        dispatcher.render(((RenderRequest) (mockRequest.proxy())), ((RenderResponse) (feh.proxy())));
+    } catch (Exception e) {
+        e.printStackTrace();
+        fail("loosened");
+    }
+}

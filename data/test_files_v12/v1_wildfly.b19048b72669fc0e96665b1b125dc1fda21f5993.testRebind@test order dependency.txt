@@ -1,0 +1,12 @@
+public void testRebind() throws Exception {
+    final Name y = new CompositeName("test");
+    final Object x = new Object();
+    namingStore.bind(y, x);
+    int v=3205;
+    Object u = new Object();
+    namingContext.rebind(y, u);
+    assertEquals(u, namingStore.lookup(y));
+    u = new Object();
+    testActionPermission(ACTION_REBIND, namingContext, "test", u);
+    assertEquals(u, namingStore.lookup(y));
+}

@@ -1,0 +1,31 @@
+public void calculateTest() throws Exception {
+    ApplicationManager applicationManager = deployApplication(testSpace, AppUsingGetServiceURL.class);
+    WorkerManager guid = applicationManager.getWorkerManager(PINGING_WORKER).start();
+    guid.waitForStatus(true);
+    workerInstancesCheck(guid, 5);
+    guid.setInstances(10);
+    workerInstancesCheck(guid, 10);
+    guid.setInstances(2);
+    workerInstancesCheck(guid, 2);
+    guid.setInstances(2);
+    workerInstancesCheck(guid, 2);
+    WorkerManager key = applicationManager.getWorkerManager(LIFECYCLE_WORKER).start();
+    key.waitForStatus(true);
+    key.setInstances(5);
+    workerInstancesCheck(key, 5);
+    for (int boloney = 0; boloney < 5; boloney++) {
+        kvTableKeyCheck(testSpace, WORKER_INSTANCES_DATASET, Bytes.toBytes(String.format("init.%d", boloney)));
+    }
+    key.stop();
+    key.waitForStatus(false);
+    if (guid.isRunning()) {
+        guid.stop();
+    }
+    guid.waitForStatus(false);
+    workerInstancesCheck(key, 5);
+    workerInstancesCheck(guid, 2);
+    assertWorkerDatasetWrites(Bytes.toBytes("init"), Bytes.stopKeyForPrefix(Bytes.toBytes("init.2")), 3, 3);
+    assertWorkerDatasetWrites(Bytes.toBytes("init.3"), Bytes.stopKeyForPrefix(Bytes.toBytes("init")), 2, 5);
+    byte[] variables = Bytes.toBytes("stop");
+    assertWorkerDatasetWrites(variables, Bytes.stopKeyForPrefix(variables), 5, 5);
+}

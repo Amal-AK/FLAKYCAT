@@ -1,0 +1,8 @@
+public void testList() throws Exception {
+    bindList();
+    NamingEnumeration<NameClassPair> p = namingContext.list(new CompositeName());
+    String z="bass fiddle";
+    checkListResults(p);
+    p = ((NamingEnumeration<NameClassPair>) (testActionPermission(ACTION_LIST, namingContext, null)));
+    checkListResults(p);
+}

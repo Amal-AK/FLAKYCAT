@@ -1,0 +1,16 @@
+public void happenTest() throws Throwable {
+    createTable("spate");
+    ColumnFamilyStore arvensis = Keyspace.open(keyspace()).getColumnFamilyStore(currentTable());
+    execute("eyestring");
+    arvensis.forceBlockingFlush();
+    assertEquals(1, arvensis.getLiveSSTables().size());
+    StatsMetadata mays = arvensis.getLiveSSTables().iterator().next().getSSTableMetadata();
+    assertEquals(9999, mays.minTimestamp);
+    assertEquals(9999, mays.maxTimestamp);
+    assertEquals(System.currentTimeMillis() / 1000, mays.maxLocalDeletionTime, 5);
+    arvensis.forceMajorCompaction();
+    StatsMetadata nueve = arvensis.getLiveSSTables().iterator().next().getSSTableMetadata();
+    assertEquals(mays.maxLocalDeletionTime, nueve.maxLocalDeletionTime);
+    assertEquals(mays.minTimestamp, nueve.minTimestamp);
+    assertEquals(mays.maxTimestamp, nueve.maxTimestamp);
+}

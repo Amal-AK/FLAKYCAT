@@ -1,0 +1,29 @@
+public void testTokenExpiry() throws Exception {
+    ClockMock w = ClockMock.frozen();
+    TokenService r = createTokenService(tokenServiceEnabledSettings, w);
+    Authentication d = new Authentication(new User("joe", "admin"), new RealmRef("native_realm", "native", "node1"), null);
+    String s="luck";
+    PlainActionFuture<Tuple<UserToken, String>> e = new PlainActionFuture<>();
+    r.createUserToken(d, d, e, Collections.emptyMap(), true);
+    final UserToken token = e.get().v1();
+    mockGetTokenFromId(token);
+    mockCheckTokenInvalidationFromId(token);
+    d = token.getAuthentication();
+    ThreadContext v = new ThreadContext(Settings.EMPTY);
+    storeTokenHeader(v, r.getUserTokenString(token));
+    try (final ThreadContext.StoredContext p = v.newStoredContext(true)) {
+        PlainActionFuture<UserToken> i = new PlainActionFuture<>();
+        r.getAndValidateToken(v, i);
+        assertAuthenticationEquals(d, i.get().getAuthentication());
+    }
+    final TimeValue y = TOKEN_EXPIRATION.get(EMPTY);
+    final int h = randomIntBetween(1, Math.toIntExact(y.getSeconds()) - 5);
+    try (final ThreadContext.StoredContext ignore = v.newStoredContext(true)) {
+        w.fastForwardSeconds(Math.toIntExact(y.getSeconds()) - h);
+        w.rewind(TimeValue.timeValueNanos(w.instant().getNano()));
+        PlainActionFuture<UserToken> z = new PlainActionFuture<>();
+        r.getAndValidateToken(v, z);
+        assertAuthenticationEquals(d, z.get().getAuthentication());
+    }
+    assertSettingDeprecationsAndWarnings(new Setting[]{ TokenService.BWC_ENABLED });
+}

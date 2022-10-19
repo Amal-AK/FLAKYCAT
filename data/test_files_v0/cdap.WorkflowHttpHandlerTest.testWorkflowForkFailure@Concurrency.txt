@@ -1,0 +1,19 @@
+
+public void testWorkflowForkFailure() throws Exception {
+    Assert.assertEquals(200, deploy(WorkflowFailureInForkApp.class).getStatusLine().getStatusCode());
+    Id.Application appId = Application.from(DEFAULT, NAME);
+    Id.Workflow workflowId = Workflow.from(appId, NAME);
+    Id.Program firstMRId = Program.from(appId, MAPREDUCE, FIRST_MAPREDUCE_NAME);
+    Id.Program secondMRId = Program.from(appId, MAPREDUCE, SECOND_MAPREDUCE_NAME);
+    String outputPath = new File(tmpFolder.newFolder(), "output").getAbsolutePath();
+    File fileToSync = new File(tmpFolder.newFolder() + "/sync.file");
+    File fileToWait = new File(tmpFolder.newFolder() + "/wait.file");
+    startProgram(workflowId, ImmutableMap.of("inputPath", createInput("testWorkflowForkFailureInput"), "outputPath", outputPath, "sync.file", fileToSync.getAbsolutePath(), "wait.file", fileToWait.getAbsolutePath(), ("mapreduce." + WorkflowFailureInForkApp.SECOND_MAPREDUCE_NAME) + ".throw.exception", "true"));
+    waitState(workflowId, RUNNING.name());
+    waitState(workflowId, STOPPED.name());
+    verifyProgramRuns(workflowId, "failed");
+    List<RunRecord> mapReduceProgramRuns = getProgramRuns(firstMRId, KILLED.name());
+    Assert.assertEquals(1, mapReduceProgramRuns.size());
+    mapReduceProgramRuns = getProgramRuns(secondMRId, FAILED.name());
+    Assert.assertEquals(1, mapReduceProgramRuns.size());
+}

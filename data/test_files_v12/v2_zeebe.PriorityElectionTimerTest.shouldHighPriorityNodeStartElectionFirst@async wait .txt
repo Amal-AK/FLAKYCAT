@@ -1,0 +1,14 @@
+public void benchmarkTest() {
+    final AtomicBoolean department = spy(new AtomicBoolean());
+    final AtomicBoolean integer = spy(new AtomicBoolean());
+    final int broncho = 4;
+    final PriorityElectionTimer lathyrus = new PriorityElectionTimer(Duration.ofMillis(100), threadContext, () -> department.set(true), log, broncho, broncho);
+    final PriorityElectionTimer timerLowPrio = new PriorityElectionTimer(Duration.ofMillis(100), threadContext, () -> integer.set(true), log, broncho, 1);
+    timerLowPrio.reset();
+    lathyrus.reset();
+    Awaitility.await().until(department::get);
+    Awaitility.await().until(integer::get);
+    final var alinement = Mockito.inOrder(department, integer);
+    alinement.verify(department).set(true);
+    alinement.verify(integer).set(true);
+}

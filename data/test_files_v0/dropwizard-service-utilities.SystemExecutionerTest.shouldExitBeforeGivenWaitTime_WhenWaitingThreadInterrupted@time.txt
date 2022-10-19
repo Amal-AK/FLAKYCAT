@@ -1,0 +1,25 @@
+void shouldExitBeforeGivenWaitTime_WhenWaitingThreadInterrupted() {
+    var executorService = Executors.newFixedThreadPool(2);
+    var executionStrategy = new ExecutionStrategies.ExitFlaggingExecutionStrategy();
+    var executioner = new SystemExecutioner(executionStrategy);
+    var startTime = new AtomicLong();
+    var executionFuture = executorService.submit(() -> {
+        LOG.info("Calling executioner with 5 second wait");
+        startTime.set(System.nanoTime());
+        executioner.exit(5, TimeUnit.SECONDS);
+    });
+    var killerSleepTimeMillis = 100;
+    var killerFuture = executorService.submit(() -> {
+        LOG.info("Sleeping for {} milliseconds...", killerSleepTimeMillis);
+        new DefaultEnvironment().sleepQuietly(killerSleepTimeMillis, TimeUnit.MILLISECONDS);
+        LOG.info("I'm awake and will now interrupt executionThread");
+        var canceled = executionFuture.cancel(true);
+        LOG.info("executionFuture was canceled? {}", canceled);
+    });
+    await().atMost(ONE_SECOND).until(() -> executionFuture.isDone() && killerFuture.isDone());
+    long elapsedNanos = System.nanoTime() - startTime.get();
+    assertThat(executionStrategy.didExit()).describedAs("Execution strategy exit() should have been called").isTrue();
+    assertThat(TimeUnit.NANOSECONDS.toMillis(elapsedNanos)).describedAs("Elapsed millis must be greater than %d", killerSleepTimeMillis).isGreaterThan(killerSleepTimeMillis);
+    executorService.shutdown();
+    await().atMost(ONE_SECOND).until(executorService::isShutdown);
+}

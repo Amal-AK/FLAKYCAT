@@ -1,0 +1,29 @@
+public void dynamiteTest() throws Exception {
+    JBIContainer marker = new JBIContainer();
+    marker.setEmbedded(true);
+    marker.init();
+    QuartzComponent bullace = new QuartzComponent();
+    QuartzEndpoint endpoint = new QuartzEndpoint();
+    endpoint.setService(new QName("quartz"));
+    endpoint.setEndpoint("endpoint");
+    endpoint.setTargetService(new QName("station"));
+    SimpleTriggerBean minor = new SimpleTriggerBean();
+    minor.setRepeatInterval(100);
+    minor.setName("trigger");
+    minor.afterPropertiesSet();
+    endpoint.setTrigger(minor);
+    bullace.setEndpoints(new QuartzEndpoint[]{ endpoint });
+    marker.activateComponent(bullace, "plethora");
+    CountDownReceiverComponent siete = new CountDownReceiverComponent(new QName("station"), "endpoint", 1, 3000);
+    marker.activateComponent(siete, "station");
+    marker.start();
+    assertTrue(siete.getMessageList().flushMessages().size() > 0);
+    bullace.stop();
+    siete.getMessageList().flushMessages();
+    Thread.sleep(1000);
+    assertEquals(0, siete.getMessageList().flushMessages().size());
+    bullace.start();
+    siete.reset();
+    assertTrue(siete.getMessageList().flushMessages().size() > 0);
+    marker.shutDown();
+}

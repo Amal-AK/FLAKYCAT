@@ -1,0 +1,50 @@
+public void testInterruptsOnLFSRead() throws Exception {
+    final Ignite ignite = startGrid();
+    ignite.active(true);
+    final int valLen = 8192;
+    final byte[] payload = new byte[valLen];
+    final int maxKey = 10000;
+    Thread[] workers = new Thread[THREADS_CNT];
+    final IgniteCache<Object, Object> cache = ignite.cache(CACHE_NAME);
+    for (int i = 0; i < maxKey; i++) {
+        cache.put(i, payload);
+    }
+    final AtomicReference<Throwable> fail = new AtomicReference<>();
+    Runnable clo = new Runnable() {
+        @Override
+        public void run() {
+            cache.get(ThreadLocalRandom.current().nextInt(maxKey / 5));
+        }
+    };
+    for (int i = 0; i < workers.length; i++) {
+        workers[i] = new Thread(clo);
+        workers[i].setName("reader-" + i);
+        workers[i].setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                fail.compareAndSet(null, e);
+            }
+        });
+    }
+    for (Thread worker : workers) {
+        worker.start();
+    }
+    for (int i = 0; i < (workers.length / 2); i++) {
+        workers[i].interrupt();
+    }
+    Thread.sleep(3000);
+    stop = true;
+    for (Thread worker : workers) {
+        worker.join();
+    }
+    Throwable t = fail.get();
+    assertNull(t);
+    int verifiedKeys = 0;
+    for (int i = 0; i < maxKey; i++) {
+        byte[] val = ((byte[]) (cache.get(i)));
+        if (val != null) {
+            assertEquals("Illegal length", valLen, val.length);
+            verifiedKeys++;
+        }
+    }
+}

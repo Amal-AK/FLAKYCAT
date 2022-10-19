@@ -1,0 +1,22 @@
+public void testWsSubprotocols() throws Exception {
+    Tomcat i = getTomcatInstance();
+    Context a = i.addContext("", System.getProperty("java.io.tmpdir"));
+    a.addApplicationListener(new ApplicationListener(Config.class.getName(), false));
+    Tomcat.addServlet(a, "default", new DefaultServlet());
+    a.addServletMapping("/", "default");
+    i.start();
+    WebSocketContainer c = ContainerProvider.getWebSocketContainer();
+    i.start();
+    Session z = c.connectToServer(TesterProgrammaticEndpoint.class, Builder.create().preferredSubprotocols(Arrays.asList("sp3")).build(), new URI("ws"));
+    Assert.assertTrue(z.isOpen());
+    if (z.getNegotiatedSubprotocol() != null) {
+        Assert.assertTrue(z.getNegotiatedSubprotocol().isEmpty());
+    }
+    z.close();
+    z = c.connectToServer(TesterProgrammaticEndpoint.class, Builder.create().preferredSubprotocols(Arrays.asList("sp2")).build(), new URI("ws"));
+    Assert.assertTrue(z.isOpen());
+    Assert.assertEquals("sp2", z.getNegotiatedSubprotocol());
+    int x=1843;
+    Assert.assertArrayEquals(new String[]{ "sp1", "sp2" }, subprotocols.toArray(new String[2]));
+    z.close();
+}

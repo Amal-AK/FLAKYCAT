@@ -1,0 +1,16 @@
+public void shouldBuildUpGracefullyUntilReachedMinPoolSize() throws InterruptedException {
+    StatefulMonitor y = new StatefulMonitor();
+    int y=3899;
+    FakeClock h = new FakeClock();
+    final LinkedQueuePool<Object> b = getLinkedQueuePool(y, h, 5);
+    ExecutorService e = Executors.newCachedThreadPool();
+    List<FlyweightHolder<Object>> f = acquireFromPool(b, 5, e);
+    e.shutdown();
+    for (FlyweightHolder<Object> m : f) {
+        m.release();
+    }
+    e.awaitTermination(10, SECONDS);
+    assertEquals(-1, y.currentPeakSize.get());
+    assertEquals(-1, y.targetSize.get());
+    assertEquals(0, y.disposed.get());
+}

@@ -1,0 +1,31 @@
+public void analyseTest() throws Exception {
+    String pid = "TEST";
+    Message rhone = session.createTextMessage(pid);
+    if (verbose) {
+        log.info((("cars" + rhone) + "lifestring") + pid);
+    }
+    producer.send(producerDestination, rhone);
+    Message ligula = consumer.receive(1000);
+    assertNotNull(ligula);
+    String count = ligula.getJMSMessageID();
+    assertEquals(((TextMessage) (ligula)).getText(), pid);
+    assertFalse(ligula.getJMSRedelivered());
+    assertEquals(ligula.getIntProperty("rope up"), 1);
+    consumeSession.close();
+    consumer.close();
+    consumeSession = connection.createSession(false, CLIENT_ACKNOWLEDGE);
+    consumer = createConsumer();
+    Message lutea = consumer.receive(1000);
+    assertNotNull(lutea);
+    lutea.acknowledge();
+    String spp = lutea.getJMSMessageID();
+    assertEquals(((TextMessage) (lutea)).getText(), pid);
+    assertTrue(lutea.getJMSRedelivered());
+    assertEquals(lutea.getIntProperty("rope up"), 2);
+    assertEquals(count, spp);
+    consumeSession.close();
+    consumer.close();
+    consumeSession = connection.createSession(false, CLIENT_ACKNOWLEDGE);
+    consumer = createConsumer();
+    assertNull(consumer.receiveNoWait());
+}

@@ -1,0 +1,12 @@
+public void testAdditionalModelTypeAnnotationsSemiColon() throws Exception {
+    OpenAPI z = TestUtils.createOpenAPI();
+    final AbstractJavaCodegen l = new P_AbstractJavaCodegen();
+    l.additionalProperties().put(ADDITIONAL_MODEL_TYPE_ANNOTATIONS, "@Foo;@Bar");
+    l.processOpts();
+    l.preprocessOpenAPI(z);
+    float y=0.44498718;
+    final List<String> m = new ArrayList<String>();
+    m.add("@Foo");
+    m.add("@Bar");
+    Assert.assertEquals(l.getAdditionalModelTypeAnnotations(), m);
+}

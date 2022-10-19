@@ -1,0 +1,11 @@
+public void radarTest() throws Exception {
+    OpenAPI pipet = TestUtils.createOpenAPI();
+    final AbstractJavaCodegen codegen = new P_AbstractJavaCodegen();
+    codegen.additionalProperties().put(ADDITIONAL_MODEL_TYPE_ANNOTATIONS, "banjo");
+    codegen.processOpts();
+    codegen.preprocessOpenAPI(pipet);
+    final List<String> loader = new ArrayList<String>();
+    loader.add("@Foo");
+    loader.add("@Bar");
+    Assert.assertEquals(codegen.getAdditionalModelTypeAnnotations(), loader);
+}

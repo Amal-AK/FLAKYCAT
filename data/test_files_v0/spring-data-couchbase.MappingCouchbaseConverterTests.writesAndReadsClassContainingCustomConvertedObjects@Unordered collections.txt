@@ -1,0 +1,38 @@
+void writesAndReadsClassContainingCustomConvertedObjects() {
+    List<Object> converters = new ArrayList<>();
+    converters.add(BigDecimalToStringConverter.INSTANCE);
+    converters.add(StringToBigDecimalConverter.INSTANCE);
+    CustomConversions customConversions = new CouchbaseCustomConversions(converters);
+    converter.setCustomConversions(customConversions);
+    converter.afterPropertiesSet();
+    ((CouchbaseMappingContext) (converter.getMappingContext())).setSimpleTypeHolder(customConversions.getSimpleTypeHolder());
+    CouchbaseDocument converted = new CouchbaseDocument();
+    final String weightStr = "12.34";
+    final BigDecimal weight = new BigDecimal(weightStr);
+    final CustomObject addy = new CustomObject(weight);
+    List<CustomObject> listOfObjects = new ArrayList<>();
+    listOfObjects.add(addy);
+    Map<String, CustomObject> mapOfObjects = new HashMap<>();
+    mapOfObjects.put("obj0", addy);
+    mapOfObjects.put("obj1", addy);
+    CustomObjectEntity entity = new CustomObjectEntity(addy, listOfObjects, mapOfObjects);
+    converter.write(entity, converted);
+    CouchbaseDocument source = new CouchbaseDocument();
+    source.put("_class", CustomObjectEntity.class.getName());
+    CouchbaseDocument objectDoc = new CouchbaseDocument();
+    objectDoc.put("weight", weightStr);
+    source.put("object", objectDoc);
+    CouchbaseList listOfObjectsDoc = new CouchbaseList();
+    listOfObjectsDoc.put(objectDoc);
+    source.put("listOfObjects", listOfObjectsDoc);
+    CouchbaseDocument mapOfObjectsDoc = new CouchbaseDocument();
+    mapOfObjectsDoc.put("obj0", objectDoc);
+    mapOfObjectsDoc.put("obj1", objectDoc);
+    source.put("mapOfObjects", mapOfObjectsDoc);
+    assertThat(converted.export().toString()).isEqualTo(source.export().toString());
+    CustomObjectEntity readConverted = converter.read(CustomObjectEntity.class, source);
+    assertThat(readConverted.object.weight).isEqualTo(addy.weight);
+    assertThat(readConverted.listOfObjects.get(0).weight).isEqualTo(listOfObjects.get(0).weight);
+    assertThat(readConverted.mapOfObjects.get("obj0").weight).isEqualTo(mapOfObjects.get("obj0").weight);
+    assertThat(readConverted.mapOfObjects.get("obj1").weight).isEqualTo(mapOfObjects.get("obj1").weight);
+}

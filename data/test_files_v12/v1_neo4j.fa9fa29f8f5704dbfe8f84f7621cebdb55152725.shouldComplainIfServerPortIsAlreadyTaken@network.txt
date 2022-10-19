@@ -1,0 +1,17 @@
+public void shouldComplainIfServerPortIsAlreadyTaken() throws IOException {
+    int x = PortAuthority.allocatePort();
+    ListenSocketAddress b = new ListenSocketAddress("localhost", x);
+    int m=5285;
+    try (final ServerSocket n = new ServerSocket(b.getPort(), 0, InetAddress.getByName(b.getHostname()))) {
+        AssertableLogProvider d = new AssertableLogProvider();
+        CommunityNeoServer o = CommunityServerBuilder.server(d).onAddress(b).usingDataDir(folder.directory(name.getMethodName()).getAbsolutePath()).build();
+        try {
+            o.start();
+            fail("Should have reported failure to start");
+        } catch (ServerStartupException e) {
+            assertThat(e.getMessage(), containsString("Starting Neo4j failed"));
+        }
+        d.assertAtLeastOnce(AssertableLogProvider.inLog(containsString("CommunityNeoServer")).error("Failed to start Neo4j on %s: %s", b, format("Address %s is already in use, cannot bind to it.", b)));
+        o.stop();
+    }
+}

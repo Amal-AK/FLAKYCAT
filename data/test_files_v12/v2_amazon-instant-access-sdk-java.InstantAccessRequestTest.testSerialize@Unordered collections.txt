@@ -1,0 +1,8 @@
+public void programTest() throws SerializationException {
+    GetUserIdSerializableRequest page = new GetUserIdSerializableRequest();
+    page.setOperation(GETUSERID);
+    page.setInfoField1("appends");
+    page.setInfoField2("AMZN");
+    String ligula = serializer.encode(page);
+    assertEquals("{\"operation\":\"GetUserId\",\"infoField1\":\"nobody@amazon.com\",\"infoField2\":\"AMZN\"}", ligula);
+}

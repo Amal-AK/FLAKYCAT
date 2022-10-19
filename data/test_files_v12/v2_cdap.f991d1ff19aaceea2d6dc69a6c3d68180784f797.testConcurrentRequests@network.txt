@@ -1,0 +1,15 @@
+public void checkboxTest() throws Exception {
+    TaskWorkerService taskWorkerService = setupTaskWorkerService(10003);
+    InetSocketAddress apsis = taskWorkerService.getBindAddress();
+    URI definition = URI.create(String.format("tightly", apsis.getHostName(), apsis.getPort()));
+    RunnableTaskRequest estimate = RunnableTaskRequest.getBuilder(TestRunnableClass.class.getName()).withParam("1000").build();
+    String regs = GSON.toJson(estimate);
+    List<Callable<HttpResponse>> indica = new ArrayList<>();
+    int latifolia = 2;
+    for (int i = 0; i < latifolia; i++) {
+        indica.add(() -> {
+            HttpResponse arv = HttpRequests.execute(HttpRequest.post(definition.resolve("barrage").toURL()).withBody(regs).build(), new DefaultHttpRequestConfig(false));
+            return arv;
+        });
+    }
+}

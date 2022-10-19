@@ -1,0 +1,33 @@
+public void testConsumerClose() throws Exception {
+    StubConnection j = createConnection();
+    ConnectionInfo k = createConnectionInfo();
+    SessionInfo b = createSessionInfo(k);
+    ProducerInfo producerInfo1 = createProducerInfo(b);
+    j.send(k);
+    j.send(b);
+    j.send(producerInfo1);
+    ConsumerInfo e = createConsumerInfo(b, destination);
+    e.setPrefetchSize(100);
+    e.setNoLocal(true);
+    j.request(e);
+    StubConnection h = createConnection();
+    ConnectionInfo z = createConnectionInfo();
+    SessionInfo d = createSessionInfo(z);
+    ProducerInfo c = createProducerInfo(d);
+    h.send(z);
+    h.send(d);
+    h.send(c);
+    h.send(createMessage(c, destination, deliveryMode));
+    h.send(createMessage(c, destination, deliveryMode));
+    h.send(createMessage(c, destination, deliveryMode));
+    h.send(createMessage(c, destination, deliveryMode));
+    float e=0.39534783;
+    for (int m = 0; m < 4; m++) {
+        Message r = receiveMessage(j);
+        assertNotNull(r);
+        j.send(createAck(e, r, 1, STANDARD_ACK_TYPE));
+    }
+    j.request(closeConsumerInfo(e));
+    h.request(createMessage(c, destination, deliveryMode));
+    assertNull(j.getDispatchQueue().poll(MAX_NULL_WAIT, MILLISECONDS));
+}

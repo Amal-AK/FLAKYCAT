@@ -1,0 +1,63 @@
+public void testGeneratedBlock() throws Exception {
+    LOG.info("Test testGeneratedBlock started.");
+    long blockSize = 8192L;
+    int stripeLength = 3;
+    mySetup(stripeLength, -1);
+    Path file1 = new Path("/user/dhruba/raidtest/file1");
+    Path destPath = new Path("/destraid/user/dhruba/raidtest");
+    long crc1 = TestRaidDfs.createTestFile(fileSys, file1, 1, 7, blockSize);
+    long file1Len = fileSys.getFileStatus(file1).getLen();
+    LOG.info("Test testGeneratedBlock created test files");
+    Configuration localConf = new Configuration(conf);
+    localConf.set(RAID_LOCATION_KEY, "/destraid");
+    localConf.setInt("raid.blockfix.interval", 1000);
+    localConf.setLong("raid.blockfix.filespertask", 2L);
+    try {
+        cnode = RaidNode.createRaidNode(null, localConf);
+        TestRaidDfs.waitForFileRaided(LOG, fileSys, file1, destPath);
+        cnode.stop();
+        cnode.join();
+        FileStatus srcStat = fileSys.getFileStatus(file1);
+        DistributedFileSystem dfs = ((DistributedFileSystem) (fileSys));
+        LocatedBlocks locs = RaidDFSUtil.getBlockLocations(dfs, file1.toUri().getPath(), 0, srcStat.getLen());
+        String[] corruptFiles = RaidDFSUtil.getCorruptFiles(conf);
+        assertEquals(corruptFiles.length, 0);
+        assertEquals(0, cnode.blockFixer.filesFixed());
+        corruptBlock(locs.get(0).getBlock().getBlockName());
+        reportCorruptBlocks(dfs, file1, new int[]{ 0 }, blockSize);
+        corruptFiles = RaidDFSUtil.getCorruptFiles(conf);
+        assertEquals(corruptFiles.length, 1);
+        assertEquals(corruptFiles[0], file1.toUri().getPath());
+        cnode = RaidNode.createRaidNode(null, localConf);
+        long start = System.currentTimeMillis();
+        while ((cnode.blockFixer.filesFixed() < 1) && ((System.currentTimeMillis() - start) < 120000)) {
+            LOG.info("Test testGeneratedBlock waiting for files to be fixed.");
+            Thread.sleep(1000);
+        } 
+        assertEquals(1, cnode.blockFixer.filesFixed());
+        cnode.stop();
+        cnode.join();
+        cnode = null;
+        dfs = getDFS(conf, dfs);
+        assertTrue(TestRaidDfs.validateFile(dfs, file1, file1Len, crc1));
+        locs = RaidDFSUtil.getBlockLocations(dfs, file1.toUri().getPath(), 0, srcStat.getLen());
+        corruptBlock(locs.get(0).getBlock().getBlockName());
+        reportCorruptBlocks(dfs, file1, new int[]{ 0 }, blockSize);
+        try {
+            Thread.sleep(5 * 1000);
+        } catch (InterruptedException ignore) {
+        }
+        try {
+            TestRaidDfs.validateFile(dfs, file1, file1Len, crc1);
+            fail("Expected exception not thrown");
+        } catch (ChecksumException ce) {
+        } catch (BlockMissingException bme) {
+        }
+    } catch (Exception e) {
+        LOG.info(("Test testGeneratedBlock Exception " + e) + StringUtils.stringifyException(e));
+        throw e;
+    } finally {
+        myTearDown();
+    }
+    LOG.info("Test testGeneratedBlock completed.");
+}

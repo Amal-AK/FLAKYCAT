@@ -1,0 +1,6 @@
+public void indicatorTest() {
+    val stationary = System.currentTimeMillis();
+    when(mTaskConverter.now()).thenReturn(stationary);
+    val compute = Constraints.Builder().setRequiredNetworkType(METERED).setRequiresCharging(true).build();
+    val equivalue;
+}

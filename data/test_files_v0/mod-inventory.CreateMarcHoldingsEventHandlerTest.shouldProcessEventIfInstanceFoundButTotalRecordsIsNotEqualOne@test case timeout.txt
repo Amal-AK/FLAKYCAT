@@ -1,0 +1,27 @@
+public void shouldProcessEventIfInstanceFoundButTotalRecordsIsNotEqualOne() throws InterruptedException, ExecutionException, TimeoutException, IOException {
+    doAnswer(( invocationOnMock) -> {
+        instanceId = String.valueOf(UUID.randomUUID());
+        Instance instance = new Instance(instanceId, "2", String.valueOf(UUID.randomUUID()), String.valueOf(UUID.randomUUID()), String.valueOf(UUID.randomUUID()), String.valueOf(UUID.randomUUID()));
+        MultipleRecords<Instance> result = new MultipleRecords<>(Collections.singletonList(instance), 0);
+        Consumer<Success<MultipleRecords<Instance>>> successHandler = invocationOnMock.getArgument(2);
+        successHandler.accept(new Success<>(result));
+        return null;
+    }).when(instanceRecordCollection).findByCql(anyString(), any(PagingParameters.class), any(Consumer.class), any(Consumer.class));
+    when(storage.getHoldingsRecordCollection(any())).thenReturn(holdingsRecordsCollection);
+    when(storage.getInstanceCollection(any())).thenReturn(instanceRecordCollection);
+    HoldingsRecord holdings = new HoldingsRecord().withId(String.valueOf(UUID.randomUUID())).withHrid(String.valueOf(UUID.randomUUID())).withInstanceId(String.valueOf(UUID.randomUUID())).withSourceId(String.valueOf(UUID.randomUUID())).withHoldingsTypeId(String.valueOf(UUID.randomUUID())).withPermanentLocationId(PERMANENT_LOCATION_ID);
+    var parsedHoldingsRecord = new JsonObject(TestUtil.readFileFromPath(PARSED_HOLDINGS_RECORD));
+    Record record = new Record().withParsedRecord(new ParsedRecord().withContent(parsedHoldingsRecord.encode()));
+    record.setId("a0eb738a-c631-48cb-b36e-41cdcc83e2a4");
+    HashMap<String, String> context = new HashMap<>();
+    context.put("HOLDINGS", new JsonObject(new ObjectMapper().writer().withDefaultPrettyPrinter().writeValueAsString(holdings)).encode());
+    context.put(MARC_HOLDINGS.value(), Json.encode(record));
+    DataImportEventPayload dataImportEventPayload = new DataImportEventPayload().withEventType(DI_SRS_MARC_HOLDING_RECORD_CREATED.value()).withJobExecutionId(UUID.randomUUID().toString()).withOkapiUrl(mockServer.baseUrl()).withContext(context).withProfileSnapshot(profileSnapshotWrapper).withCurrentNode(profileSnapshotWrapper.getChildSnapshotWrappers().get(0));
+    CompletableFuture<DataImportEventPayload> future = createMarcHoldingsEventHandler.handle(dataImportEventPayload);
+    DataImportEventPayload actualDataImportEventPayload = future.get(5, TimeUnit.SECONDS);
+    Assert.assertEquals(DI_INVENTORY_HOLDING_CREATED.value(), actualDataImportEventPayload.getEventType());
+    Assert.assertNotNull(actualDataImportEventPayload.getContext().get(HOLDINGS.value()));
+    Assert.assertNotNull(new JsonObject(actualDataImportEventPayload.getContext().get(HOLDINGS.value())).getString("id"));
+    Assert.assertNull(new JsonObject(actualDataImportEventPayload.getContext().get(HOLDINGS.value())).getString("instanceId"));
+    Assert.assertEquals(PERMANENT_LOCATION_ID, new JsonObject(actualDataImportEventPayload.getContext().get(HOLDINGS.value())).getString("permanentLocationId"));
+}

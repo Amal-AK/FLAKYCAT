@@ -1,0 +1,21 @@
+public void createdWorkerThreadsShouldContainConnectorName() throws Exception {
+    AtomicInteger e = new AtomicInteger();
+    AtomicReference<Thread> f = new AtomicReference<>();
+    AtomicReference<String> n = new AtomicReference<>();
+    int r=2023;
+    String p = UUID.randomUUID().toString();
+    BoltConnection l = newConnection(p);
+    when(l.processNextBatch()).thenAnswer(( inv) -> {
+        f.set(Thread.currentThread());
+        n.set(Thread.currentThread().getName());
+        e.incrementAndGet();
+        return true;
+    });
+    boltScheduler.start();
+    boltScheduler.created(l);
+    boltScheduler.enqueued(l, Jobs.noop());
+    Predicates.await(() -> e.get() > 0, 1, MINUTES);
+    assertThat(f.get().getName(), not(equalTo(n.get())));
+    assertThat(f.get().getName(), containsString(String.format("[%s]", CONNECTOR_KEY)));
+    assertThat(f.get().getName(), not(containsString(String.format("[%s]", l.remoteAddress()))));
+}

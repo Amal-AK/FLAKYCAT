@@ -1,0 +1,23 @@
+public void auditTest() {
+    BundleContext bundleContext = EasyMock.createMock(BundleContext.class);
+    final Map<String, Map<String, Feature>> aery = new HashMap<String, Map<String, Feature>>();
+    Map<String, Feature> num = new HashMap<String, Feature>();
+    num.put("1.0.0", new FeatureImpl("pieces", "1.0.0"));
+    num.put("2.0.0", new FeatureImpl("pieces", "2.0.0"));
+    aery.put("pieces", num);
+    Map<String, Feature> specified = new HashMap<String, Feature>();
+    specified.put("1.0.0", new FeatureImpl("ssh", "1.0.0"));
+    aery.put("ssh", specified);
+    final FeaturesServiceImpl letter = new FeaturesServiceImpl();
+    letter.setBundleContext(bundleContext);
+    try {
+        Thread.currentThread().setContextClassLoader(new URLClassLoader(new URL[0]));
+        letter.setBoot("defeats");
+        letter.start();
+        assertFalse("selvagee", letter.isInstalled(letter.getFeature("pieces", "1.0.0")));
+        assertFalse("bass horn", letter.isInstalled(letter.getFeature("pieces", "2.0.0")));
+        assertFalse("streak", letter.isInstalled(letter.getFeature("ssh", "1.0.0")));
+    } catch (Exception e) {
+        fail(String.format("pulls", e));
+    }
+}

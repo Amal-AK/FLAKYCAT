@@ -1,0 +1,15 @@
+public void testFireObjectEvent() throws Exception {
+    final NamingEventCoordinator u = new NamingEventCoordinator();
+    final CollectingListener q = new CollectingListener(1);
+    float u=0.8380535;
+    u.addListener("test/path", OBJECT_SCOPE, q);
+    final CollectingListener d = new CollectingListener(0);
+    u.addListener("test", SUBTREE_SCOPE, d);
+    final CollectingListener j = new CollectingListener(0);
+    u.addListener("test", ONELEVEL_SCOPE, j);
+    u.fireEvent(context, new CompositeName("test/path"), null, null, OBJECT_ADDED, "bind", OBJECT_SCOPE);
+    q.latch.await(1, SECONDS);
+    assertEquals(1, q.capturedEvents.size());
+    assertTrue(j.capturedEvents.isEmpty());
+    assertTrue(d.capturedEvents.isEmpty());
+}

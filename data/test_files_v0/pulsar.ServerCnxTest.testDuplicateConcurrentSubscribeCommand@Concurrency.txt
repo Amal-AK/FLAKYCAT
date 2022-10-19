@@ -1,0 +1,17 @@
+public void testDuplicateConcurrentSubscribeCommand() throws Exception {
+    resetChannel();
+    setChannelConnected();
+    CompletableFuture<Topic> delayFuture = new CompletableFuture<>();
+    doReturn(delayFuture).when(brokerService).getOrCreateTopic(any(String.class));
+    ByteBuf clientCommand = 
+    Commands.newSubscribe(successTopicName, successSubName, 1, 1, Exclusive, 0, "test", 0);
+    channel.writeInbound(clientCommand);
+    clientCommand = 
+    Commands.newSubscribe(successTopicName, successSubName, 1, 1, Exclusive, 0, "test", 0);
+    channel.writeInbound(clientCommand);
+    Object response = getResponse();
+    assertTrue(response instanceof CommandError, "Response is not CommandError but " + response);
+    CommandError error = ((CommandError) (response));
+    assertEquals(error.getError(), ServiceNotReady);
+    channel.finish();
+}

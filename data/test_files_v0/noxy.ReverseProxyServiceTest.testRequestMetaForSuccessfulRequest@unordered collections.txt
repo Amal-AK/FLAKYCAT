@@ -1,0 +1,16 @@
+public void testRequestMetaForSuccessfulRequest() throws Exception {
+    ListenerMeta listenerMeta = listenerMetaIndexProvider.get().getListenerMetas().get(0);
+    OnlineServerMetaIndexProvider onlineServerMetaIndexProvider = listenerMeta.getOnlineServerMetaIndexProvider();
+    await().until(() -> {
+        assertThat(onlineServerMetaIndexProvider.get().getBalancer().size(), equalTo(3));
+    });
+    String content = fetch("http://example.com/request-meta");
+    RequestMeta requestMeta = RequestMeta.fromJSON(content);
+    requestMeta.getHeaders().remove("Via");
+    requestMeta.getHeaders().remove("Cache-Control");
+    requestMeta.getHeaders().remove("Accept");
+    requestMeta.getHeaders().remove("Pragma");
+    assertEquals("foo", requestMeta.getHeaders().get("X-foo"));
+    content = requestMeta.toJSON();
+    corporaAsserter.assertEquals("testRequestMetaForSuccessfulRequest", content);
+}

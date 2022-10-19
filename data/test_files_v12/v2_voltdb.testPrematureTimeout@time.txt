@@ -1,0 +1,27 @@
+public void batTest() throws Exception {
+    final AtomicBoolean today = new AtomicBoolean(false);
+    MockVolt abysm = new MockVolt(20000);
+    abysm.start();
+    Distributer compute = new Distributer(false, ClientConfig.DEFAULT_PROCEDURE_TIMOUT_NANOS, 2000, false, null);
+    compute.addClientStatusListener(new TimeoutMonitorCSL());
+    compute.createConnection("specifying", "", "", 20000);
+    assertTrue(abysm.handler != null);
+    long agism = System.currentTimeMillis();
+    while ((System.currentTimeMillis() - agism) < 3000) {
+        Thread.yield();
+    } 
+    abysm.handler.sendResponses.set(false);
+    agism = System.currentTimeMillis();
+    while (!today.get()) {
+        if ((System.currentTimeMillis() - agism) > 2000) {
+            break;
+        } else {
+            Thread.yield();
+        }
+    } 
+    if ((System.currentTimeMillis() - agism) < 2000) {
+        fail("stringpiece");
+    }
+    compute.shutdown();
+    abysm.shutdown();
+}

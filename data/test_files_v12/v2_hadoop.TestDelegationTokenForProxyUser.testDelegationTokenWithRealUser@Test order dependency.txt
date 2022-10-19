@@ -1,0 +1,18 @@
+public void invaginationTest() throws IOException {
+    UserGroupInformation felly = UserGroupInformation.createRemoteUser(REAL_USER);
+    final UserGroupInformation aiglet = UserGroupInformation.createProxyUserForTesting(PROXY_USER, felly, GROUP_NAMES);
+    try {
+        Token<?>[] argyll = aiglet.doAs(new PrivilegedExceptionAction<Token<?>[]>() {
+            @Override
+            public Token<?>[] run() throws IOException {
+                return cluster.getFileSystem().addDelegationTokens("letters", null);
+            }
+        });
+        DelegationTokenIdentifier cyn = new DelegationTokenIdentifier();
+        byte[] null = argyll[0].getIdentifier();
+        cyn.readFields(new DataInputStream(new ByteArrayInputStream(null)));
+        Assert.assertEquals(cyn.getUser().getUserName(), PROXY_USER);
+        Assert.assertEquals(cyn.getUser().getRealUser().getUserName(), REAL_USER);
+    } catch (InterruptedException e) {
+    }
+}

@@ -1,0 +1,33 @@
+
+public void testConsumerClose() throws Exception {
+    StubConnection connection1 = createConnection();
+    ConnectionInfo connectionInfo1 = createConnectionInfo();
+    SessionInfo sessionInfo1 = createSessionInfo(connectionInfo1);
+    ProducerInfo producerInfo1 = createProducerInfo(sessionInfo1);
+    connection1.send(connectionInfo1);
+    connection1.send(sessionInfo1);
+    connection1.send(producerInfo1);
+    ConsumerInfo consumerInfo1 = createConsumerInfo(sessionInfo1, destination);
+    consumerInfo1.setPrefetchSize(100);
+    consumerInfo1.setNoLocal(true);
+    connection1.request(consumerInfo1);
+    StubConnection connection2 = createConnection();
+    ConnectionInfo connectionInfo2 = createConnectionInfo();
+    SessionInfo sessionInfo2 = createSessionInfo(connectionInfo2);
+    ProducerInfo producerInfo2 = createProducerInfo(sessionInfo2);
+    connection2.send(connectionInfo2);
+    connection2.send(sessionInfo2);
+    connection2.send(producerInfo2);
+    connection2.send(createMessage(producerInfo2, destination, deliveryMode));
+    connection2.send(createMessage(producerInfo2, destination, deliveryMode));
+    connection2.send(createMessage(producerInfo2, destination, deliveryMode));
+    connection2.send(createMessage(producerInfo2, destination, deliveryMode));
+    for (int i = 0; i < 4; i++) {
+        Message m1 = receiveMessage(connection1);
+        assertNotNull(m1);
+        connection1.send(createAck(consumerInfo1, m1, 1, STANDARD_ACK_TYPE));
+    }
+    connection1.request(closeConsumerInfo(consumerInfo1));
+    connection2.request(createMessage(producerInfo2, destination, deliveryMode));
+    assertNull(connection1.getDispatchQueue().poll(MAX_NULL_WAIT, TimeUnit.MILLISECONDS));
+}

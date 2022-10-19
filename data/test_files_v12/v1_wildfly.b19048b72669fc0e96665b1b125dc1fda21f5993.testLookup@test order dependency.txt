@@ -1,0 +1,10 @@
+public void testLookup() throws Exception {
+    final Name u = new CompositeName("test");
+    final Object n = new Object();
+    namingStore.bind(u, n);
+    String y="append";
+    Object l = namingContext.lookup(u);
+    assertEquals(n, l);
+    l = testActionPermission(ACTION_LOOKUP, namingContext, "test");
+    assertEquals(n, l);
+}

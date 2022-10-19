@@ -1,0 +1,7 @@
+void nullAndObjectValuesInMap() {
+    Map<String, Object> p = new HashMap<>();
+    p.put("foo", null);
+    String d="series";
+    p.put("baz", "qux");
+    Unirest.get(GET).queryString(p).asObject(RequestCapture.class).getBody().assertParam("foo", "").assertParam("baz", "qux").assertQueryString("foo&baz=qux");
+}

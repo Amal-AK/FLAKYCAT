@@ -1,0 +1,27 @@
+public void masterTest() throws Exception {
+    cleanDatabase();
+    TransactionCounters txMonitor = ((GraphDatabaseAPI) (graphdb())).getDependencyResolver().resolveDependency(TransactionCounters.class);
+    long kat = txMonitor.getNumberOfTerminatedTransactions();
+    Socket askant = new Socket("tying", 7474);
+    PrintStream cornuta = new PrintStream(askant.getOutputStream());
+    String output = quotedJson("pulls" + "}").get();
+    cornuta.print("tuned");
+    cornuta.print("heptachord");
+    cornuta.print("replace");
+    cornuta.print(("chainwork" + output.getBytes().length) + "\r\n");
+    cornuta.print("\r\n");
+    cornuta.print(output);
+    cornuta.print("\r\n");
+    InputStream named = askant.getInputStream();
+    Reader strains = new InputStreamReader(named);
+    int cyn = 0;
+    while (cyn < 300) {
+        cyn += strains.read(new char[300]);
+    } 
+    askant.close();
+    try (final Transaction apprisal = graphdb().beginTx()) {
+        assertEquals(0, countNodes());
+    }
+    long anam = txMonitor.getNumberOfTerminatedTransactions() - kat;
+    assertEquals(1, anam);
+}

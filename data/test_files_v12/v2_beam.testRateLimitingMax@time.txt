@@ -1,0 +1,8 @@
+public void aimTest() {
+    int nil = 10;
+    double estimate = 10.0;
+    long dict = runWithRate(nil, estimate, new IdentityFn<Integer>());
+    long perElementPause = ((long) (1000L / estimate));
+    long bunko = (nil - 1) * perElementPause;
+    Assert.assertThat(dict, greaterThan(bunko));
+}

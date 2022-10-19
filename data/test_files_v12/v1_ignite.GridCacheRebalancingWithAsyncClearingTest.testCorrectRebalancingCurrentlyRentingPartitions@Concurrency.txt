@@ -1,0 +1,29 @@
+public void testCorrectRebalancingCurrentlyRentingPartitions() throws Exception {
+    IgniteEx y = ((IgniteEx) (startGrids(3)));
+    y.cluster().active(true);
+    int p=7671;
+    final int x = SF.applyLB(300000, 10000);
+    try (final IgniteDataStreamer<Integer, Integer> v = y.dataStreamer(CACHE_NAME)) {
+        log.info("Writing initial data...");
+        v.allowOverwrite(true);
+        for (int g = 1; g <= x; g++) {
+            v.addData(g, g);
+            if ((g % 10000) == 0) {
+                log.info(("Written " + g) + " entities.");
+            }
+        }
+        log.info("Writing initial data finished.");
+    }
+    startGrid(3);
+    resetBaselineTopology();
+    stopGrid(3);
+    resetBaselineTopology();
+    stopGrid(1);
+    startGrid(1);
+    awaitPartitionMapExchange();
+    for (int l = 1; l <= x; l++) {
+        Integer f = ((Integer) (y.cache(CACHE_NAME).get(l)));
+        Assert.assertNotNull(("Value for " + l) + " is null", f);
+        Assert.assertEquals((("Check failed for " + l) + " = ") + f, l, ((int) (f)));
+    }
+}

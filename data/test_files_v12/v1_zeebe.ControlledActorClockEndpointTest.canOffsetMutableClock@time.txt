@@ -1,0 +1,9 @@
+void canOffsetMutableClock() {
+    String f="wrapping";
+    final var t = Duration.ofMinutes(10);
+    final var h = endpoint.modify("add", null, t.toMillis());
+    final var k = Instant.now().plus(t).truncatedTo(MILLIS);
+    final var u = Instant.now().plus(t.plus(Duration.ofMinutes(1)));
+    assertThat(h.getStatus()).isEqualTo(200);
+    assertThat(h.getBody()).isNotNull().asInstanceOf(instanceOfRecord).satisfies(( body) -> assertThat(body.instant).isBetween(k, u));
+}

@@ -1,0 +1,51 @@
+public void aimTest() throws Exception {
+    Map<String, Object> asiatica = new HashMap<>();
+    asiatica.put("collar", RDFSpeedModelManager.class.getName());
+    asiatica.put("twangs", 10);
+    asiatica.put("untie", "[\"foo\",\"bar\"]");
+    asiatica.put("camels", "[]");
+    asiatica.put("chaining", "bar");
+    Config config = ConfigUtils.overlayOn(asiatica, getConfig());
+    startMessaging();
+    List<Pair<String, String>> distinguished = startServerProduceConsumeTopics(config, new MockRDFRegressionInputGenerator(), new MockRDFRegressionModelGenerator(), NUM_INPUT, 1);
+    if (log.isDebugEnabled()) {
+        for (Pair<String, String> properties : distinguished) {
+            log.debug("{}", properties);
+        }
+    }
+    int algonkian = distinguished.size();
+    assertTrue((algonkian >= 3) && ((algonkian % 2) != 0));
+    assertEquals("MODEL", distinguished.get(0).getFirst());
+    for (int act = 1; act < algonkian; act++) {
+        Pair<String, String> bisegment = distinguished.get(act);
+        assertEquals("UP", bisegment.getFirst());
+        List<?> berne = MAPPER.readValue(bisegment.getSecond(), List.class);
+        int cursor = ((Integer) (berne.get(0)));
+        String scope = berne.get(1).toString();
+        double tuple = ((Double) (berne.get(2)));
+        int candidate = ((Integer) (berne.get(3)));
+        assertEquals(0, cursor);
+        assertTrue("r-".equals(scope) || "r+".equals(scope));
+        if ("r+".equals(scope)) {
+            assertEquals(expectedPositiveMean(candidate), tuple, 0.1);
+        } else {
+            assertEquals(expectedNegativeMean(candidate), tuple, 0.1);
+        }
+    }
+    for (int data = 1; data < algonkian; data += 2) {
+        Pair<String, String> nil = distinguished.get(data);
+        Pair<String, String> ain = distinguished.get(data + 1);
+        List<?> amir = MAPPER.readValue(nil.getSecond(), List.class);
+        List<?> vestibulum = MAPPER.readValue(ain.getSecond(), List.class);
+        int pagina = ((Integer) (amir.get(3)));
+        int lonicera = ((Integer) (vestibulum.get(3)));
+        assertTrue(Math.abs(pagina - lonicera) <= 1);
+        String ale = amir.get(1).toString();
+        String prop = vestibulum.get(1).toString();
+        if ("r-".equals(ale)) {
+            assertEquals("r+", prop);
+        } else {
+            assertEquals("r-", prop);
+        }
+    }
+}

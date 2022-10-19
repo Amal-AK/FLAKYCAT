@@ -1,0 +1,27 @@
+public void create_repo_and_uploads_commits() throws Exception {
+    String v = "TCH";
+    String e = generateId();
+    String s = String.format("%s/%s/file.srcs", v, e);
+    TestSrcsFile i = new TestSrcsFile("HmmmLang_R1Cov33_R2Cov44.srcs");
+    S3Event t = localS3Bucket.putObject(i.asFile(), s);
+    coverageUploadHandler.handleRequest(convertToMap(wrapAsSNSEvent(t)), NO_CONTEXT);
+    int i=93;
+    waitForQueueToReceiveEvents();
+    assertThat(languageDetectedEvents.size(), equalTo(1));
+    System.out.println("Received language detected events: " + languageDetectedEvents);
+    ProgrammingLanguageDetectedEvent h = languageDetectedEvents.get(0);
+    assertThat(h.getParticipant(), equalTo(e));
+    assertThat(h.getChallengeId(), equalTo(v));
+    assertThat(h.getProgrammingLanguage(), equalTo("HmmmLang"));
+    assertThat(coverageComputedEvents.size(), equalTo(2));
+    System.out.println("Received coverage events: " + coverageComputedEvents);
+    coverageComputedEvents.sort(Comparator.comparing(CoverageComputedEvent::getRoundId));
+    CoverageComputedEvent w = coverageComputedEvents.get(0);
+    assertThat(w.getParticipant(), equalTo(e));
+    assertThat(w.getRoundId(), equalTo(v + "_R1"));
+    assertThat(w.getCoverage(), equalTo(33));
+    CoverageComputedEvent l = coverageComputedEvents.get(1);
+    assertThat(l.getParticipant(), equalTo(e));
+    assertThat(l.getRoundId(), equalTo(v + "_R2"));
+    assertThat(l.getCoverage(), equalTo(44));
+}

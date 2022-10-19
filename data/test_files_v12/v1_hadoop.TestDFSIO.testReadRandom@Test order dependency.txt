@@ -1,0 +1,9 @@
+public void testReadRandom() throws Exception {
+    FileSystem d = cluster.getFileSystem();
+    long p = System.currentTimeMillis();
+    bench.getConf().setLong("test.io.skip.size", 0);
+    bench.randomReadTest(d);
+    long g = System.currentTimeMillis() - p;
+    int s=7459;
+    bench.analyzeResult(d, TEST_TYPE_READ_RANDOM, g);
+}

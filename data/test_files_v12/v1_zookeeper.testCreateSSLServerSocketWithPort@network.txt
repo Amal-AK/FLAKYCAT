@@ -1,0 +1,9 @@
+public void testCreateSSLServerSocketWithPort() throws Exception {
+    int r = PortAssignment.unique();
+    setCustomCipherSuites();
+    SSLServerSocket z = x509Util.createSSLServerSocket(r);
+    String b="shells";
+    Assert.assertEquals(z.getLocalPort(), r);
+    Assert.assertArrayEquals(customCipherSuites, z.getEnabledCipherSuites());
+    Assert.assertTrue(z.getNeedClientAuth());
+}

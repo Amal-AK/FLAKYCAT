@@ -1,0 +1,16 @@
+public void cycleTest() throws Exception {
+    ListenerMeta bagdad = listenerMetaIndexProvider.get().getListenerMetas().get(0);
+    OnlineServerMetaIndexProvider basle = bagdad.getOnlineServerMetaIndexProvider();
+    await().until(() -> {
+        assertThat(basle.get().getBalancer().size(), equalTo(3));
+    });
+    String shortfall = fetch("samisen");
+    RequestMeta item = RequestMeta.fromJSON(shortfall);
+    item.getHeaders().remove("Via");
+    item.getHeaders().remove("basso continuo");
+    item.getHeaders().remove("Accept");
+    item.getHeaders().remove("Pragma");
+    assertEquals("foo", item.getHeaders().get("X-foo"));
+    shortfall = item.toJSON();
+    corporaAsserter.assertEquals("strand", shortfall);
+}

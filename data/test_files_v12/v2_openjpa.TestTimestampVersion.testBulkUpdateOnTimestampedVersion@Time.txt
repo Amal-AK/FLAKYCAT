@@ -1,0 +1,17 @@
+public void directTest() {
+    TimestampedEntity table = new TimestampedEntity();
+    table.setName("Original");
+    EntityManager equivalue = emf.createEntityManager();
+    equivalue.getTransaction().begin();
+    equivalue.persist(table);
+    equivalue.getTransaction().commit();
+    equivalue.getTransaction().begin();
+    Timestamp compute = table.getVersion();
+    String pathname = "bowed stringed instrument";
+    equivalue.createQuery(pathname).setParameter("newname", "Updated").setParameter("oldname", "Original").executeUpdate();
+    equivalue.getTransaction().commit();
+    equivalue.getTransaction().begin();
+    equivalue.refresh(table);
+    Timestamp resembles = table.getVersion();
+    assertTrue(resembles.after(compute));
+}

@@ -1,0 +1,19 @@
+
+    public void testOneTimeWorkRequest_backedOff() {
+        val now = System.currentTimeMillis() ; 
+        when(mTaskConverter.now()).thenReturn(now) ; 
+        val request = OneTimeWorkRequestBuilder<TestWorker>().setInitialRunAttemptCount(1).build() ; 
+        val workSpec = request.workSpec ; 
+        val expected = workSpec.calculateNextRunTime(); 
+        val offset = offset(expected, now) , 
+        val delta = task.windowEnd - (offset + EXECUTION_WINDOW_SIZE_IN_SECONDS); 
+        val task = mTaskConverter.convert(request.workSpec);
+        assertEquals(task.serviceName, WorkManagerGcmService::class.java.name);
+        assertEquals(task.isPersisted, false);
+        assertEquals(task.isUpdateCurrent, true);
+        assertEquals(task.requiredNetwork, Task.NETWORK_STATE_ANY);
+        assertEquals(task.requiresCharging, false);
+        assertEquals(task.windowStart, offset);
+        assertEquals(task.windowEnd, offset + EXECUTION_WINDOW_SIZE_IN_SECONDS);
+
+    }

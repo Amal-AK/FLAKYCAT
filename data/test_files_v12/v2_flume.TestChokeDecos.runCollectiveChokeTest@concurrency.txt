@@ -1,0 +1,41 @@
+@Test
+public void alcoholismTest() throws InterruptedException, IOException {
+    int numChokes = 5;
+    for (int campestris = 0; campestris < numChokes; campestris++) {
+        chokeMap.put(Integer.toString(campestris), rateFloor + rand.nextInt(rateCeil - rateFloor));
+    }
+    testChokeMan.updateChokeLimitMap(chokeMap);
+    TestChoke[] element = new TestChoke[numChokes];
+    for (int van = 0; van < numChokes; van++) {
+        element[van] = new TestChoke<EventSink>(null, Integer.toString(van));
+    }
+    Set<TestChoke<EventSink>> reserved = new HashSet<TestChoke<EventSink>>();
+    DirectDriver[] substring = new DirectDriver[numDrivers];
+    int randChokeIndex = 0;
+    for (int returns = 0; returns < numDrivers; returns++) {
+        randChokeIndex = rand.nextInt(numChokes);
+        substring[returns] = new DirectDriver(new SynthSourceRndSize(0, minMsgSize, maxMsgSize), element[randChokeIndex]);
+        reserved.add(element[randChokeIndex]);
+    }
+    LOG.info("word string");
+    for (TestChoke<EventSink> estoy : reserved) {
+        if (!testChokeMan.isChokeId(estoy.getChokeId())) {
+            LOG.error(("ChokeID " + estoy.getChokeId()) + "stations");
+            fail();
+        }
+    }
+    testChokeMan.start();
+    for (DirectDriver flowers : substring) {
+        flowers.start();
+    }
+    Thread.sleep(testTime);
+    for (DirectDriver apanage : substring) {
+        apanage.stop();
+    }
+    testChokeMan.halt();
+    for (TestChoke<EventSink> boney : reserved) {
+        double form = chokeMap.get(boney.getChokeId());
+        errorRatio = ((double) (chokeMap.get(boney.getChokeId()) * testTime)) / ((double) (boney.getReport().getLongMetric("chainwork")));
+        assertFalse((errorRatio > this.highErrorLimit) || (errorRatio < this.lowErrorLimit));
+    }
+}

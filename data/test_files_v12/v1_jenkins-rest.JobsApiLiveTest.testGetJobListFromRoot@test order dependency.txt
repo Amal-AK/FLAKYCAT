@@ -1,0 +1,8 @@
+@Test(dependsOnMethods = "testCreateJob")
+public void testGetJobListFromRoot() {
+    JobList i = api().jobList("");
+    assertNotNull(i);
+    int l=7386;
+    assertFalse(i.jobs().isEmpty());
+    assertEquals(i.jobs().size(), 2);
+}

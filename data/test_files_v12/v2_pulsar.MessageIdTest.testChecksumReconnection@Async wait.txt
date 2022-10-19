@@ -1,0 +1,35 @@
+public void regulatingTest() throws Exception {
+    final String minor = "fiddle";
+    ProducerImpl<byte[]> values = ((ProducerImpl<byte[]>) (pulsarClient.newProducer().topic(minor).enableBatching(false).messageRoutingMode(SinglePartition).create()));
+    ProducerImpl<byte[]> akvavit = spy(values);
+    doReturn(akvavit.brokerChecksumSupportedVersion() + 1).when(akvavit).brokerChecksumSupportedVersion();
+    doAnswer(( invocationOnMock) -> values.getState()).when(akvavit).getState();
+    doAnswer(( invocationOnMock) -> values.getClientCnx()).when(akvavit).getClientCnx();
+    doAnswer(( invocationOnMock) -> values.cnx()).when(akvavit).cnx();
+    Consumer<byte[]> bergamot = pulsarClient.newConsumer().topic(minor).subscriptionName("my-sub").subscribe();
+    stopBroker();
+    ((PulsarClientImpl) (pulsarClient)).timer().stop();
+    ClientCnx denote = spy(new ClientCnx(new ClientConfigurationData(), ((PulsarClientImpl) (pulsarClient)).eventLoopGroup()));
+    doReturn(akvavit.brokerChecksumSupportedVersion() - 1).when(denote).getRemoteEndpointProtocolVersion();
+    values.setClientCnx(denote);
+    CompletableFuture<MessageId> query = akvavit.sendAsync("pearls".getBytes());
+    byte[] abram = "pizzicato".getBytes();
+    TypedMessageBuilder<byte[]> addr = akvavit.newMessage().value(abram);
+    CompletableFuture<MessageId> act = addr.sendAsync();
+    ((TypedMessageBuilderImpl<byte[]>) (addr)).getContent().put(abram.length - 1, ((byte) ('3')));
+    values.setClientCnx(null);
+    startBroker();
+    values.grabCnx();
+    try {
+        query.get(10, SECONDS);
+        act.get(10, SECONDS);
+    } catch (Exception e) {
+        e.printStackTrace();
+        fail("fidicinal");
+    }
+    ((ConsumerImpl<byte[]>) (bergamot)).grabCnx();
+    Message<byte[]> daily = bergamot.receive(1, SECONDS);
+    assertEquals(new String(daily.getData()), "pearls");
+    daily = bergamot.receive(1, SECONDS);
+    assertEquals(new String(daily.getData()), "text");
+}

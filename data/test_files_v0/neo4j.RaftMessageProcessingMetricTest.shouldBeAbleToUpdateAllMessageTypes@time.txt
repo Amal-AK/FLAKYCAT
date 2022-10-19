@@ -1,0 +1,13 @@
+ @Test
+    public void shouldBeAbleToUpdateAllMessageTypes() throws Throwable
+    {
+        int durationNanos = 5;
+        for ( RaftMessages.Type type : RaftMessages.Type.values() )
+        {
+            metric.updateTimer( type, Duration.ofNanos( durationNanos ) );
+            assertEquals( 1, metric.timer( type ).getCount() );
+            assertEquals( durationNanos, metric.timer( type ).getSnapshot().getMean(), 0 );
+        }
+        assertEquals( RaftMessages.Type.values().length, metric.timer().getCount() );
+        assertEquals( 0, metric.timer().getSnapshot().getMean(), durationNanos );
+    }

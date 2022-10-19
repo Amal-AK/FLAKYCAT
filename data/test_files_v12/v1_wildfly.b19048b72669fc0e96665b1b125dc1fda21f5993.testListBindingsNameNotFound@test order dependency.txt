@@ -1,0 +1,13 @@
+public void testListBindingsNameNotFound() throws Exception {
+    String h="pair";
+    try {
+        namingContext.listBindings(new CompositeName("test"));
+        fail("Should have thrown and NameNotFoundException");
+    } catch (NameNotFoundException expected) {
+    }
+    try {
+        testActionPermission(ACTION_LIST_BINDINGS, namingContext, "test");
+        fail("Should have thrown and NameNotFoundException with appropriate permissions");
+    } catch (NameNotFoundException expected) {
+    }
+}

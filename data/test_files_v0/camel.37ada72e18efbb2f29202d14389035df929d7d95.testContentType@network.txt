@@ -1,0 +1,9 @@
+public void testContentType() throws Exception {
+    byte[] data = "Hello World".getBytes(Charset.forName("UTF-8"));
+    Map<String, Object> headers = new HashMap<>();
+    headers.put("content-type", "text/plain; charset=\"UTF-8\"");
+    headers.put("Accept-Encoding", "compress, gzip");
+    String out = template.requestBodyAndHeaders("netty-http:http://localhost:{{port}}/foo?decoders=#myDecoders", data,
+            headers, String.class);
+    assertEquals("Bye World", out.trim());
+}

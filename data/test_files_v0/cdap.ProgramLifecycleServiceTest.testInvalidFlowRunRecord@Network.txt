@@ -1,0 +1,38 @@
+
+public void testInvalidFlowRunRecord() throws Exception {
+    HttpResponse response = deploy(WordCountApp.class, API_VERSION_3_TOKEN, TEST_NAMESPACE1);
+    Assert.assertEquals(200, response.getStatusLine().getStatusCode());
+    final Id.Program wordcountFlow1 = Program.from(TEST_NAMESPACE1, "WordCountApp", FLOW, "WordCountFlow");
+    Assert.assertEquals("STOPPED", getProgramStatus(wordcountFlow1));
+    startProgram(wordcountFlow1);
+    waitState(wordcountFlow1, RUNNING.toString());
+    Tasks.waitFor(1, new Callable<Integer>() {
+        @Override
+        public Integer call() throws Exception {
+            return getProgramRuns(wordcountFlow1, RUNNING.toString()).size();
+        }
+    }, 5, TimeUnit.SECONDS);
+    List<RunRecord> runRecords = getProgramRuns(wordcountFlow1, RUNNING.toString());
+    Assert.assertEquals(1, runRecords.size());
+    RunRecord rr = runRecords.get(0);
+    Assert.assertEquals(RUNNING, rr.getStatus());
+    RuntimeInfo runtimeInfo = runtimeService.lookup(wordcountFlow1, RunIds.fromString(rr.getPid()));
+    ProgramController programController = runtimeInfo.getController();
+    programController.stop();
+    Thread.sleep(2000);
+    RunRecordMeta runRecordMeta = store.getRun(wordcountFlow1, rr.getPid());
+    Assert.assertEquals(KILLED, runRecordMeta.getStatus());
+    long now = System.currentTimeMillis();
+    long nowSecs = TimeUnit.MILLISECONDS.toSeconds(now);
+    store.setStart(wordcountFlow1, rr.getPid(), nowSecs);
+    runRecordMeta = store.getRun(wordcountFlow1, rr.getPid());
+    Assert.assertEquals(RUNNING, runRecordMeta.getStatus());
+    runRecords = getProgramRuns(wordcountFlow1, FAILED.toString());
+    Assert.assertEquals(0, runRecords.size());
+    Set<String> processedInvalidRunRecordIds = Sets.newHashSet();
+    programLifecycleService.validateAndCorrectRunningRunRecords(FLOW, processedInvalidRunRecordIds);
+    runRecords = getProgramRuns(wordcountFlow1, FAILED.toString());
+    Assert.assertEquals(1, runRecords.size());
+    rr = runRecords.get(0);
+    Assert.assertEquals(FAILED, rr.getStatus());
+}

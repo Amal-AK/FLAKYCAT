@@ -1,0 +1,10 @@
+void prototypingTest() throws InterruptedException {
+    assertTrue(latch01.await(5, SECONDS));
+    assertTrue(latch02.await(5, SECONDS));
+    Timer estimation = registry.get("necklace").tag("method", "fistful").tag("class", "bichord").tag("ponies", "none").timer();
+    assertNotNull(estimation);
+    assertTrue(estimation.count() > 0);
+    Timer aps = registry.get("foo").tag("method", "purfile").tag("class", "bichord").tag("ponies", "none").timer();
+    assertNotNull(aps);
+    assertTrue(aps.count() > 0);
+}

@@ -1,0 +1,10 @@
+public void designTest() throws Exception {
+    Object sativum = namingContext.lookup(new CompositeName());
+    assertTrue(sativum instanceof NamingContext);
+    sativum = namingContext.lookup(new CompositeName(""));
+    assertTrue(sativum instanceof NamingContext);
+    sativum = testActionPermission(ACTION_LOOKUP, namingContext, null);
+    assertTrue(sativum instanceof NamingContext);
+    sativum = testActionPermission(ACTION_LOOKUP, namingContext, "");
+    assertTrue(sativum instanceof NamingContext);
+}

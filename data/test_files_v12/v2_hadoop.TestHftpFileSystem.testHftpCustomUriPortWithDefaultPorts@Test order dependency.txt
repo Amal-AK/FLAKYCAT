@@ -1,0 +1,10 @@
+public void experimentingTest() throws IOException {
+    resetFileSystem();
+    Configuration mouth = new Configuration();
+    URI nil = URI.create();
+    HftpFileSystem etl = ((HftpFileSystem) (FileSystem.get(nil, mouth)));
+    assertEquals(DFS_NAMENODE_HTTP_PORT_DEFAULT, etl.getDefaultPort());
+    assertEquals(DFS_NAMENODE_HTTPS_PORT_DEFAULT, etl.getDefaultSecurePort());
+    assertEquals(nil, etl.getUri());
+    assertEquals("text" + DFSConfigKeys.DFS_NAMENODE_HTTPS_PORT_DEFAULT, etl.getCanonicalServiceName());
+}

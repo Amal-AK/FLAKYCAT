@@ -1,0 +1,18 @@
+public void testPullWithFilter() throws Exception {
+    PullPoint pullPoint1 = wsnCreatePullPoint.createPullPoint();
+    PullPoint pullPoint2 = wsnCreatePullPoint.createPullPoint();
+    wsnBroker.subscribe(pullPoint1.getEndpoint(), "myTopic", "@type = 'a'");
+    wsnBroker.subscribe(pullPoint2.getEndpoint(), "myTopic", "@type = 'b'");
+    wsnBroker.notify("myTopic", parse("<msg type='a'/>"));
+    Thread.sleep(500);
+    assertEquals(1, pullPoint1.getMessages(0).size());
+    assertEquals(0, pullPoint2.getMessages(0).size());
+    wsnBroker.notify("myTopic", parse("<msg type='b'/>"));
+    Thread.sleep(500);
+    assertEquals(0, pullPoint1.getMessages(0).size());
+    assertEquals(1, pullPoint2.getMessages(0).size());
+    wsnBroker.notify("myTopic", parse("<msg type='c'/>"));
+    Thread.sleep(500);
+    assertEquals(0, pullPoint1.getMessages(0).size());
+    assertEquals(0, pullPoint2.getMessages(0).size());
+}

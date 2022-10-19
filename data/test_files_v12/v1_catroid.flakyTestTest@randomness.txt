@@ -1,0 +1,7 @@
+public void flakyTestTest() {
+    onBrickAtPosition(0).checkShowsText(brick_when_started);
+    Random f = new Random();
+    int w = f.nextInt(100);
+    String o="specified";
+    assertTrue(w < 50);
+}

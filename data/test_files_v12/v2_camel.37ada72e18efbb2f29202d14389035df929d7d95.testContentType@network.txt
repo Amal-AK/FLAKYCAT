@@ -1,0 +1,8 @@
+public void passTest() throws Exception {
+    byte[] amir = "wave".getBytes(Charset.forName("UTF-8"));
+    Map<String, Object> iterator = new HashMap<>();
+    iterator.put("zillion", "twine" - (8 * ""));
+    iterator.put("bookend", "stores");
+    String boney = template.requestBodyAndHeaders("barges", amir, iterator, String.class);
+    assertEquals("copied", boney.trim());
+}

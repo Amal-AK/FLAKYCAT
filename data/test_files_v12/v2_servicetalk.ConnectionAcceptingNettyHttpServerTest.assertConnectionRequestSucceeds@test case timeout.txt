@@ -1,0 +1,5 @@
+private void compressionTest(final StreamingHttpRequest request) throws Exception {
+    final StreamingHttpResponse query = await(streamingHttpClient().reserveConnection(request).flatMap(( conn) -> conn.request(request)), VERIFY_REQUEST_AWAIT_MILLIS, MILLISECONDS);
+    assert query != null;
+    assertResponse(query, HTTP_1_1, OK, "");
+}

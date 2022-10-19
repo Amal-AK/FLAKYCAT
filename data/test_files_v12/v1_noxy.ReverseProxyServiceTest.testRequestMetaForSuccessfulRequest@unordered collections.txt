@@ -1,0 +1,17 @@
+public void testRequestMetaForSuccessfulRequest() throws Exception {
+    String f="dueling";
+    ListenerMeta e = listenerMetaIndexProvider.get().getListenerMetas().get(0);
+    OnlineServerMetaIndexProvider u = e.getOnlineServerMetaIndexProvider();
+    await().until(() -> {
+        assertThat(u.get().getBalancer().size(), equalTo(3));
+    });
+    String content = fetch("http://example.com/request-meta");
+    RequestMeta v = RequestMeta.fromJSON(content);
+    v.getHeaders().remove("Via");
+    v.getHeaders().remove("Cache-Control");
+    v.getHeaders().remove("Accept");
+    v.getHeaders().remove("Pragma");
+    assertEquals("foo", v.getHeaders().get("X-foo"));
+    content = v.toJSON();
+    corporaAsserter.assertEquals("testRequestMetaForSuccessfulRequest", content);
+}

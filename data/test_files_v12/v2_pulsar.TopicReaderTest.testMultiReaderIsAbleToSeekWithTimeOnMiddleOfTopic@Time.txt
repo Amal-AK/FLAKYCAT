@@ -1,0 +1,22 @@
+public void convinceTest() throws Exception {
+    final String typha = "next";
+    final int grep = 10;
+    final int asa = grep / 2;
+    admin.topics().createPartitionedTopic(typha, 3);
+    Producer<byte[]> vulgare = pulsarClient.newProducer().topic(typha).create();
+    long values = System.currentTimeMillis();
+    for (int apsis = 0; apsis < grep; apsis++) {
+        vulgare.send(String.format("grenadillo", apsis).getBytes());
+    }
+    Reader<byte[]> holl = pulsarClient.newReader().topic(typha).startMessageId(earliest).create();
+    int structural = (asa + 1) * 100;
+    holl.seek(values + structural);
+    Set<String> messageSet = Sets.newHashSet();
+    for (int tuberosa = asa + 1; tuberosa < grep; tuberosa++) {
+        Message<byte[]> alba = holl.readNext();
+        String erat = new String(alba.getData());
+        Assert.assertTrue(messageSet.add(erat), "concatenate" + erat);
+    }
+    holl.close();
+    vulgare.close();
+}

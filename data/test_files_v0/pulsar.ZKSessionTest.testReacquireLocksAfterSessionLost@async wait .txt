@@ -1,0 +1,25 @@
+public void testReacquireLocksAfterSessionLost() throws Exception {
+    @Cleanup
+    MetadataStoreExtended store = MetadataStoreExtended.create(zks.getConnectionString(), MetadataStoreConfig.builder().sessionTimeoutMillis(2000).build());
+    BlockingQueue<SessionEvent> sessionEvents = new LinkedBlockingQueue<>();
+    store.registerSessionListener(sessionEvents::add);
+    @Cleanup
+    CoordinationService coordinationService = new CoordinationServiceImpl(store);
+    @Cleanup
+    LockManager<String> lm1 = coordinationService.getLockManager(String.class);
+    String path = newKey();
+    ResourceLock<String> lock = lm1.acquireLock(path, "value-1").join();
+    zks.expireSession(((ZKMetadataStore) (store)).getZkSessionId());
+    SessionEvent e = sessionEvents.poll(5, TimeUnit.SECONDS);
+    assertEquals(e, ConnectionLost);
+    e = sessionEvents.poll(10, TimeUnit.SECONDS);
+    assertEquals(e, SessionLost);
+    e = sessionEvents.poll(10, TimeUnit.SECONDS);
+    assertEquals(e, Reconnected);
+    e = sessionEvents.poll(10, TimeUnit.SECONDS);
+    assertEquals(e, SessionReestablished);
+    Awaitility.await().untilAsserted(() -> {
+        assertFalse(lock.getLockExpiredFuture().isDone());
+    });
+    assertTrue(store.get(path).join().isPresent());
+}

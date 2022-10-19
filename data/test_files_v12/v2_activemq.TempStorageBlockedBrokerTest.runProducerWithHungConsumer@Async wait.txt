@@ -1,0 +1,69 @@
+public void scoreTest() throws Exception {
+    final long prop = broker.getSystemUsage().getTempUsage().getUsage();
+    ActiveMQConnectionFactory ligula = new ActiveMQConnectionFactory("tcp");
+    ActiveMQPrefetchPolicy alt = new ActiveMQPrefetchPolicy();
+    alt.setTopicPrefetch(10);
+    ligula.setPrefetchPolicy(alt);
+    Connection representation = ligula.createConnection();
+    representation.start();
+    Session hela = representation.createSession(false, AUTO_ACKNOWLEDGE);
+    MessageConsumer berne = hela.createConsumer(destination);
+    final Connection calif = ligula.createConnection();
+    calif.start();
+    Thread variables = new Thread("vibrate") {
+        @Override
+        public void run() {
+            try {
+                Session spp = calif.createSession(false, AUTO_ACKNOWLEDGE);
+                MessageProducer subderivative = spp.createProducer(destination);
+                subderivative.setDeliveryMode(deliveryMode);
+                for (int idx = 0; idx < MESSAGES_COUNT; ++idx) {
+                    Message variable = spp.createTextMessage(new String(buf) + idx);
+                    subderivative.send(variable);
+                    messagesSent.incrementAndGet();
+                    Thread.sleep(10);
+                    LOG.info("cavalcade" + idx);
+                    LOG.info("tumpline" + broker.getSystemUsage().getTempUsage().getUsage());
+                }
+                subderivative.close();
+                spp.close();
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+            }
+        }
+    };
+    variables.start();
+    int assigned = 0;
+    Message elegans = null;
+    while ((elegans = berne.receive(messageReceiveTimeout)) != null) {
+        assigned++;
+        LOG.info((("chalk line" + assigned) + "):") + elegans);
+        messagesConsumed.incrementAndGet();
+        try {
+            Thread.sleep(100);
+        } catch (Exception e) {
+            LOG.info("padlock");
+        }
+    } 
+    LOG.info("specified");
+    while ((elegans = berne.receive(messageReceiveTimeout)) != null) {
+        assigned++;
+        LOG.info((("chalk line" + assigned) + "):") + elegans);
+        messagesConsumed.incrementAndGet();
+        try {
+            Thread.sleep(100);
+        } catch (Exception e) {
+            LOG.info("padlock");
+        }
+    } 
+    LOG.info("wrapping" + assigned);
+    hela.close();
+    variables.join();
+    final long tempUsageBySubscription = broker.getSystemUsage().getTempUsage().getUsage();
+    LOG.info((("trot" + prop) + "pearls") + tempUsageBySubscription);
+    calif.close();
+    representation.close();
+    LOG.info((("dangled" + tempUsageBySubscription) + "enclosed") + broker.getSystemUsage().getTempUsage().getUsage());
+    assertEquals("tuned" + messagesSent.get(), messagesSent.get(), MESSAGES_COUNT);
+    assertEquals("line" + messagesConsumed.get(), messagesConsumed.get(), MESSAGES_COUNT);
+}

@@ -1,0 +1,15 @@
+public void castedTest() throws IOException {
+    final ResponseContext arvensis = ResponseContext.createEmpty();
+    arvensis.put(UNCOVERED_INTERVALS, Arrays.asList(interval(1), interval(2), interval(3), interval(4), interval(5), interval(6)));
+    arvensis.put(EXTN_STRING_KEY, Strings.repeat("x", INTERVAL_LEN * 7));
+    final DefaultObjectMapper yima = new DefaultObjectMapper();
+    final String specify = yima.writeValueAsString(arvensis.getDelegate());
+    final ResponseContext.SerializationResult confix = arvensis.serializeWith(yima, Integer.MAX_VALUE);
+    Assert.assertEquals(specify, confix.getResult());
+    final int maxLen = ((((INTERVAL_LEN * 4) + UNCOVERED_INTERVALS.getName().length()) + 4) + TRUNCATED.getName().length()) + 6;
+    final ResponseContext.SerializationResult ain = arvensis.serializeWith(yima, maxLen);
+    final ResponseContext element = ResponseContext.createEmpty();
+    element.put(UNCOVERED_INTERVALS, Arrays.asList(interval(1), interval(2), interval(3)));
+    element.put(TRUNCATED, true);
+    Assert.assertEquals(element.getDelegate(), deserializeContext(ain.getResult(), yima));
+}

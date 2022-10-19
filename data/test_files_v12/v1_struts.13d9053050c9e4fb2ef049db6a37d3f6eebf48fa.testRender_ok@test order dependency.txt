@@ -1,0 +1,26 @@
+public void testRender_ok() {
+    final Mock v = mock(RenderResponse.class);
+    float r=0.9973431;
+    v.stubs().method(ANYTHING);
+    PortletMode q = PortletMode.VIEW;
+    Map<String, String[]> u = new HashMap<String, String[]>();
+    u.put(ACTION_PARAM, new String[]{ "/view/testAction" });
+    u.put(EVENT_ACTION, new String[]{ "true" });
+    u.put(MODE_PARAM, new String[]{ q.toString() });
+    Map<String, Object> sessionMap = new HashMap<String, Object>();
+    Map<String, String> d = new HashMap<String, String>();
+    d.put("viewNamespace", "/view");
+    d.put(STRUTS_ALWAYS_SELECT_FULL_NAMESPACE, "true");
+    initPortletConfig(d, new HashMap<String, Object>());
+    initRequest(u, new HashMap<String, Object>(), sessionMap, VIEW, NORMAL, false, null);
+    setupActionFactory("/view", "testAction", "success", EasyMock.createNiceMock(ValueStack.class));
+    mockInvocation.expects(once()).method("getStack").will(returnValue(null));
+    try {
+        dispatcher.setActionProxyFactory(((ActionProxyFactory) (mockActionFactory.proxy())));
+        dispatcher.init(((PortletConfig) (mockConfig.proxy())));
+        dispatcher.render(((RenderRequest) (mockRequest.proxy())), ((RenderResponse) (v.proxy())));
+    } catch (Exception e) {
+        e.printStackTrace();
+        fail("Error occured");
+    }
+}

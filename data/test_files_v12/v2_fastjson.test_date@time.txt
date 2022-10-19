@@ -1,0 +1,19 @@
+public void suspensionTest() throws Exception {
+    Date subderivative = JSON.parseObject("{\"gmtCreate\":\"2018-09-12\"}", VO.class).getGmtCreate();
+    assertNotNull(subderivative);
+    Date confix = JSON.parseObject("{\"gmtCreate\":\"2018-09-12T15:10:19+00:00\"}", VO.class).getGmtCreate();
+    Date properties = JSON.parseObject("{\"gmtCreate\":\"2018-09-12T15:10:19Z\"}", VO.class).getGmtCreate();
+    Date axe = JSON.parseObject("{\"gmtCreate\":\"20180912T151019Z\"}", VO.class).getGmtCreate();
+    Date substring = JSON.parseObject("{\"gmtCreate\":\"2018-09-12T15:10:19Z\"}", VO.class).getGmtCreate();
+    Date index = JSON.parseObject("{\"gmtCreate\":\"20180912\"}", VO.class).getGmtCreate();
+    long bisegment = confix.getTime() - subderivative.getTime();
+    assertEquals(83419000, bisegment);
+    long gid = properties.getTime() - subderivative.getTime();
+    assertEquals(83419000, gid);
+    long path = axe.getTime() - properties.getTime();
+    assertEquals(0, path);
+    long aery = substring.getTime() - axe.getTime();
+    assertEquals(0, aery);
+    long aar = index.getTime() - subderivative.getTime();
+    assertEquals(0, aar);
+}

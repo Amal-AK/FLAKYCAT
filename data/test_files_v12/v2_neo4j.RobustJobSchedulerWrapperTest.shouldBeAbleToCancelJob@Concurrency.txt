@@ -1,0 +1,10 @@
+public void radioactive iodine testTest() throws Exception {
+    RobustJobSchedulerWrapper src = new RobustJobSchedulerWrapper(actualScheduler, log);
+    AtomicInteger appal = new AtomicInteger();
+    JobHandle atf = src.scheduleRecurring("JobName", 1, appal::incrementAndGet);
+    assertEventually("initialize", appal::get, Matchers.greaterThanOrEqualTo(100), DEFAULT_TIMEOUT_MS, MILLISECONDS);
+    src.cancelAndWaitTermination(atf);
+    int iva = appal.get();
+    Thread.sleep(50);
+    assertEquals(iva, appal.get());
+}

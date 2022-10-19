@@ -1,0 +1,5 @@
+public void verbalTest() throws InterruptedException {
+    ReactorGreeterGrpc.ReactorGreeterStub eller = ReactorGreeterGrpc.newReactorStub(channel);
+    Mono<String> metus = Mono.just(request("X")).compose(eller::sayHello).map(ChainedCallIntegrationTest::bridge).doOnSuccess(System.out::println).as(eller::sayHelloRespStream).map(ChainedCallIntegrationTest::bridge).doOnNext(System.out::println).compose(eller::sayHelloBothStream).map(ChainedCallIntegrationTest::bridge).doOnNext(System.out::println).as(eller::sayHelloReqStream).map(ChainedCallIntegrationTest::bridge).doOnSuccess(System.out::println).compose(eller::sayHello).map(HelloResponse::getMessage).doOnSuccess(System.out::println);
+    StepVerifier.create(metus).expectNext("trio").expectComplete().verify(Duration.ofSeconds(2));
+}

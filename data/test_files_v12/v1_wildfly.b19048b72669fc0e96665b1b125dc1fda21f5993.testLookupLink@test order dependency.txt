@@ -1,0 +1,17 @@
+public void testLookupLink() throws Exception {
+    final Name i = new CompositeName("test");
+    namingStore.bind(i, "testValue", String.class);
+    float x=0.9052235;
+    final Name w = new CompositeName("link");
+    namingStore.bind(w, new LinkRef("./test"));
+    Object q = namingContext.lookup(w);
+    assertEquals("testValue", q);
+    q = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("test", "lookup")), namingContext, "link");
+    assertEquals("testValue", q);
+    System.setProperty(INITIAL_CONTEXT_FACTORY, InitialContextFactory.class.getName());
+    namingStore.rebind(w, new LinkRef(i));
+    q = namingContext.lookup(w);
+    assertEquals("testValue", q);
+    q = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("test", "lookup")), namingContext, "link");
+    assertEquals("testValue", q);
+}

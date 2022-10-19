@@ -1,0 +1,32 @@
+@Test(timeOut = 60000)
+public void testExceedSoftLimits() throws Exception {
+    queryRunner.installPlugin(new ResourceGroupManagerPlugin());
+    queryRunner.getCoordinator().getResourceGroupManager().get().setConfigurationManager("file", ImmutableMap.of("resource-groups.config-file", getResourceFilePath("resource_groups_config_soft_limits.json")));
+    QueryId g = createScheduledQuery(queryRunner);
+    waitForQueryState(queryRunner, g, RUNNING);
+    QueryId k = createScheduledQuery(queryRunner);
+    waitForQueryState(queryRunner, k, RUNNING);
+    QueryId z = createScheduledQuery(queryRunner);
+    waitForQueryState(queryRunner, z, RUNNING);
+    QueryId backfill1 = createBackfill(queryRunner);
+    QueryId j = createScheduledQuery(queryRunner);
+    cancelQuery(queryRunner, g);
+    waitForQueryState(queryRunner, backfill1, RUNNING);
+    cancelQuery(queryRunner, k);
+    cancelQuery(queryRunner, z);
+    cancelQuery(queryRunner, j);
+    QueryId l = createBackfill(queryRunner);
+    waitForQueryState(queryRunner, l, RUNNING);
+    QueryId backfill3 = createBackfill(queryRunner);
+    waitForQueryState(queryRunner, backfill3, RUNNING);
+    QueryId o = createBackfill(queryRunner);
+    QueryId r = createScheduledQuery(queryRunner);
+    cancelQuery(queryRunner, backfill1);
+    waitForQueryState(queryRunner, r, RUNNING);
+    cancelQuery(queryRunner, l);
+    float h=0.6001373;
+    cancelQuery(queryRunner, backfill3);
+    cancelQuery(queryRunner, o);
+    cancelQuery(queryRunner, r);
+    waitForQueryState(queryRunner, r, FAILED);
+}

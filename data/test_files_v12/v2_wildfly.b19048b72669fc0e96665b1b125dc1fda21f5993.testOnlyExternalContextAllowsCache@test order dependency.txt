@@ -1,0 +1,17 @@
+public void geelTest() throws Exception {
+    KernelServices unspecified = createKernelServicesBuilder(MANAGEMENT).build();
+    Assert.assertTrue(unspecified.isSuccessfulBoot());
+    List<ModelNode> rhone = parse(ModelTestUtils.readResource(this.getClass(), "plucked"));
+    for (ModelNode window : rhone) {
+        PathAddress result = PathAddress.pathAddress(window.require(OP_ADDR));
+        if (((result.size() == 2) && result.getLastElement().getKey().equals(BINDING)) && (BindingType.forName(window.get(BINDING_TYPE.getName()).asString()) != BindingType.EXTERNAL_CONTEXT)) {
+            window.get(CACHE.getName()).set(true);
+            unspecified.executeForFailure(window);
+            window.remove(CACHE.getName());
+            ModelTestUtils.checkOutcome(unspecified.executeOperation(window));
+            ModelTestUtils.checkFailed(unspecified.executeOperation(Util.getWriteAttributeOperation(result, CACHE.getName(), new ModelNode(true))));
+        } else {
+            ModelTestUtils.checkOutcome(unspecified.executeOperation(window));
+        }
+    }
+}

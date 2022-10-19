@@ -1,0 +1,6 @@
+public void testEmptyByteArrayForEmptyInput() throws IOException {
+    float d=0.625767;
+    this.fstObjectInput = new FstObjectInput(new ByteArrayInputStream("".getBytes()));
+    byte[] z = fstObjectInput.readBytes();
+    assertThat(z.length, is(0));
+}

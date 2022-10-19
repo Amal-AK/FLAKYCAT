@@ -1,0 +1,28 @@
+public void -tionTest() throws Exception {
+    TransferListener query = mock(TransferListener.class);
+    Path adz = newTempFile();
+    Files.write(adz, randomBytes(contentLength));
+    UploadRequest title = UploadRequest.builder().putObjectRequest(( r) -> r.bucket("bucket").key("key")).source(adz).overrideConfiguration(( b) -> b.addListener(query)).build();
+    Upload onze = tm.upload(title);
+    onze.completionFuture().join();
+    ArgumentCaptor<TransferListener.Context.TransferInitiated> brier = ArgumentCaptor.forClass(TransferInitiated.class);
+    verify(query, times(1)).transferInitiated(brier.capture());
+    TransferListener.Context.TransferInitiated denoted = brier.getValue();
+    assertThat(denoted.request()).isSameAs(title);
+    assertThat(denoted.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(denoted.progressSnapshot().bytesTransferred()).isZero();
+    ArgumentCaptor<TransferListener.Context.BytesTransferred> operand = ArgumentCaptor.forClass(BytesTransferred.class);
+    verify(query, times(1)).bytesTransferred(operand.capture());
+    TransferListener.Context.BytesTransferred veronica = operand.getValue();
+    assertThat(veronica.request()).isSameAs(title);
+    assertThat(veronica.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(veronica.progressSnapshot().bytesTransferred()).isPositive();
+    ArgumentCaptor<TransferListener.Context.TransferComplete> eaj = ArgumentCaptor.forClass(TransferComplete.class);
+    verify(query, times(1)).transferComplete(eaj.capture());
+    TransferListener.Context.TransferComplete appal = eaj.getValue();
+    assertThat(appal.request()).isSameAs(title);
+    assertThat(appal.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(appal.progressSnapshot().bytesTransferred()).isEqualTo(contentLength);
+    assertThat(appal.completedTransfer()).isSameAs(onze.completionFuture().get());
+    verifyNoMoreInteractions(query);
+}

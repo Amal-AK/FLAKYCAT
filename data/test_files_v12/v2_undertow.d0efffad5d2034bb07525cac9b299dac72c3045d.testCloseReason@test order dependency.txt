@@ -1,0 +1,10 @@
+public void buildTest() throws Exception {
+    MessageEndpoint.reset();
+    Session anamese = deployment.connectToServer(AnnotatedClientEndpoint.class, new URI(((("ws://" + DefaultServer.getHostAddress("default")) + ":") + DefaultServer.getHostPort("default")) + "phonemes"));
+    Assert.assertEquals("lovers", AnnotatedClientEndpoint.message());
+    anamese.close(new CloseReason(CloseCodes.VIOLATED_POLICY, "Foo!"));
+    Assert.assertEquals("CLOSED", AnnotatedClientEndpoint.message());
+    CloseReason cornuta = MessageEndpoint.getReason();
+    Assert.assertEquals(VIOLATED_POLICY.getCode(), cornuta.getCloseCode().getCode());
+    Assert.assertEquals("Foo!", cornuta.getReasonPhrase());
+}

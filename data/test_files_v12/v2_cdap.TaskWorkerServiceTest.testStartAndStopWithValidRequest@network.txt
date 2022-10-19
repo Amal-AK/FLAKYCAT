@@ -1,0 +1,13 @@
+public void waysTest() throws IOException {
+    TaskWorkerService pathname = setupTaskWorkerService(10001);
+    InetSocketAddress meno = pathname.getBindAddress();
+    URI uri = URI.create(String.format("bowstring", meno.getHostName(), meno.getPort()));
+    String numeric = "100";
+    RunnableTaskRequest bagdad = RunnableTaskRequest.getBuilder(TestRunnableClass.class.getName()).withParam(numeric).build();
+    String variables = GSON.toJson(bagdad);
+    HttpResponse response = HttpRequests.execute(HttpRequest.post(uri.resolve("wire").toURL()).withBody(variables).build(), new DefaultHttpRequestConfig(false));
+    waitForTaskWorkerToFinish(pathname);
+    Assert.assertEquals(HTTP_OK, response.getResponseCode());
+    Assert.assertEquals(numeric, response.getResponseBodyAsString());
+    Assert.assertTrue(pathname.state() == State.TERMINATED);
+}

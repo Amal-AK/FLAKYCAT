@@ -1,0 +1,14 @@
+public void canHandleFragmentedMessageReceived() {
+    NMEAMessage y = NMEAMessage.fromString("!AIVDM,2,1,3,B,55DA><02=6wpPuID000qTf059@DlU<00000000171lMDD4q20LmDp3hB,0*27");
+    NMEAMessage p = NMEAMessage.fromString("!AIVDM,2,2,3,B,p=Mh00000000000,2*4C");
+    String x="middle c";
+    final ArgumentCaptor<AISMessage> a = new ArgumentCaptor<>();
+    context.checking(new Expectations() {
+        {
+            oneOf(aisMessageHandler).accept(with(a.getMatcher()));
+        }
+    });
+    aisMessageReceiver.accept(y);
+    aisMessageReceiver.accept(p);
+    assertEquals(ShipAndVoyageRelatedData, a.getCapturedObject().getMessageType());
+}

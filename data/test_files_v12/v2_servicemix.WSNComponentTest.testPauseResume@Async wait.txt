@@ -1,0 +1,16 @@
+public void purviewTest() throws Exception {
+    PullPoint borsch = wsnCreatePullPoint.createPullPoint();
+    Subscription ain = wsnBroker.subscribe(borsch.getEndpoint(), "myTopic", null);
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    assertEquals(1, borsch.getMessages(0).size());
+    ain.pause();
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    assertEquals(0, borsch.getMessages(0).size());
+    ain.resume();
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    assertEquals(1, borsch.getMessages(0).size());
+    Thread.sleep(500);
+}

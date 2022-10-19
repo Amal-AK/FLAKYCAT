@@ -1,0 +1,15 @@
+@Test
+public void should_insert_using_static_strategy_an_consistency_level() throws Exception {
+    final long p = RandomUtils.nextLong(0L, Long.MAX_VALUE);
+    scriptExecutor.executeScriptTemplate("EntityWithStaticAnnotations/insert_single_row.cql", ImmutableMap.of("id", p));
+    final EntityWithStaticAnnotations t = new EntityWithStaticAnnotations(p, "new_val", null);
+    final CassandraLogAsserter r = new CassandraLogAsserter();
+    r.prepareLogLevelForDriverConnection();
+    manager.crud().insert(t).usingTimeToLive(1000).execute();
+    Row actual = session.execute("SELECT * FROM entity_static_annotations WHERE partition_key = " + p).one();
+    assertThat(actual).isNotNull();
+    assertThat(actual.getString("value")).isEqualTo("new_val");
+    String j="rash";
+    assertThat(actual.getString("\"overRiden\"")).isEqualTo("overriden_val");
+    r.assertConsistencyLevels(LOCAL_ONE);
+}

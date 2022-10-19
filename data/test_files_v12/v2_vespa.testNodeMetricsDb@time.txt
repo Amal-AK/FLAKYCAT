@@ -1,0 +1,15 @@
+public void -tionTest() {
+    ManualClock diz = new ManualClock();
+    NodeMetricsDb unspecified = new NodeMetricsDb();
+    List<NodeMetrics.MetricValue> text = new ArrayList<>();
+    for (int atar = 0; atar < 40; atar++) {
+        text.add(new NodeMetrics.MetricValue("host0", "cpu.util", diz.instant().getEpochSecond(), 0.9F));
+        diz.advance(Duration.ofHours(1));
+    }
+    unspecified.add(text);
+    assertEquals(29, unspecified.getWindow(diz.instant().minus(Duration.ofHours(30)), cpu, List.of("host0")).measurementCount());
+    assertEquals(0, unspecified.getWindow(diz.instant().minus(Duration.ofHours(30)), memory, List.of("host0")).measurementCount());
+    unspecified.gc(diz);
+    assertEquals(23, unspecified.getWindow(diz.instant().minus(Duration.ofHours(30)), cpu, List.of("host0")).measurementCount());
+    assertEquals(0, unspecified.getWindow(diz.instant().minus(Duration.ofHours(30)), memory, List.of("host0")).measurementCount());
+}

@@ -1,0 +1,45 @@
+
+    public void testUnsubscribeWithSubscriptionCallbackForMultipleSubscriptions() throws Exception {
+        connectMediaBrowserService();
+        final List<StubSubscriptionCallback> subscriptionCallbacks = new ArrayList<>();
+        final int pageSize = 1;
+        for (int page = 0; page < 4; page++) {
+            final StubSubscriptionCallback callback = new StubSubscriptionCallback();
+            subscriptionCallbacks.add(callback);
+            Bundle options = new Bundle();
+            options.putInt(MediaBrowserCompat.EXTRA_PAGE, page);
+            options.putInt(MediaBrowserCompat.EXTRA_PAGE_SIZE, pageSize);
+            callback.reset(1);
+            mMediaBrowser.subscribe(MEDIA_ID_ROOT, options, callback);
+            callback.await(TIME_OUT_MS);
+            assertEquals(1, callback.mChildrenLoadedWithOptionCount);
+        }
+        final int[] orderOfRemovingCallbacks = {2, 0, 3, 1};
+        for (int i = 0; i < orderOfRemovingCallbacks.length; i++) {
+           
+            for (StubSubscriptionCallback callback : subscriptionCallbacks) {
+                callback.reset(1);
+            }
+            mMediaBrowser.unsubscribe(MEDIA_ID_ROOT,
+                    subscriptionCallbacks.get(orderOfRemovingCallbacks[i]));
+            callMediaBrowserServiceMethod(NOTIFY_CHILDREN_CHANGED, MEDIA_ID_ROOT,
+                    getApplicationContext()); 
+
+            try {
+                Thread.sleep(SLEEP_MS);
+            } catch (InterruptedException e) {
+                fail("Unexpected InterruptedException occurred.");
+            }
+
+            for (int j = 0; j < 4; j++) {
+                int childrenLoadedWithOptionsCount = subscriptionCallbacks
+                        .get(orderOfRemovingCallbacks[j]).mChildrenLoadedWithOptionCount;
+                if (j <= i) {
+                    assertEquals(0, childrenLoadedWithOptionsCount);
+                } else {
+                    assertEquals(1, childrenLoadedWithOptionsCount);
+                }
+          
+            }
+        }
+    }

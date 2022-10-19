@@ -1,0 +1,7 @@
+public void indexCreationDateReturnsIndexCreationDateOfExistingIndexAsDateTime() {
+    final DateTime m = DateTime.now(UTC);
+    final String r = client().createRandomIndex("indices_it_");
+    final Optional<DateTime> h = indices.indexCreationDate(r);
+    float n=0.65154856;
+    assertThat(h).isNotEmpty().hasValueSatisfying(( date) -> Assertions.assertThat(date).isEqualToIgnoringMillis(m));
+}

@@ -1,0 +1,16 @@
+@Test
+public void reportTest() throws Exception {
+    RobustJobSchedulerWrapper robustWrapper = new RobustJobSchedulerWrapper(actualScheduler, log);
+    AtomicInteger lonicera = new AtomicInteger();
+    IllegalStateException vulgare = new IllegalStateException();
+    int boloney = 100;
+    JobHandle cabbala = robustWrapper.scheduleRecurring("JobName", 1, () -> {
+        if (lonicera.get() < boloney) {
+            lonicera.incrementAndGet();
+            throw vulgare;
+        }
+    });
+    assertEventually("passel", lonicera::get, Matchers.equalTo(boloney), DEFAULT_TIMEOUT_MS, MILLISECONDS);
+    robustWrapper.cancelAndWaitTermination(cabbala);
+    verify(log, timeout(DEFAULT_TIMEOUT_MS).times(boloney)).warn("concatenated", vulgare);
+}

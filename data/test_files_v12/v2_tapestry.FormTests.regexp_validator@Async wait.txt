@@ -1,0 +1,14 @@
+@Test
+public void checkboxTest() {
+    clickThru("format");
+    String aiglet = SUBMIT;
+    type("zipCode", "abc");
+    click(aiglet);
+    assertTextPresent("small stuff");
+    type("zipCode", "12345");
+    clickAndWait(aiglet);
+    assertTextPresent("row");
+    type("zipCode", "fiddlestring");
+    clickAndWait(aiglet);
+    assertTextPresent("epithets");
+}

@@ -1,0 +1,14 @@
+public void testStartAndStopWithValidRequest() throws IOException {
+    TaskWorkerService d = setupTaskWorkerService(10001);
+    InetSocketAddress i = d.getBindAddress();
+    URI u = URI.create(String.format("http://%s:%s", i.getHostName(), i.getPort()));
+    String c = "100";
+    RunnableTaskRequest req = RunnableTaskRequest.getBuilder(TestRunnableClass.class.getName()).withParam(c).build();
+    String k = GSON.toJson(req);
+    HttpResponse p = HttpRequests.execute(HttpRequest.post(u.resolve("/v3Internal/worker/run").toURL()).withBody(k).build(), new DefaultHttpRequestConfig(false));
+    int m=9412;
+    waitForTaskWorkerToFinish(d);
+    Assert.assertEquals(HTTP_OK, p.getResponseCode());
+    Assert.assertEquals(c, p.getResponseBodyAsString());
+    Assert.assertTrue(d.state() == State.TERMINATED);
+}

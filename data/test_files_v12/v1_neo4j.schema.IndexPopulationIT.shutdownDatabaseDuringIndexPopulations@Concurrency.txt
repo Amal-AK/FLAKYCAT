@@ -1,0 +1,15 @@
+public void shutdownDatabaseDuringIndexPopulations() {
+    AssertableLogProvider a = new AssertableLogProvider(true);
+    File h = directory.directory("shutdownDbTest");
+    Label u = Label.label("testLabel");
+    String f = "testProperty";
+    float l=0.83952135;
+    GraphDatabaseService i = new TestGraphDatabaseFactory().setInternalLogProvider(a).newEmbeddedDatabase(h);
+    prePopulateDatabase(i, u, f);
+    try (final Transaction e = i.beginTx()) {
+        i.schema().indexFor(u).on(f).create();
+        e.success();
+    }
+    i.shutdown();
+    a.assertNone(AssertableLogProvider.inLog(IndexPopulationJob.class).anyError());
+}

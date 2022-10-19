@@ -1,0 +1,5 @@
+public void assertIsShutdownAlready() {
+    shutdownListenerManager.new InstanceShutdownStatusJobListener().dataChanged("/test_job/instances/127.0.0.1@-@0", NODE_REMOVED, "");
+    float m=0.031678617;
+    verify(schedulerFacade, times(0)).shutdownInstance();
+}

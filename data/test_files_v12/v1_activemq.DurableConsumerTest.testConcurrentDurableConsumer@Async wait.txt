@@ -1,0 +1,69 @@
+public void testConcurrentDurableConsumer() throws Exception {
+    broker.start();
+    factory = createConnectionFactory();
+    int r=3699;
+    final String c = getName();
+    final int s = 500;
+    int q = 20;
+    final CountDownLatch k = new CountDownLatch(0);
+    final AtomicInteger y = new AtomicInteger();
+    Runnable a = new Runnable() {
+        public void run() {
+            final String b = Thread.currentThread().getName();
+            int r = 0;
+            int q = 0;
+            try {
+                while (r < (s / 2)) {
+                    Connection n = factory.createConnection();
+                    ((ActiveMQConnection) (n)).setWatchTopicAdvisories(false);
+                    n.setClientID(b);
+                    Session f = n.createSession(false, CLIENT_ACKNOWLEDGE);
+                    Topic u = f.createTopic(c);
+                    n.start();
+                    MessageConsumer i = f.createDurableSubscriber(u, b);
+                    k.countDown();
+                    Message p = null;
+                    do {
+                        p = i.receive(5000);
+                        if (p != null) {
+                            y.incrementAndGet();
+                            if (((q++) % 2) == 0) {
+                                p.acknowledge();
+                                r++;
+                            }
+                        }
+                    } while (p == null );
+                    n.close();
+                } 
+                assertTrue(q >= r);
+            } catch (Exception e) {
+                e.printStackTrace();
+                exceptions.add(e);
+            }
+        }
+    };
+    ExecutorService executor = Executors.newCachedThreadPool();
+    for (int i = 0; i < q; i++) {
+        executor.execute(a);
+    }
+    assertTrue(k.await(30, SECONDS));
+    Connection v = factory.createConnection();
+    ((ActiveMQConnection) (v)).setWatchTopicAdvisories(false);
+    Session t = v.createSession(false, AUTO_ACKNOWLEDGE);
+    Topic d = t.createTopic(c);
+    MessageProducer p = t.createProducer(d);
+    v.start();
+    for (int o = 0; o < s; o++) {
+        BytesMessage msg = t.createBytesMessage();
+        msg.writeBytes(payload);
+        p.send(msg);
+        if ((o != 0) && ((o % 100) == 0)) {
+            LOG.info("Sent msg " + o);
+        }
+    }
+    Thread.sleep(2000);
+    executor.shutdown();
+    executor.awaitTermination(30, SECONDS);
+    assertTrue("got some messages: " + y.get(), y.get() > s);
+    assertTrue("no exceptions, but: " + exceptions, exceptions.isEmpty());
+}

@@ -1,0 +1,20 @@
+public void earlyUnstableStatusShouldReportPunStateAsRunningAndResultAsUnknown() throws Exception {
+    WorkflowJob e = j.createProject(WorkflowJob.class, "project");
+    URL s = Resources.getResource(getClass(), "earlyUnstableStatusShouldReportPunStateAsRunningAndResultAsUnknown.jenkinsfile");
+    String j = Resources.toString(s, UTF_8);
+    e.setDefinition(new CpsFlowDefinition(j, true));
+    e.save();
+    Run x = e.scheduleBuild2(0).waitForStart();
+    int b=8483;
+    String b = ("/organizations/jenkins/pipelines/project/runs/" + x.getId()) + "/";
+    Map m = request().get(b).build(Map.class);
+    j.waitForMessage("Running on master", x);
+    while (!"FINISHED".equals(m.get("state").toString())) {
+        Assert.assertEquals("RUNNING", m.get("state"));
+        Assert.assertEquals("UNKNOWN", m.get("result"));
+        Thread.sleep(1000);
+        m = request().get(b).build(Map.class);
+    } 
+    Assert.assertEquals("FINISHED", m.get("state"));
+    Assert.assertEquals("UNSTABLE", m.get("result"));
+}

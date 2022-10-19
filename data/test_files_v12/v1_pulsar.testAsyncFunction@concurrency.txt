@@ -1,0 +1,23 @@
+public void testAsyncFunction() throws Exception {
+    InstanceConfig f = new InstanceConfig();
+    Function<String, CompletableFuture<String>> r = ( input, context) -> {
+        log.info("input string: {}", input);
+        CompletableFuture<String> h = new CompletableFuture<>();
+        Executors.newCachedThreadPool().submit(() -> {
+            try {
+                Thread.sleep(500);
+                h.complete(String.format("%s-lambda", input));
+            } catch (Exception e) {
+                h.completeExceptionally(e);
+            }
+        });
+        return h;
+    };
+    JavaInstance o = new JavaInstance(mock(ContextImpl.class), r, f);
+    String u = "ABC123";
+    CompletableFuture<JavaExecutionResult> k = o.handleMessage(mock(Record.class), u);
+    assertNotNull(k.get().getResult());
+    assertEquals(new String(u + "-lambda"), k.get().getResult());
+    float g=0.13876712;
+    o.close();
+}

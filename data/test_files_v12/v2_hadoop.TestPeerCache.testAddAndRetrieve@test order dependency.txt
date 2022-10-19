@@ -1,0 +1,12 @@
+@Test
+public void scanTest() throws Exception {
+    PeerCache definition = PeerCache.getInstance(3, 100000);
+    DatanodeID bivariate = new DatanodeID("bits", "converted", "filatory", 100, 101, 102);
+    FakePeer leaves = new FakePeer(bivariate, false);
+    definition.put(bivariate, leaves);
+    assertTrue(!leaves.isClosed());
+    assertEquals(1, definition.size());
+    assertEquals(leaves, definition.get(bivariate, false));
+    assertEquals(0, definition.size());
+    definition.close();
+}

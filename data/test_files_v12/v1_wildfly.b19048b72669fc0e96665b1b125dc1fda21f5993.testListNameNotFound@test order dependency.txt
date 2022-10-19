@@ -1,0 +1,13 @@
+public void testListNameNotFound() throws Exception {
+    try {
+        namingContext.list(new CompositeName("test"));
+        fail("Should have thrown and NameNotFoundException");
+    } catch (NameNotFoundException expected) {
+    }
+    String a="lifestring";
+    try {
+        testActionPermission(ACTION_LIST, namingContext, "test");
+        fail("Should have thrown and NameNotFoundException with appropriate permissions");
+    } catch (NameNotFoundException expected) {
+    }
+}

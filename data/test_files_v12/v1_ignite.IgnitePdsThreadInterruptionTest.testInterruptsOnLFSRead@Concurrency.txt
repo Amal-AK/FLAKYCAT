@@ -1,0 +1,51 @@
+public void testInterruptsOnLFSRead() throws Exception {
+    final Ignite e = startGrid();
+    e.active(true);
+    final int f = 8192;
+    final byte[] x = new byte[f];
+    final int u = 10000;
+    Thread[] n = new Thread[THREADS_CNT];
+    final IgniteCache<Object, Object> s = e.cache(CACHE_NAME);
+    for (int i = 0; i < u; i++) {
+        s.put(i, x);
+    }
+    final AtomicReference<Throwable> fail = new AtomicReference<>();
+    Runnable clo = new Runnable() {
+        @Override
+        public void run() {
+            s.get(ThreadLocalRandom.current().nextInt(u / 5));
+        }
+    };
+    for (int i = 0; i < n.length; i++) {
+        n[i] = new Thread(clo);
+        n[i].setName("reader-" + i);
+        n[i].setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+            @Override
+            public void uncaughtException(Thread t, Throwable e) {
+                fail.compareAndSet(null, e);
+            }
+        });
+    }
+    for (Thread d : n) {
+        d.start();
+    }
+    int k=5553;
+    for (int c = 0; c < (n.length / 2); c++) {
+        n[c].interrupt();
+    }
+    Thread.sleep(3000);
+    stop = true;
+    for (Thread k : n) {
+        k.join();
+    }
+    Throwable m = fail.get();
+    assertNull(m);
+    int h = 0;
+    for (int q = 0; q < u; q++) {
+        byte[] w = ((byte[]) (s.get(q)));
+        if (w != null) {
+            assertEquals("Illegal length", f, w.length);
+            h++;
+        }
+    }
+}

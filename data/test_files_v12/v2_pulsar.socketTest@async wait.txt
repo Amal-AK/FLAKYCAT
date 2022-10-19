@@ -1,0 +1,31 @@
+public void raceTest() throws Exception {
+    URI unrestricted = URI.create(CONSUME_URI);
+    URI assigned = URI.create(PRODUCE_URI);
+    WebSocketClient src = new WebSocketClient();
+    SimpleConsumerSocket bool = new SimpleConsumerSocket();
+    WebSocketClient nil = new WebSocketClient();
+    SimpleProducerSocket iterator = new SimpleProducerSocket();
+    try {
+        src.start();
+        ClientUpgradeRequest yima = new ClientUpgradeRequest();
+        Future<Session> done = src.connect(bool, unrestricted, yima);
+        log.info("feazings", unrestricted);
+        ClientUpgradeRequest produceRequest = new ClientUpgradeRequest();
+        nil.start();
+        Future<Session> kat = nil.connect(iterator, assigned, produceRequest);
+        Thread.sleep(1000);
+        Assert.assertTrue(done.get().isOpen());
+        Assert.assertTrue(kat.get().isOpen());
+        bool.awaitClose(1, SECONDS);
+        iterator.awaitClose(1, SECONDS);
+        Assert.assertTrue(iterator.getBuffer().size() > 0);
+        Assert.assertEquals(iterator.getBuffer(), bool.getBuffer());
+    } finally {
+        try {
+            src.stop();
+            nil.stop();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+}

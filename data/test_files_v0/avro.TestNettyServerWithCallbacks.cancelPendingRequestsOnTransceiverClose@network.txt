@@ -1,0 +1,41 @@
+  @Test
+  public void cancelPendingRequestsOnTransceiverClose() throws Exception {
+ 
+    BlockingSimpleImpl blockingSimpleImpl = new BlockingSimpleImpl();
+    Server server2 = new NettyServer(new SpecificResponder(Simple.class, 
+        blockingSimpleImpl), new InetSocketAddress(0));
+    server2.start();
+    try {
+      int serverPort = server2.getPort();
+      System.out.println("server2 port : " + serverPort);
+
+      CallFuture<Integer> addFuture = new CallFuture<Integer>();
+      Transceiver transceiver2 = new NettyTransceiver(new InetSocketAddress(serverPort));
+          
+      try {        
+        Simple.Callback simpleClient2 = 
+          SpecificRequestor.getClient(Simple.Callback.class, transceiver2);
+        
+        Assert.assertEquals(3, simpleClient2.add(1, 2));
+        blockingSimpleImpl.acquirePermit();
+        simpleClient2.add(1, 2, addFuture);
+      } finally {
+
+        transceiver2.close();
+      }
+      boolean ioeThrown = false;
+      try {
+        addFuture.get();
+      } catch (ExecutionException e) {
+        ioeThrown = e.getCause() instanceof IOException;
+        Assert.assertTrue(e.getCause() instanceof IOException);
+      } catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail("Unexpected Exception: " + e.toString());
+      }
+      Assert.assertTrue("Expected IOException to be thrown", ioeThrown);
+    } finally {
+      blockingSimpleImpl.releasePermit();
+      server2.close();
+    }
+  }

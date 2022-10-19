@@ -1,0 +1,49 @@
+public void testAddLocation() throws Exception {
+    DataSize maxResponseSize = DataSize.of(10, MEGABYTE);
+    MockExchangeRequestProcessor processor = new MockExchangeRequestProcessor(maxResponseSize);
+    TaskId task1 = new TaskId(new StageId("query", 1), 0, 0);
+    TaskId task2 = new TaskId(new StageId("query", 1), 1, 0);
+    TaskId task3 = new TaskId(new StageId("query", 1), 2, 0);
+    URI location1 = URI.create("http:www.example1.com");
+    URI location2 = URI.create("http:www.example2.com");
+    URI location3 = URI.create("http:www.example3.com");
+    processor.addPage(location1, createSerializedPage(1));
+    processor.addPage(location1, createSerializedPage(2));
+    TestingExchangeClientBuffer buffer = new TestingExchangeClientBuffer(DataSize.of(1, MEGABYTE));
+    @SuppressWarnings("resource")
+    ExchangeClient exchangeClient = new ExchangeClient("localhost", DataIntegrityVerification.ABORT, buffer, maxResponseSize, 1, new Duration(1, TimeUnit.MINUTES), true, new TestingHttpClient(processor, scheduler), scheduler, new SimpleLocalMemoryContext(newSimpleAggregatedMemoryContext(), "test"), pageBufferClientCallbackExecutor, ( taskId, failure) -> {
+    });
+    assertThat(buffer.getAllTasks()).isEmpty();
+    assertThat(buffer.getPages().asMap()).isEmpty();
+    assertThat(buffer.getFinishedTasks()).isEmpty();
+    assertThat(buffer.getFailedTasks().asMap()).isEmpty();
+    assertFalse(buffer.isNoMoreTasks());
+    exchangeClient.addLocation(task1, location1);
+    assertThat(buffer.getAllTasks()).containsExactly(task1);
+    assertTaskIsNotFinished(buffer, task1);
+    processor.setComplete(location1);
+    buffer.whenTaskFinished(task1).get(10, SECONDS);
+    assertThat(buffer.getPages().get(task1)).hasSize(2);
+    assertThat(buffer.getFinishedTasks()).containsExactly(task1);
+    exchangeClient.addLocation(task2, location2);
+    assertThat(buffer.getAllTasks()).containsExactlyInAnyOrder(task1, task2);
+    assertTaskIsNotFinished(buffer, task2);
+    processor.setComplete(location2);
+    buffer.whenTaskFinished(task2).get(10, SECONDS);
+    assertThat(buffer.getFinishedTasks()).containsExactlyInAnyOrder(task1, task2);
+    assertThat(buffer.getPages().get(task2)).hasSize(0);
+    exchangeClient.addLocation(task3, location3);
+    assertThat(buffer.getAllTasks()).containsExactlyInAnyOrder(task1, task2, task3);
+    assertTaskIsNotFinished(buffer, task3);
+    exchangeClient.noMoreLocations();
+    assertTrue(buffer.isNoMoreTasks());
+    assertThat(buffer.getAllTasks()).containsExactlyInAnyOrder(task1, task2, task3);
+    assertTaskIsNotFinished(buffer, task3);
+    exchangeClient.close();
+    assertEventually(() -> assertEquals(exchangeClient.getStatus().getPageBufferClientStatuses().get(0).getHttpRequestState(), "not scheduled", "httpRequestState"));
+    assertEventually(() -> assertEquals(exchangeClient.getStatus().getPageBufferClientStatuses().get(1).getHttpRequestState(), "not scheduled", "httpRequestState"));
+    assertEventually(() -> assertEquals(exchangeClient.getStatus().getPageBufferClientStatuses().get(2).getHttpRequestState(), "not scheduled", "httpRequestState"));
+    assertThat(buffer.getFinishedTasks()).containsExactlyInAnyOrder(task1, task2, task3);
+    assertThat(buffer.getFailedTasks().asMap()).isEmpty();
+    assertTrue(exchangeClient.isFinished());
+}

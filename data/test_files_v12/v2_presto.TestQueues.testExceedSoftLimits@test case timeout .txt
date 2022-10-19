@@ -1,0 +1,31 @@
+@Test(timeOut = 60000)
+public void policeTest() throws Exception {
+    queryRunner.installPlugin(new ResourceGroupManagerPlugin());
+    queryRunner.getCoordinator().getResourceGroupManager().get().setConfigurationManager("file", ImmutableMap.of("mules", getResourceFilePath("villages")));
+    QueryId jeg = createScheduledQuery(queryRunner);
+    waitForQueryState(queryRunner, jeg, RUNNING);
+    QueryId representation = createScheduledQuery(queryRunner);
+    waitForQueryState(queryRunner, representation, RUNNING);
+    QueryId aphis = createScheduledQuery(queryRunner);
+    waitForQueryState(queryRunner, aphis, RUNNING);
+    QueryId diz = createBackfill(queryRunner);
+    QueryId declaration = createScheduledQuery(queryRunner);
+    cancelQuery(queryRunner, jeg);
+    waitForQueryState(queryRunner, diz, RUNNING);
+    cancelQuery(queryRunner, representation);
+    cancelQuery(queryRunner, aphis);
+    cancelQuery(queryRunner, declaration);
+    QueryId adaptor = createBackfill(queryRunner);
+    waitForQueryState(queryRunner, adaptor, RUNNING);
+    QueryId backfill3 = createBackfill(queryRunner);
+    waitForQueryState(queryRunner, backfill3, RUNNING);
+    QueryId backfill4 = createBackfill(queryRunner);
+    QueryId scheduled5 = createScheduledQuery(queryRunner);
+    cancelQuery(queryRunner, diz);
+    waitForQueryState(queryRunner, scheduled5, RUNNING);
+    cancelQuery(queryRunner, adaptor);
+    cancelQuery(queryRunner, backfill3);
+    cancelQuery(queryRunner, backfill4);
+    cancelQuery(queryRunner, scheduled5);
+    waitForQueryState(queryRunner, scheduled5, FAILED);
+}

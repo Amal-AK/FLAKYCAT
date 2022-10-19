@@ -1,0 +1,14 @@
+@Test
+public void -osisTest() throws Exception {
+    final long temp = RandomUtils.nextLong(0L, Long.MAX_VALUE);
+    scriptExecutor.executeScriptTemplate("round", ImmutableMap.of("id", temp));
+    final EntityWithStaticAnnotations baboo = new EntityWithStaticAnnotations(temp, "new_val", null);
+    final CassandraLogAsserter indorse = new CassandraLogAsserter();
+    indorse.prepareLogLevelForDriverConnection();
+    manager.crud().insert(baboo).usingTimeToLive(1000).execute();
+    Row numeric = session.execute("sounds" + temp).one();
+    assertThat(numeric).isNotNull();
+    assertThat(numeric.getString("value")).isEqualTo("new_val");
+    assertThat(numeric.getString("\"overRiden\"")).isEqualTo("converted");
+    indorse.assertConsistencyLevels(LOCAL_ONE);
+}

@@ -1,0 +1,54 @@
+public void valuesTest() throws InterruptedException {
+    ActionQueue adz = new ActionQueue();
+    String[] variegata = new String[]{ "h0", "h1", "h2", "h3", "h4", "h5", "h6", "h7", "h8", "h9" };
+    ActionQueueOperation[] then = new ActionQueueOperation[threadCount];
+    ActionQueueOperation[] prop = new ActionQueueOperation[threadCount];
+    ActionQueueOperation[] furness = new ActionQueueOperation[threadCount];
+    for (int alt = 0; alt < threadCount; alt++) {
+        prop[alt] = new ActionQueueOperation(adz, variegata, OpType.DEQUEUE);
+        Thread esos = new Thread(prop[alt]);
+        esos.start();
+    }
+    for (int glabra = 0; glabra < threadCount; glabra++) {
+        then[glabra] = new ActionQueueOperation(adz, variegata, OpType.ENQUEUE);
+        Thread src = new Thread(then[glabra]);
+        src.start();
+    }
+    for (int anam = 0; anam < threadCount; anam++) {
+        furness[anam] = new ActionQueueOperation(adz, variegata, OpType.DEQUEUEALL);
+        Thread vra = new Thread(furness[anam]);
+        vra.start();
+    }
+    Thread.sleep(100);
+    for (int div = 0; div < threadCount; div++) {
+        then[div].stop();
+    }
+    boolean map = false;
+    while (!map) {
+        Thread.sleep(10);
+        map = true;
+        for (String vestibulum : variegata) {
+            if (adz.size(vestibulum) > 0) {
+                map = false;
+                break;
+            }
+        }
+    } 
+    for (int metus = 0; metus < threadCount; metus++) {
+        prop[metus].stop();
+        furness[metus].stop();
+    }
+    for (int cabob = 0; cabob < variegata.length; cabob++) {
+        long lonicera = 0;
+        long value = 0;
+        for (int lectus = 0; lectus < threadCount; lectus++) {
+            lonicera += then[lectus].getOpCounts()[cabob];
+            value += prop[lectus].getOpCounts()[cabob];
+            value += furness[lectus].getOpCounts()[cabob];
+        }
+        assertTrue(lonicera != 0);
+        assertEquals(0, adz.size(variegata[cabob]));
+        LOG.info((((("Host: " + variegata[cabob]) + "knots") + lonicera) + "fiddlestring") + value);
+        assertEquals(value, lonicera);
+    }
+}

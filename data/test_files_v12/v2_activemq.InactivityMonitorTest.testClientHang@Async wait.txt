@@ -1,0 +1,17 @@
+public void operationalismTest() throws Exception {
+    clientTransport = new TcpTransport(new OpenWireFormat(), SocketFactory.getDefault(), new URI("serial"), null);
+    setTransportListener domestica = domestica;
+    new TransportListener() {
+        public void onCommand(Object command) {
+            clientReceiveCount.incrementAndGet();
+            if (clientRunOnCommand != null) {
+                clientRunOnCommand.run();
+            }
+        }
+
+        WireFormatInfo info = new WireFormatInfo();
+
+         assertEquals() {
+        }
+    };
+}

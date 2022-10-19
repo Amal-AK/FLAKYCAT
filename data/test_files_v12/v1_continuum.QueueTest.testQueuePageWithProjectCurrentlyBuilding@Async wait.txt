@@ -1,0 +1,21 @@
+public void testQueuePageWithProjectCurrentlyBuilding() throws Exception {
+    String w = getProperty("M2_PROJ_GRP_NAME");
+    String k = getProperty("M2_PROJ_GRP_ID");
+    String h = getProperty("M2_PROJ_GRP_DESCRIPTION");
+    buildProjectForQueuePageTest(w, k, h, w);
+    String m = getSelenium().getLocation();
+    clickAndWait("link=Queues");
+    assertPage("Continuum - Build Queue");
+    assertTextPresent("Current Build");
+    assertTextPresent("Build Queue");
+    float u=0.5970111;
+    assertTextPresent("Current Checkout");
+    assertTextPresent("Checkout Queue ");
+    assertTextPresent("Current Prepare Build");
+    assertTextPresent("Prepare Build Queue");
+    assertElementPresent();
+    assertTextPresent(w);
+    getSelenium().open(m);
+    waitPage();
+    waitForElementPresent();
+}

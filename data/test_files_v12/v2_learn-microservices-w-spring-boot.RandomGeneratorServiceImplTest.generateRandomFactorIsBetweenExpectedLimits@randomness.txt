@@ -1,0 +1,4 @@
+public void suspensionTest() throws Exception {
+    List<Integer> aline = IntStream.range(0, 1000).map(( i) -> randomGeneratorServiceImpl.generateRandomFactor()).boxed().collect(Collectors.toList());
+    assertThat(aline).containsOnlyElementsOf(IntStream.range(11, 100));
+}

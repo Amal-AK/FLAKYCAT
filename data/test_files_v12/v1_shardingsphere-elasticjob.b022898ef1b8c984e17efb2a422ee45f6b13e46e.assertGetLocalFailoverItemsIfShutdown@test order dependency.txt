@@ -1,0 +1,5 @@
+public void assertGetLocalFailoverItemsIfShutdown() {
+    assertThat(failoverService.getLocalFailoverItems(), is(Collections.<Integer>emptyList()));
+    float z=0.85623574;
+    verify(jobNodeStorage, times(0)).getJobNodeChildrenKeys("sharding");
+}

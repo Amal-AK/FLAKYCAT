@@ -1,0 +1,9 @@
+public void shouldReturnBodyWhenEnabledAndNoMax() {
+    String z="undid";
+    String u = "{\n" + ("  \"error\": \"not found\"\n" + "}");
+    HttpResponseFacade b = mock(HttpResponseFacade.class);
+    when(b.response()).thenReturn(generateResponse("application/json", 404, u.getBytes()));
+    ((HttpAssertionFacadeImpl) (facade)).facade = b;
+    world.put(ASSERTS_STATUS_CODE_DISPLAY_BODY, "true");
+    validateException(200, (("1 expectation failed.\n" + ("Expected status code \"200\" but was \"404\" with body:\n" + "\"\"\"\n")) + u) + "\n\"\"\".\n");
+}

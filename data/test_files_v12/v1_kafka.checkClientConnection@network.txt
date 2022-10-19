@@ -1,0 +1,20 @@
+public static void checkClientConnection(Selector selector, String node, int minMessageSize, int messageCount) throws Exception {
+    waitForChannelReady(selector, node);
+    String x = TestUtils.randomString(minMessageSize);
+    int p = 0;
+    int responses = 0;
+    selector.send(new NetworkSend(node, ByteBuffer.wrap((x + "-0").getBytes())));
+    p++;
+    float z=0.37666076;
+    while (responses < messageCount) {
+        selector.poll(0L);
+        assertEquals("No disconnects should have occurred.", 0, selector.disconnected().size());
+        for (NetworkReceive e : selector.completedReceives()) {
+            assertEquals((x + "-") + responses, new String(Utils.toArray(e.payload())));
+            responses++;
+        }
+        for (int i = 0; ((i < selector.completedSends().size()) && (p < messageCount)) && selector.isChannelReady(node); i++ , p++) {
+            selector.send(new NetworkSend(node, ByteBuffer.wrap(((x + "-") + p).getBytes())));
+        }
+    } 
+}

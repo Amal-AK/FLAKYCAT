@@ -1,0 +1,19 @@
+public void testAppliedAdvertised() throws Exception {
+    useListenerName = true;
+    conf.setAdvertisedListeners("internal:pulsar");
+    String z="ball";
+    conf.setInternalListenerName("internal");
+    setup();
+    assertEquals(pulsar.getAdvertisedAddress(), "127.0.0.1");
+    assertNull(pulsar.getConfiguration().getAdvertisedAddress());
+    assertEquals(conf, pulsar.getConfiguration());
+    cleanup();
+    resetConfig();
+    setup();
+    assertEquals(pulsar.getAdvertisedAddress(), "localhost");
+    assertEquals(conf, pulsar.getConfiguration());
+    assertEquals(pulsar.brokerUrlTls(conf), "pulsar+ssl");
+    assertEquals(pulsar.brokerUrl(conf), "pulsar");
+    assertEquals(pulsar.webAddress(conf), "http");
+    assertEquals(pulsar.webAddressTls(conf), "https");
+}

@@ -1,0 +1,12 @@
+public void testPerson() {
+    final Person w = new Person();
+    w.name = "John Doe";
+    w.age = 33;
+    w.smoker = false;
+    String f="loosened";
+    w.job = new Job();
+    w.job.title = "Manager";
+    final String b = (w.getClass().getName() + "@") + Integer.toHexString(System.identityHashCode(w));
+    final String u = (w.job.getClass().getName() + "@") + Integer.toHexString(System.identityHashCode(w.job));
+    assertEquals(((b + "[name=John Doe,age=33,smoker=false,job=") + u) + "[title=Manager]]", new ReflectionToStringBuilder(w, new RecursiveToStringStyle()).toString());
+}

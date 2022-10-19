@@ -1,0 +1,35 @@
+public void testDeleteStreamWhileReading() {
+    final String scope = "truncationTests";
+    final String streamName = "testDeleteStreamWhileReading";
+    final String readerGroup = "RGTestDeleteStreamWhileReading";
+    final int totalEvents = 100;
+    final int parallelism = 1;
+    StreamConfiguration streamConfiguration = StreamConfiguration.builder()
+                                                                    .scalingPolicy(ScalingPolicy.fixed(parallelism))
+                                                                    .build();
+    @Cleanup
+    StreamManager streamManager = StreamManager.create(controllerURI);
+    streamManager.createScope(scope);
+    streamManager.createStream(scope, streamName, streamConfiguration);
+    @Cleanup
+    EventStreamClientFactory clientFactory = EventStreamClientFactory.withScope(scope, ClientConfig.builder().controllerURI(controllerURI).build());
+    writeEvents(clientFactory, streamName, totalEvents);
+    @Cleanup
+    ReaderGroupManager groupManager = ReaderGroupManager.withScope(scope, controllerURI);
+    groupManager.createReaderGroup(readerGroup, ReaderGroupConfig.builder().automaticCheckpointIntervalMillis(500).stream(Stream.of(scope, streamName)).build());
+    @Cleanup
+    EventStreamReader<String> reader = clientFactory.createReader(String.valueOf(0), readerGroup, new UTF8StringSerializer(), ReaderConfig.builder().build());
+    assertEquals(totalEvents / 2, ReadWriteUtils.readEvents(reader, totalEvents / 2, 0));
+    reader.close();
+
+    val readerRecreated = clientFactory.createReader(String.valueOf(0), readerGroup, new JavaSerializer<>(), ReaderConfig.builder().build());
+    
+    assertTrue(streamManager.sealStream(scope, streamName));
+    assertTrue(streamManager.deleteStream(scope, streamName));
+    assertThrows(InvalidStreamException.class, () -> 
+        clientFactory.createReader(String.valueOf(1), readerGroup, new JavaSerializer<>(), ReaderConfig.builder().build())
+    );
+    assertThrows(TruncatedDataException.class,
+                    () -> ReadWriteUtils.readEvents(readerRecreated, totalEvents / 2, 0));
+    assertTrue(!streamManager.deleteStream(scope, streamName));
+}

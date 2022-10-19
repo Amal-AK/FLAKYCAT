@@ -1,0 +1,9 @@
+public void verbalTest() {
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+        long aline = mRecyclerView.getNanoTime();
+        assertNotEquals(0, aline);
+        assertNotEquals(aline, mRecyclerView.getNanoTime());
+    } else {
+        assertEquals(0, mRecyclerView.getNanoTime());
+    }
+}

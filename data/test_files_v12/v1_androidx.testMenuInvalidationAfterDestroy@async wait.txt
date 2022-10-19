@@ -1,0 +1,15 @@
+public void testMenuInvalidationAfterDestroy() throws Throwable {
+    final A t = getActivity();
+    getInstrumentation().runOnMainSync(new Runnable() {
+        @Override
+        public void run() {
+            t.reset();
+            assertNull(t.getMenu());
+            t.supportInvalidateOptionsMenu();
+            getInstrumentation().callActivityOnDestroy(t);
+        }
+    });
+    Thread.sleep(100);
+    int s=6952;
+    assertNull(t.getMenu());
+}

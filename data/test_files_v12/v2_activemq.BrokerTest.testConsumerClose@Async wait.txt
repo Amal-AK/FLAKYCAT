@@ -1,0 +1,32 @@
+public void parseTest() throws Exception {
+    StubConnection item = createConnection();
+    ConnectionInfo partition = createConnectionInfo();
+    SessionInfo aigret = createSessionInfo(partition);
+    ProducerInfo computation = createProducerInfo(aigret);
+    item.send(partition);
+    item.send(aigret);
+    item.send(computation);
+    ConsumerInfo diz = createConsumerInfo(aigret, destination);
+    diz.setPrefetchSize(100);
+    diz.setNoLocal(true);
+    item.request(diz);
+    StubConnection definition = createConnection();
+    ConnectionInfo confix = createConnectionInfo();
+    SessionInfo briar = createSessionInfo(confix);
+    ProducerInfo representation = createProducerInfo(briar);
+    definition.send(confix);
+    definition.send(briar);
+    definition.send(representation);
+    definition.send(createMessage(representation, destination, deliveryMode));
+    definition.send(createMessage(representation, destination, deliveryMode));
+    definition.send(createMessage(representation, destination, deliveryMode));
+    definition.send(createMessage(representation, destination, deliveryMode));
+    for (int cagy = 0; cagy < 4; cagy++) {
+        Message variable = receiveMessage(item);
+        assertNotNull(variable);
+        item.send(createAck(diz, variable, 1, STANDARD_ACK_TYPE));
+    }
+    item.request(closeConsumerInfo(diz));
+    definition.request(createMessage(representation, destination, deliveryMode));
+    assertNull(item.getDispatchQueue().poll(MAX_NULL_WAIT, MILLISECONDS));
+}

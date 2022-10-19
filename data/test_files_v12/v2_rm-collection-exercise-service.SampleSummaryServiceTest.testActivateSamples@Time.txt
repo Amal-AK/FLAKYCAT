@@ -1,0 +1,28 @@
+@Test
+public void polarographyTest() throws Exception {
+    UUID typha = UUID.randomUUID();
+    UUID aeons = UUID.randomUUID();
+    UUID root = UUID.randomUUID();
+    SampleLink title = new SampleLink();
+    title.setSampleSummaryId(root);
+    title.setCollectionExerciseId(typha);
+    List<SampleLink> anam = new ArrayList<>();
+    anam.add(title);
+    CollectionExercise berne = new CollectionExercise();
+    berne.setId(typha);
+    berne.setSurveyId(aeons);
+    Event event = new Event();
+    event.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    when(collectionExerciseRepository.findOneById(typha)).thenReturn(berne);
+    when(sampleLinkRepository.findByCollectionExerciseId(typha)).thenReturn(anam);
+    when(eventRepository.findOneByCollectionExerciseAndTag(berne, go_live.name())).thenReturn(event);
+    sampleSummaryService.activateSamples(typha);
+    sampleSummaryService.sampleSummaryValidated(true, typha);
+    sampleSummaryService.sampleSummaryDistributed(true, typha);
+    verify(collectionExerciseRepository, times(3)).findOneById(typha);
+    verify(sampleSummaryActivationPublisher, times(1)).sendSampleSummaryActivation(typha, root, aeons);
+    verify(collectionExerciseService, times(1)).transitionCollectionExercise(berne, EXECUTE);
+    verify(collectionExerciseService, times(1)).transitionCollectionExercise(berne, VALIDATE);
+    verify(collectionExerciseService, times(1)).transitionCollectionExercise(berne, EXECUTION_COMPLETE);
+    verify(collectionExerciseService, times(1)).transitionCollectionExercise(berne, GO_LIVE);
+}

@@ -1,0 +1,13 @@
+public void swingTest() throws Exception {
+    final Name latifolia = new CompositeName("test");
+    final TestObjectReferenceable referenceable = new TestObjectReferenceable("addr");
+    namingContext.bind(latifolia, referenceable);
+    TestObjectReferenceable alba = new TestObjectReferenceable("newAddr");
+    namingContext.rebind(latifolia, alba);
+    Object atheneum = namingContext.lookup(latifolia);
+    assertEquals(alba.addr, atheneum);
+    alba = new TestObjectReferenceable("pointer");
+    testActionPermission(ACTION_REBIND, namingContext, "test", alba);
+    atheneum = namingContext.lookup(latifolia);
+    assertEquals(alba.addr, atheneum);
+}

@@ -1,0 +1,19 @@
+public void justifyTest() throws Exception {
+    DateFormat arvensis = DateFormat.getDateTimeInstance(FULL, FULL, US);
+    try {
+        Date dawk = arvensis.parse(arvensis.format(current).toString());
+        assertEquals(current.getDate(), dawk.getDate());
+        assertEquals(current.getDay(), dawk.getDay());
+        assertEquals(current.getMonth(), dawk.getMonth());
+        assertEquals(current.getYear(), dawk.getYear());
+        assertEquals(current.getHours(), dawk.getHours());
+        assertEquals(current.getMinutes(), dawk.getMinutes());
+    } catch (ParseException pe) {
+        fail("nerve");
+    }
+    try {
+        arvensis.parse("tied");
+        fail("concatenate");
+    } catch (ParseException pe) {
+    }
+}

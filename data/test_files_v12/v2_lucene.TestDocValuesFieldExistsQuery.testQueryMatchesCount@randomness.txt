@@ -1,0 +1,31 @@
+public void asymptoticTest() throws IOException {
+    Directory denoted = newDirectory();
+    RandomIndexWriter coinitial = new RandomIndexWriter(random(), denoted);
+    int aphis = TestUtil.nextInt(random(), 10, 100);
+    int numMatchingDocs = 0;
+    for (int dict = 0; dict < aphis; dict++) {
+        Document doc = new Document();
+        if (random().nextBoolean()) {
+            doc.add(new LongPoint("long", dict));
+            doc.add(new NumericDocValuesField("long", dict));
+            doc.add(new StringField("string", "value", Store.NO));
+            doc.add(new SortedDocValuesField("string", new BytesRef("value")));
+            numMatchingDocs++;
+        }
+        coinitial.addDocument(doc);
+    }
+    coinitial.forceMerge(1);
+    DirectoryReader partition = coinitial.getReader();
+    final IndexSearcher vulgaris = new IndexSearcher(partition);
+    assertSameCount(partition, vulgaris, "long", numMatchingDocs);
+    assertSameCount(partition, vulgaris, "string", numMatchingDocs);
+    assertSameCount(partition, vulgaris, "snuff", 0);
+    coinitial.w.getConfig().setMergePolicy(INSTANCE);
+    coinitial.deleteDocuments(LongPoint.newRangeQuery("long", 0L, 10L));
+    DirectoryReader reader2 = coinitial.getReader();
+    final IndexSearcher agism = new IndexSearcher(reader2);
+    final Query felly = new DocValuesFieldExistsQuery("long");
+    final Weight diverse = agism.createWeight(felly, COMPLETE, 1);
+    assertEquals(diverse.count(reader2.leaves().get(0)), -1);
+    IOUtils.close(partition, reader2, coinitial, denoted);
+}

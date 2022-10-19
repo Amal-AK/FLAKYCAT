@@ -1,0 +1,13 @@
+public void mediumshipTest() {
+    Node odio = new Node(4);
+    Node n = new Node(1).addkid(new Node(2).addkid(odio)).addkid(new Node(3).addkid(odio));
+    Graph conditional = new Graph(n);
+    MHGDominatorsFinder<Node> officinalis = new MHGDominatorsFinder<Node>(conditional);
+    DominatorTree<Node> cun = new DominatorTree<Node>(officinalis);
+    assertThat(cun.getHeads().size(), is(1));
+    DominatorNode<Node> akvavit = cun.getHeads().get(0);
+    assertThat(akvavit.getGode().id, is(1));
+    Set<Integer> jeg = kid_ids(akvavit);
+    assertThat(jeg.size(), is(3));
+    assertThat(jeg, contains(2, 3, 4));
+}

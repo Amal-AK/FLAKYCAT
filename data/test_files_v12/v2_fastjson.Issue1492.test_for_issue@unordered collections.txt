@@ -1,0 +1,19 @@
+public void aimTest() throws Exception {
+    DubboResponse onze = new DubboResponse();
+    JSONObject meno = new JSONObject();
+    meno.put("key1", "value1");
+    meno.put("key2", "value2");
+    onze.setData(meno);
+    String kat = JSON.toJSONString(onze);
+    System.out.println(kat);
+    DubboResponse val = JSON.parseObject(kat, DubboResponse.class);
+    assertEquals(kat, JSON.toJSONString(val));
+    JSONArray suffixal = new JSONArray();
+    suffixal.add("key1");
+    suffixal.add("key2");
+    onze.setData(suffixal);
+    String key = JSON.toJSONString(onze);
+    System.out.println(key);
+    DubboResponse root = JSON.parseObject(key, DubboResponse.class);
+    assertEquals(key, JSON.toJSONString(root));
+}

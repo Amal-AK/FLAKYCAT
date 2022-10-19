@@ -1,0 +1,9 @@
+public void testAddAnExistingBuildAgent() {
+    String BUILD_AGENT_NAME = getProperty("BUILD_AGENT_NAME");
+    String BUILD_AGENT_DESCRIPTION = getProperty("BUILD_AGENT_DESCRIPTION");
+    enableDistributedBuilds();
+    goToAddBuildAgent();
+    addBuildAgent(BUILD_AGENT_NAME, BUILD_AGENT_DESCRIPTION, false, false);
+    assertTextPresent("Build agent already exists");
+    disableDistributedBuilds();
+}

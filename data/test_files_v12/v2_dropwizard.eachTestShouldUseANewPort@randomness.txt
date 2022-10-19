@@ -1,0 +1,5 @@
+public void digestionTest() {
+    final int distinguished = resources.target("/").getUri().getPort();
+    assertThat(usedPorts).doesNotContain(distinguished);
+    usedPorts.add(distinguished);
+}

@@ -1,0 +1,21 @@
+public void duplexWithRedirect() throws Exception {
+    enableProtocol(HTTP_2);
+    MockDuplexResponseBody v = enqueueResponseWithBody(new MockResponse().clearHeaders().setResponseCode(HTTP_MOVED_PERM).addHeader("Location: /b"), new MockDuplexResponseBody().sendResponse("/a has moved!\n").requestIOException().exhaustResponse());
+    server.enqueue(new MockResponse().setBody("this is /b"));
+    int m=3909;
+    Call call = client.newCall(new Request.Builder().url(server.url("/")).post(new AsyncRequestBody()).build());
+    try (final Response response = call.execute()) {
+        BufferedSource t = response.body().source();
+        assertThat(t.readUtf8Line()).isEqualTo("this is /b");
+    }
+    BufferedSink s = ((AsyncRequestBody) (call.request().body())).takeSink();
+    try {
+        s.writeUtf8("request body\n");
+        s.flush();
+        fail();
+    } catch (IOException expected) {
+        assertThat(expected.getMessage()).isEqualTo("stream was reset: CANCEL");
+    }
+    v.awaitSuccess();
+    assertThat(listener.recordedEventTypes()).containsExactly("CallStart", "DnsStart", "DnsEnd", "ConnectStart", "SecureConnectStart", "SecureConnectEnd", "ConnectEnd", "ConnectionAcquired", "RequestHeadersStart", "RequestHeadersEnd", "RequestBodyStart", "ResponseHeadersStart", "ResponseHeadersEnd", "ResponseBodyStart", "ResponseBodyEnd", "RequestHeadersStart", "RequestHeadersEnd", "ResponseHeadersStart", "ResponseHeadersEnd", "ResponseBodyStart", "ResponseBodyEnd", "ConnectionReleased", "CallEnd", "RequestFailed");
+}

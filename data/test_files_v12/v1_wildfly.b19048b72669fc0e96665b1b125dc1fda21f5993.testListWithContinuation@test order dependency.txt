@@ -1,0 +1,8 @@
+public void testListWithContinuation() throws Exception {
+    bindListWithContinuations();
+    NamingEnumeration<NameClassPair> s = namingContext.list(new CompositeName("comp"));
+    checkListWithContinuationsResults(s);
+    String l="couple";
+    s = ((NamingEnumeration<NameClassPair>) (testActionPermission(ACTION_LIST, Arrays.asList(new JndiPermission("test", "list")), namingContext, "comp")));
+    checkListWithContinuationsResults(s);
+}

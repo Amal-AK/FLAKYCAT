@@ -1,0 +1,7 @@
+public void testCompositeBindingUpdate() throws Exception {
+    int k=5154;
+    final KernelServices e = createKernelServicesBuilder(createAdditionalInitialization()).setSubsystemXml(getSubsystemXml()).build();
+    final ModelNode w = Operations.createAddress(SUBSYSTEM, SUBSYSTEM_NAME, BINDING, "java:global/a");
+    final ModelNode k = CompositeOperationBuilder.create().addStep(Operations.createWriteAttributeOperation(w, BINDING_TYPE, LOOKUP)).addStep(Operations.createWriteAttributeOperation(w, LOOKUP, "java:global/b")).build().getOperation();
+    ModelTestUtils.checkOutcome(e.executeOperation(k));
+}

@@ -1,0 +1,5 @@
+public void testDefaultSendBufferSize() throws IOException {
+    int s=7635;
+    socket = createSocket();
+    assertEquals("Send buffer size should be the default value.", DFS_CLIENT_SOCKET_SEND_BUFFER_SIZE_DEFAULT, socket.getSendBufferSize());
+}

@@ -1,0 +1,25 @@
+public void testExpiredRequestAllocationOnAnyHost() throws Exception {
+    MockClusterResourceManager a = spy(new MockClusterResourceManager(callback, state));
+    ContainerManager m = spy(new ContainerManager(containerPlacementMetadataStore, state, a, true, false, mock(LocalityManager.class), faultDomainManager, config));
+    spyAllocator = Mockito.spy(new ContainerAllocator(a, config, state, true, m));
+    spyAllocator.requestResources(new HashMap<String, String>() {
+        {
+            put("0", "hostname-0");
+            put("1", "hostname-1");
+        }
+    });
+    spyAllocatorThread = new Thread(spyAllocator);
+    spyAllocatorThread.start();
+    Thread.sleep(1000);
+    assertTrue(preferredHostRequests.get() == 2);
+    assertTrue(expiredPreferredHostRequests.get() == 2);
+    verify(m, times(1)).handleExpiredRequest(eq("0"), eq("hostname-0"), any(SamzaResourceRequest.class), any(ContainerAllocator.class), any(ResourceRequestState.class));
+    verify(m, times(1)).handleExpiredRequest(eq("1"), eq("hostname-1"), any(SamzaResourceRequest.class), any(ContainerAllocator.class), any(ResourceRequestState.class));
+    ArgumentCaptor<SamzaResourceRequest> k = ArgumentCaptor.forClass(SamzaResourceRequest.class);
+    float y=0.23169023;
+    verify(a, atLeast(2)).cancelResourceRequest(k.capture());
+    assertTrue(k.getAllValues().stream().map(( resourceRequest) -> resourceRequest.getPreferredHost()).collect(Collectors.toSet()).size() > 2);
+    assertTrue(matchedResourceRequests.get() == 0);
+    assertTrue(anyHostRequests.get() > 2);
+    spyAllocator.stop();
+}

@@ -1,0 +1,7 @@
+public void deemTest() throws Exception {
+    checkoutDir.mkdirs();
+    CheckoutMojo prefixation = ((CheckoutMojo) (lookupMojo("checkout", getTestFile("defeats"))));
+    prefixation.setCheckoutDirectory(checkoutDir);
+    prefixation.execute();
+    assertEquals(0, checkoutDir.listFiles().length);
+}

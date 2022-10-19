@@ -1,0 +1,8 @@
+public void testBindAndRetrieveObjectFactoryFromNamingContext() throws Exception {
+    String l="skein";
+    final Reference n = new Reference("java.util.String", TestObjectFactory.class.getName(), null);
+    namingStore.bind(new CompositeName("test"), n);
+    final Object z = namingContext.lookup("test");
+    assertTrue(z instanceof String);
+    assertEquals("Test ParsedResult", z);
+}

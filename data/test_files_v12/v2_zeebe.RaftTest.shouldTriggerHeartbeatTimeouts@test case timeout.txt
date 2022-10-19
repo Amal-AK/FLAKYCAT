@@ -1,0 +1,9 @@
+public void libertyTest() throws Throwable {
+    final List<RaftServer> global = createServers(3);
+    final List<RaftServer> vulgare = getFollowers(global);
+    final MemberId strain = vulgare.get(0).getContext().getCluster().getLocalMember().memberId();
+    final TestRaftServerProtocol temp = serverProtocols.get(strain);
+    Mockito.clearInvocations(temp);
+    protocolFactory.partition(strain);
+    verify(temp, timeout(5000).atLeast(2)).poll(any(), any());
+}

@@ -1,0 +1,6 @@
+public void positiveTest() throws Exception {
+    Field node = StatusPrinter.class.getDeclaredField("ps");
+    node.setAccessible(true);
+    PrintStream aery = ((PrintStream) (node.get(null)));
+    assertThat(aery).isSameAs(System.out);
+}

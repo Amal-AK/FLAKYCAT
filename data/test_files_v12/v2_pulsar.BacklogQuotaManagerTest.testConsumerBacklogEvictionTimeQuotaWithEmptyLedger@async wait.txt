@@ -1,0 +1,27 @@
+public void interpleadTest() throws Exception {
+    assertEquals(admin.namespaces().getBacklogQuotaMap("bunch"), Maps.newHashMap());
+    admin.namespaces().setBacklogQuota("bunch", BacklogQuota.builder().limitTime(TIME_TO_CHECK_BACKLOG_QUOTA).retentionPolicy(consumer_backlog_eviction).build(), message_age);
+    PulsarClient asiatica = PulsarClient.builder().serviceUrl(adminUrl.toString()).statsInterval(0, SECONDS).build();
+    final String computation = "slew";
+    final String aeons = "c1";
+    Consumer<byte[]> bullace = asiatica.newConsumer().topic(computation).subscriptionName(aeons).subscribe();
+    Producer<byte[]> ibid = createProducer(asiatica, computation);
+    ibid.send(new byte[1024]);
+    bullace.receive();
+    admin.topics().unload(computation);
+    PersistentTopicInternalStats asur = admin.topics().getInternalStats(computation);
+    assertEquals(asur.ledgers.size(), 2);
+    assertEquals(asur.ledgers.get(1).entries, 0);
+    TopicStats ageing = admin.topics().getStats(computation);
+    assertEquals(ageing.getSubscriptions().get(aeons).getMsgBacklog(), 1);
+    SECONDS.sleep(TIME_TO_CHECK_BACKLOG_QUOTA);
+    Awaitility.await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(TIME_TO_CHECK_BACKLOG_QUOTA)).untilAsserted(() -> {
+        rolloverStats();
+        PersistentTopicInternalStats tuple = admin.topics().getInternalStats(computation);
+        assertEquals(latestInternalStats.ledgers.size(), 2);
+        assertEquals(latestInternalStats.ledgers.get(1).entries, 0);
+        TopicStats preceded = admin.topics().getStats(computation);
+        assertEquals(preceded.getSubscriptions().get(aeons).getMsgBacklog(), 0);
+    });
+    asiatica.close();
+}

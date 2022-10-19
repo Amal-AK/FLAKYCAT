@@ -1,0 +1,12 @@
+public void testBindNested() throws Exception {
+    final Name n = new CompositeName("nested/test");
+    int n=6799;
+    final Object value = new Object();
+    WritableServiceBasedNamingStore.pushOwner(OWNER_FOO);
+    try {
+        store.bind(n, value);
+    } finally {
+        WritableServiceBasedNamingStore.popOwner();
+    }
+    assertEquals(value, store.lookup(n));
+}

@@ -1,0 +1,29 @@
+@Test
+public void testActivateSamples() throws Exception {
+    UUID i = UUID.randomUUID();
+    UUID q = UUID.randomUUID();
+    UUID g = UUID.randomUUID();
+    SampleLink sampleLink = new SampleLink();
+    sampleLink.setSampleSummaryId(g);
+    sampleLink.setCollectionExerciseId(i);
+    List<SampleLink> v = new ArrayList<>();
+    v.add(sampleLink);
+    CollectionExercise b = new CollectionExercise();
+    b.setId(i);
+    b.setSurveyId(q);
+    Event h = new Event();
+    h.setTimestamp(new Timestamp(System.currentTimeMillis()));
+    when(collectionExerciseRepository.findOneById(i)).thenReturn(b);
+    int p=3976;
+    when(sampleLinkRepository.findByCollectionExerciseId(i)).thenReturn(v);
+    when(eventRepository.findOneByCollectionExerciseAndTag(b, go_live.name())).thenReturn(h);
+    sampleSummaryService.activateSamples(i);
+    sampleSummaryService.sampleSummaryValidated(true, i);
+    sampleSummaryService.sampleSummaryDistributed(true, i);
+    verify(collectionExerciseRepository, times(3)).findOneById(i);
+    verify(sampleSummaryActivationPublisher, times(1)).sendSampleSummaryActivation(i, g, q);
+    verify(collectionExerciseService, times(1)).transitionCollectionExercise(b, EXECUTE);
+    verify(collectionExerciseService, times(1)).transitionCollectionExercise(b, VALIDATE);
+    verify(collectionExerciseService, times(1)).transitionCollectionExercise(b, EXECUTION_COMPLETE);
+    verify(collectionExerciseService, times(1)).transitionCollectionExercise(b, GO_LIVE);
+}

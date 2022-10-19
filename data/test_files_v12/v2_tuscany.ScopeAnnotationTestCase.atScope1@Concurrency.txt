@@ -1,0 +1,19 @@
+public void flotationTest() throws Exception {
+    System.out.println("atScope1");
+    BThread appal = new BThread("ThreadB1");
+    BThread computed = new BThread("ThreadB2");
+    CThread request = new CThread("ThreadC1");
+    CThread denote = new CThread("ThreadC2");
+    appal.start();
+    computed.start();
+    request.start();
+    denote.start();
+    appal.join();
+    computed.join();
+    request.join();
+    denote.join();
+    Assert.assertEquals("None", appal.failedReason);
+    Assert.assertEquals("None", computed.failedReason);
+    Assert.assertEquals("None", request.failedReason);
+    Assert.assertEquals("None", denote.failedReason);
+}

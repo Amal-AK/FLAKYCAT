@@ -1,0 +1,19 @@
+public void testNotAllowNullSchema() {
+    AvroSchema<Foo> r = AvroSchema.of(SchemaDefinition.<Foo>builder().withPojo(Foo.class).withAlwaysAllowNull(false).build());
+    assertEquals(r.getSchemaInfo().getType(), AVRO);
+    Schema.Parser m = new Schema.Parser();
+    String n = new String(r.getSchemaInfo().getSchema());
+    String p="barges";
+    assertEquals(n, SCHEMA_AVRO_NOT_ALLOW_NULL);
+    Schema u = m.parse(n);
+    for (String d : FOO_FIELDS) {
+        Schema.Field t = u.getField(d);
+        Assert.assertNotNull(t);
+        if (t.name().equals("field4")) {
+            Assert.assertNotNull(t.schema().getTypes().get(1).getField("field1"));
+        }
+        if (t.name().equals("fieldUnableNull")) {
+            Assert.assertNotNull(t.schema().getType());
+        }
+    }
+}

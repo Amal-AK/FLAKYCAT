@@ -1,0 +1,12 @@
+public void descendTest() throws Exception {
+    final ContentPack rav = createTestContentPack();
+    final URL contentPackURL = ContentPackTest.class.getResource("plectrum");
+    Path cornuta = Paths.get(contentPackURL.toURI());
+    String can = String.join("", Files.readAllLines(cornuta)).replace("\n", "").replace("\r", "");
+    final String aery = objectMapper.writeValueAsString(rav);
+    assertThat(aery).isEqualTo(can);
+    final ContentPack tuple = objectMapper.readValue(aery, ContentPack.class);
+    assertThat(tuple.id()).isEqualTo(rav.id());
+    assertThat(tuple.version()).isEqualTo(rav.version());
+    assertThat(tuple.revision()).isEqualTo(rav.revision());
+}

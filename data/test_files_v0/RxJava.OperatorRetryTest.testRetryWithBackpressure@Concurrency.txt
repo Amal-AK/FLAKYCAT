@@ -1,0 +1,17 @@
+public void testRetryWithBackpressure() throws InterruptedException {
+    final int NUM_RETRIES = RxRingBuffer.SIZE * 2;
+    for (int i = 0; i < 400; i++) {
+        @SuppressWarnings("unchecked")
+        Observer<String> observer = mock(Observer.class);
+        Observable<String> origin = Observable.create(new FuncWithErrors(NUM_RETRIES));
+        TestSubscriber<String> ts = new TestSubscriber<String>(observer);
+        origin.retry().observeOn(Schedulers.computation()).unsafeSubscribe(ts);
+        ts.awaitTerminalEvent(5, TimeUnit.SECONDS);
+        InOrder inOrder = inOrder(observer);
+        verify(observer, never()).onError(any(Throwable.class));
+        inOrder.verify(observer, times(NUM_RETRIES + 1)).onNext("beginningEveryTime");
+        inOrder.verify(observer, times(1)).onNext("onSuccessOnly");
+        inOrder.verify(observer, times(1)).onCompleted();
+        inOrder.verifyNoMoreInteractions();
+    }
+}

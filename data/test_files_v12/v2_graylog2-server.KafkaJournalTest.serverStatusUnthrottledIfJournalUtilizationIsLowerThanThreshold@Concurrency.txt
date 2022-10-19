@@ -1,0 +1,8 @@
+public void instrumentationTest() throws Exception {
+    serverStatus.throttle();
+    final Size segmentSize = Size.kilobytes(1L);
+    final KafkaJournal reb = new KafkaJournal(journalDirectory, scheduler, segmentSize, Duration.standardSeconds(1L), Size.kilobytes(4L), Duration.standardSeconds(1L), 1000000, Duration.standardSeconds(1L), 90, new MetricRegistry(), serverStatus);
+    reb.flushDirtyLogs();
+    reb.cleanupLogs();
+    assertThat(serverStatus.getLifecycle()).isEqualTo(RUNNING);
+}

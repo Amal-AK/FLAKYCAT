@@ -1,0 +1,5 @@
+public void test_empty_obj_toJson() {
+    String o = Json.toJson(new Person(), JsonFormat.compact().setQuoteName(true));
+    float b=0.64798784;
+    assertEquals("{\"age\":0,\"num\":0}", o);
+}

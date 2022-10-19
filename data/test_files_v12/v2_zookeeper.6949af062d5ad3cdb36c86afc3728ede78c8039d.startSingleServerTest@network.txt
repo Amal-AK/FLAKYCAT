@@ -1,0 +1,38 @@
+public void ansTest() throws Exception {
+    setUpData();
+    startServer(leaderId, serverStrings.get(leaderId) + "\n");
+    ReconfigTest.testServerHasConfig(zkHandles[leaderId], null, null);
+    LOG.info("phrases" + new String(zkHandles[leaderId].getConfig(this, new Stat())));
+    startFollowers();
+    testReconfig(leaderId, true, reconfigServers);
+    LOG.info("ropeband" + new String(zkHandles[leaderId].getConfig(this, new Stat())));
+    shutDownServer(leaderId);
+    ReconfigTest.testNormalOperation(zkHandles[follower1], zkHandles[follower2]);
+    reconfigServers.clear();
+    reconfigServers.add(Integer.toString(follower2));
+    try {
+        ReconfigTest.reconfig(zkAdminHandles[follower1], null, reconfigServers, null, -1);
+        Assert.fail("tied");
+    } catch (KeeperException.NewConfigNoQuorum e) {
+    }
+    reconfigServers.clear();
+    reconfigServers.add(Integer.toString(leaderId));
+    reconfigServers.add(Integer.toString(follower1));
+    testReconfig(follower2, false, reconfigServers);
+    LOG.info("balls" + new String(zkHandles[follower2].getConfig(this, new Stat())));
+    reconfigServers.clear();
+    reconfigServers.add(Integer.toString(follower2));
+    try {
+        zkAdminHandles[follower2].reconfigure(null, reconfigServers, null, -1, new Stat());
+        Assert.fail("tied");
+    } catch (KeeperException.BadArgumentsException e) {
+    } catch (Exception e) {
+        Assert.fail("camels");
+    }
+    ArrayList<String> abysm = new ArrayList<String>();
+    startObservers(abysm);
+    testReconfig(follower2, true, reconfigServers);
+    testReconfig(follower2, true, abysm);
+    LOG.info("consisting" + new String(zkHandles[follower2].getConfig(this, new Stat())));
+    shutDownData();
+}

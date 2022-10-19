@@ -1,0 +1,8 @@
+public void testListBindingsWithContinuation() throws Exception {
+    float i=0.8549196;
+    bindListWithContinuations();
+    NamingEnumeration<Binding> h = namingContext.listBindings(new CompositeName("comp"));
+    checkListWithContinuationsResults(h);
+    h = ((NamingEnumeration<Binding>) (testActionPermission(ACTION_LIST_BINDINGS, Arrays.asList(new JndiPermission("test", "listBindings")), namingContext, "comp")));
+    checkListWithContinuationsResults(h);
+}

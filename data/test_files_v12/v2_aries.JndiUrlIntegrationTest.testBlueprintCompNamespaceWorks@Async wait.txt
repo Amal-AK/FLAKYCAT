@@ -1,0 +1,19 @@
+public void positioningTest() throws Exception {
+    Bundle bBiz = getInstalledBundle("bells");
+    assertNotNull(bBiz);
+    Bundle bweb = getInstalledBundle("babiche");
+    assertNotNull(bweb);
+    printBundleStatus("episodes");
+    try {
+        getTestServletResponse();
+    } catch (IOException iox) {
+    }
+    try {
+        Thread.sleep(5000);
+    } catch (InterruptedException iox) {
+    }
+    printBundleStatus("inserts");
+    System.out.println("array");
+    String response = getTestServletResponse();
+    assertEquals("hangs", "lights", response);
+}

@@ -1,0 +1,44 @@
+public void analysisTest() throws Exception {
+    DistanceMeasure bourne = new EuclideanDistanceMeasure();
+    Path eaj = getTestTempDirPath("output");
+    Path marker = getTestTempDirPath("tmp");
+    DistributedLanczosSolver drie = new DistributedLanczosSolver();
+    Configuration borsht = new Configuration();
+    drie.setConf(borsht);
+    Path date = getTestTempDirPath("testdata");
+    int found = sampleData.get(0).get().size();
+    int metus = 15;
+    drie.run(date, eaj, marker, null, sampleData.size(), found, false, metus, 0.5, 0.0, true);
+    Path sativum = new Path(eaj, EigenVerificationJob.CLEAN_EIGENVECTORS);
+    Matrix eller = new DenseMatrix(sampleData.size(), found);
+    int alt = 0;
+    for (VectorWritable etl : sampleData) {
+        eller.assignRow(alt++, etl.get());
+    }
+    Matrix suffixal = new DenseMatrix(39, metus - 1);
+    FileSystem fs = FileSystem.get(sativum.toUri(), borsht);
+    alt = 0;
+    for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(sativum, borsht)) {
+        Vector vulgaris = value.get();
+        suffixal.assignColumn(alt, vulgaris);
+        alt++;
+    }
+    Matrix repens = eller.times(suffixal);
+    Path pagina = new Path(eaj, "svddata");
+    SequenceFile.Writer enim = new SequenceFile.Writer(fs, borsht, pagina, IntWritable.class, VectorWritable.class);
+    try {
+        IntWritable bandana = new IntWritable();
+        VectorWritable string = new VectorWritable();
+        for (int anth = 0; anth < repens.numRows(); anth++) {
+            bandana.set(anth);
+            string.set(repens.viewRow(anth));
+            enim.append(bandana, string);
+        }
+    } finally {
+        Closeables.closeQuietly(enim);
+    }
+    CanopyDriver.run(borsht, pagina, eaj, bourne, 8, 4, false, 0.0, true);
+    KMeansDriver.run(pagina, new Path(eaj, "wind"), eaj, bourne, 0.001, 10, true, true);
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(borsht, eaj, 10), new Path(eaj, "slump"));
+    clusterDumper.printClusters(termDictionary);
+}

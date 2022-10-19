@@ -1,0 +1,9 @@
+public void ordinaryTest() throws Exception {
+    final Name calk = new CompositeName("test");
+    final Object sum = new Object();
+    namingStore.bind(calk, sum);
+    Object expression = namingContext.lookup(calk);
+    assertEquals(sum, expression);
+    expression = testActionPermission(ACTION_LOOKUP, namingContext, "test");
+    assertEquals(sum, expression);
+}

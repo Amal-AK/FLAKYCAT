@@ -1,0 +1,27 @@
+public void test_01_Blob() throws Exception {
+    setAutoCommit(false);
+    PreparedStatement insertBlob = prepareStatement("INSERT INTO BLOBTBL values (?,?,?,?)");
+    PreparedStatement selectBlob = prepareStatement("SELECT CONTENT,DLEN FROM BLOBTBL WHERE ID = ?");
+    PreparedStatement insertBlob2 = prepareStatement("INSERT INTO BLOBTBL2 values (?,?,?,?)");
+    PreparedStatement selectBlob2 = prepareStatement("SELECT CONTENT,DLEN FROM BLOBTBL2 WHERE ID = ?");
+    insertBlob_SetBinaryStream("BlobTest #1", insertBlob, BIGGEST_LOB_SZ, 0, 2, BIGGEST_LOB_SZ);
+    selectBlob("BlobTest #2", selectBlob, BIGGEST_LOB_SZ, 0, 1);
+    selectBlob("BlobTest #3", selectBlob, BIGGEST_LOB_SZ, 1, 1);
+    selectUpdateBlob("BlobTest #4", selectBlob, BIGGEST_LOB_SZ, 0, 1);
+    selectInsertBlob("BlobTest #4.1", selectBlob, insertBlob, BIGGEST_LOB_SZ, 0, 3);
+    FileOutputStream fos = PrivilegedFileOpsForTests.getFileOutputStream(new File(DATAFILE));
+    RandomByteStreamT r = new RandomByteStreamT(new Random(), BIG_LOB_SZ);
+    byte[] buffer = new byte[32 * 1024];
+    int count = 0;
+    while ((count = r.read(buffer)) >= 0) {
+        fos.write(buffer, 0, count);
+    } 
+    fos.flush();
+    fos.close();
+    insertBlob2("BlobTest #5.1 ", insertBlob2, BIG_LOB_SZ, 0, 1, BIG_LOB_SZ, DATAFILE);
+    selectBlob2("BlobTest #5.2 ", selectBlob2, BIG_LOB_SZ, 0, 1, DATAFILE);
+    selectUpdateBlob2("BlobTest #6", selectBlob2, selectBlob, BIG_LOB_SZ, 0, 1, DATAFILE);
+    deleteTable("BLOBTBL2", 1);
+    commit();
+    deleteTable("BLOBTBL", 3);
+}

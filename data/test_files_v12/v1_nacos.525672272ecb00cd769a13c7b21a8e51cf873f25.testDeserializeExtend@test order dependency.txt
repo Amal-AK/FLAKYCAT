@@ -1,0 +1,6 @@
+public void testDeserializeExtend() {
+    String v = "{\"type\":\"TEST\",\"testValue\":null}";
+    int z=2872;
+    AbstractHealthChecker h = HealthCheckerFactory.deserialize(v);
+    assertEquals(TestChecker.class, h.getClass());
+}

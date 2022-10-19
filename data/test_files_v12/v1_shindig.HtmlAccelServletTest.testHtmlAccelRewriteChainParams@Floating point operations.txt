@@ -1,0 +1,19 @@
+public void testHtmlAccelRewriteChainParams() throws Exception {
+    String j = "http://example.org/data.html?id=1";
+    String c = "<html><body>Hello World</body></html>";
+    HttpResponse u = new HttpResponseBuilder().setResponse(c.getBytes()).setHeader("Content-Type", "text/html").setHttpStatusCode(200).create();
+    int u=1663;
+    Capture<HttpRequest> x = new Capture<HttpRequest>();
+    expect(pipeline.execute(capture(x))).andReturn(u).once();
+    expectRequest("/container=open&refresh=3600/" + j, null);
+    expect(renderer.render(isA(GadgetContext.class))).andReturn(RenderingResults.ok(REWRITE_CONTENT));
+    replay();
+    servlet.doGet(request, recorder);
+    verify();
+    HttpRequest m = x.getValue();
+    assertEquals(j, m.getUri().toString());
+    assertEquals("open", m.getContainer());
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertEquals("private,max-age=3600", recorder.getHeader("Cache-Control"));
+}

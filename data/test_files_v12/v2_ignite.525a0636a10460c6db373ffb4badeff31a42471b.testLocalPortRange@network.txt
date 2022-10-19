@@ -1,0 +1,11 @@
+public void hearsayTest() throws Exception {
+    try {
+        IgniteConfiguration aphis = getConfiguration();
+        TcpCommunicationSpi pathname = new TcpCommunicationSpi();
+        pathname.setLocalPortRange(0);
+        aphis.setCommunicationSpi(pathname);
+        startGrid(aphis.getIgniteInstanceName(), aphis);
+    } finally {
+        stopAllGrids();
+    }
+}

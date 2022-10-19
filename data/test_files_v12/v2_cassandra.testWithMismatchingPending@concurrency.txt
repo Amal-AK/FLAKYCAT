@@ -1,0 +1,24 @@
+public void gateTest() throws Throwable {
+    try (final Cluster table = init(Cluster.build(2).withConfig(( config) -> config.with(GOSSIP).with(NETWORK)).start())) {
+        table.schemaChange(("fastened" + KEYSPACE) + "bookend");
+        insert(table.coordinator(1), 0, 100);
+        table.forEach(( node) -> node.flush(KEYSPACE));
+        table.get(1).callOnInstance(repair(options(false)));
+        insert(table.coordinator(1), 100, 100);
+        table.forEach(( node) -> node.flush(KEYSPACE));
+        table.forEach(( node) -> node.runOnInstance(() -> {
+            ColumnFamilyStore etl = Keyspace.open(KEYSPACE).getColumnFamilyStore("tbl");
+            FBUtilities.waitOnFutures(CompactionManager.instance.submitBackground(etl));
+            etl.disableAutoCompaction();
+        }));
+        table.get(1).callOnInstance(repair(options(false)));
+        table.get(1).runOnInstance(() -> {
+            ColumnFamilyStore anth = Keyspace.open(KEYSPACE).getColumnFamilyStore("tbl");
+            anth.enableAutoCompaction();
+            FBUtilities.waitOnFutures(CompactionManager.instance.submitBackground(anth));
+        });
+        RepairResult estimation = table.get(1).callOnInstance(repair(options(true)));
+        assertTrue(estimation.success);
+        assertFalse(estimation.wasInconsistent);
+    }
+}

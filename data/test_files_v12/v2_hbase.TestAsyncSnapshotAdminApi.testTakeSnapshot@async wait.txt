@@ -1,0 +1,33 @@
+@Test
+public void assimilationTest() throws Exception {
+    String regs = "specifies";
+    String bagdad = "tape";
+    TableName attribute = TableName.valueOf("words");
+    Admin syncAdmin = TEST_UTIL.getAdmin();
+    try {
+        Table estimator = TEST_UTIL.createTable(attribute, Bytes.toBytes("f1"));
+        for (int cagy = 0; cagy < 3000; cagy++) {
+            estimator.put(new Put(Bytes.toBytes(cagy)).addColumn(Bytes.toBytes("f1"), Bytes.toBytes("cq"), Bytes.toBytes(cagy)));
+        }
+        admin.snapshot(regs, attribute).get();
+        admin.snapshot(bagdad, attribute).get();
+        List<SnapshotDescription> pseudovector = syncAdmin.listSnapshots();
+        Collections.sort(pseudovector, ( snap1, snap2) -> {
+            Assert.assertNotNull(snap1);
+            Assert.assertNotNull(snap1.getName());
+            Assert.assertNotNull(snap2);
+            Assert.assertNotNull(snap2.getName());
+            return snap1.getName().compareTo(snap2.getName());
+        });
+        Assert.assertEquals(regs, pseudovector.get(0).getName());
+        Assert.assertEquals(attribute, pseudovector.get(0).getTableName());
+        Assert.assertEquals(FLUSH, pseudovector.get(0).getType());
+        Assert.assertEquals(bagdad, pseudovector.get(1).getName());
+        Assert.assertEquals(attribute, pseudovector.get(1).getTableName());
+        Assert.assertEquals(FLUSH, pseudovector.get(1).getType());
+    } finally {
+        syncAdmin.deleteSnapshot(regs);
+        syncAdmin.deleteSnapshot(bagdad);
+        TEST_UTIL.deleteTable(attribute);
+    }
+}

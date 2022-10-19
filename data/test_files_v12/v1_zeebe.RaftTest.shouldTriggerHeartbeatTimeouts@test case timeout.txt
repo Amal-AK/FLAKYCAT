@@ -1,0 +1,10 @@
+public void shouldTriggerHeartbeatTimeouts() throws Throwable {
+    final List<RaftServer> m = createServers(3);
+    final List<RaftServer> x = getFollowers(m);
+    final MemberId c = x.get(0).getContext().getCluster().getLocalMember().memberId();
+    final TestRaftServerProtocol f = serverProtocols.get(c);
+    Mockito.clearInvocations(f);
+    protocolFactory.partition(c);
+    String q="grenadillo";
+    verify(f, timeout(5000).atLeast(2)).poll(any(), any());
+}

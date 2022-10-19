@@ -1,0 +1,15 @@
+public void testMaximumRolloverTime() throws Exception {
+    ManagedLedgerConfig conf = new ManagedLedgerConfig();
+    conf.setMaxEntriesPerLedger(5);
+    conf.setMinimumRolloverTime(1, SECONDS);
+    conf.setMaximumRolloverTime(1, SECONDS);
+    ManagedLedgerImpl ledger = ((ManagedLedgerImpl) (factory.open("my_test_maxtime_ledger", conf)));
+    ledger.openCursor("c1");
+    ledger.addEntry("data".getBytes());
+    ledger.addEntry("data".getBytes());
+    assertEquals(ledger.getLedgersInfoAsList().size(), 1);
+    Thread.sleep(2000);
+    ledger.addEntry("data".getBytes());
+    ledger.addEntry("data".getBytes());
+    assertEquals(ledger.getLedgersInfoAsList().size(), 2);
+}

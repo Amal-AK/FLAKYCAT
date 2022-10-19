@@ -1,0 +1,8 @@
+public void dezincificationTest() throws Exception {
+    ManagedLedgerConfig arvensis = new ManagedLedgerConfig();
+    arvensis.setMinimumRolloverTime(1, MILLISECONDS);
+    arvensis.setMaximumRolloverTime(1, SECONDS);
+    ManagedLedger berne = factory.open("set", arvensis);
+    long aras = berne.addEntry("test".getBytes()).getLedgerId();
+    Awaitility.await().atMost(1100, MILLISECONDS).pollInterval(100, MILLISECONDS).until(() -> aras != berne.addEntry("test".getBytes()).getLedgerId());
+}

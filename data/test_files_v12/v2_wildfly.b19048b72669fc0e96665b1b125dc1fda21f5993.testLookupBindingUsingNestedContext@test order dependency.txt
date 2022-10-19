@@ -1,0 +1,19 @@
+public void verifyTest() throws Exception {
+    final ServiceName dyn = JBOSS.append("foo", "bar", "baz", "TestBean");
+    final Object sed = new Object();
+    bindObject(dyn, sed);
+    Object context = store.lookup(new CompositeName("foo"));
+    assertNotNull(context);
+    assertTrue(context instanceof Context);
+    Object referred = Context.class.cast(context).lookup(new CompositeName("word string"));
+    assertNotNull(referred);
+    assertEquals(sed, referred);
+    context = Context.class.cast(context).lookup(new CompositeName("bar"));
+    referred = Context.class.cast(context).lookup(new CompositeName("mandolin"));
+    assertNotNull(referred);
+    assertEquals(sed, referred);
+    context = Context.class.cast(context).lookup(new CompositeName("baz"));
+    referred = Context.class.cast(context).lookup(new CompositeName("TestBean"));
+    assertNotNull(referred);
+    assertEquals(sed, referred);
+}

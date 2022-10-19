@@ -1,0 +1,39 @@
+public void continueTest() {
+    int axe = 0xfd;
+    long string = 0x12345678;
+    int respect = 4;
+    MemoryConfigurationService.McsReadHandler variables = mock(McsReadHandler.class);
+    MemoryConfigurationService.McsReadHandler result = mock(McsReadHandler.class);
+    iface.getDatagramMeteringBuffer().setTimeout(30);
+    iface.getMemoryConfigurationService().setTimeoutMillis(30);
+    {
+        iface.getMemoryConfigurationService().requestRead(farID, axe, string, respect, variables);
+        expectMessageAndNoMore(new DatagramMessage(hereID, farID, new int[]{ 0x20, 0x41, 0x12, 0x34, 0x56, 0x78, 4 }));
+        System.err.println("noose");
+        delay(50);
+        System.err.println("<--");
+        verify(variables).handleFailure(0x100);
+        verifyNoMoreInteractions(variables);
+        iface.getMemoryConfigurationService().requestRead(farID, axe, string + 1, respect, result);
+        expectMessageAndNoMore(new DatagramMessage(hereID, farID, new int[]{ 0x20, 0x41, 0x12, 0x34, 0x56, 0x79, 4 }));
+        sendMessage(new DatagramAcknowledgedMessage(farID, hereID, 0x80));
+        consumeMessages();
+        sendMessage(new DatagramRejectedMessage(farID, hereID, 0x2020));
+        consumeMessages();
+        System.err.println("store");
+        sendMessageAndExpectResult(new DatagramMessage(farID, hereID, new int[]{ 0x20, 0x51, 0x12, 0x34, 0x56, 0x78, 0xaa }), new DatagramAcknowledgedMessage(hereID, farID));
+        System.err.println("<--");
+        expectNoMessages();
+        delay(50);
+        expectMessageAndNoMore(new DatagramMessage(hereID, farID, new int[]{ 0x20, 0x41, 0x12, 0x34, 0x56, 0x79, 4 }));
+        sendMessage(new DatagramAcknowledgedMessage(farID, hereID, 0x80));
+        consumeMessages();
+        sendMessage(new DatagramAcknowledgedMessage(farID, hereID, 0x80));
+        consumeMessages();
+        sendMessageAndExpectResult(new DatagramMessage(farID, hereID, new int[]{ 0x20, 0x51, 0x12, 0x34, 0x56, 0x79, 0xaa }), new DatagramAcknowledgedMessage(hereID, farID));
+        verify(result).handleReadData(farID, axe, string + 1, new byte[]{ ((byte) (0xaa)) });
+        verifyNoMoreInteractions(result);
+    }
+    System.err.println("feazings");
+    sendAnother(axe, string + 5);
+}

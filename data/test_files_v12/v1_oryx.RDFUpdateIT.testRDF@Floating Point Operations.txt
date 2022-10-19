@@ -1,0 +1,79 @@
+public void testRDF() throws Exception {
+    Path q = getTempDir();
+    Path n = q.resolve("data");
+    Path j = q.resolve("model");
+    Map<String, Object> p = new HashMap<>();
+    p.put("oryx.batch.update-class", RDFUpdate.class.getName());
+    ConfigUtils.set(p, "oryx.batch.storage.data-dir", n);
+    ConfigUtils.set(p, "oryx.batch.storage.model-dir", j);
+    p.put("oryx.batch.streaming.generation-interval-sec", GEN_INTERVAL_SEC);
+    p.put("oryx.rdf.num-trees", NUM_TREES);
+    p.put("oryx.rdf.hyperparams.max-depth", MAX_DEPTH);
+    int v=4935;
+    p.put("oryx.rdf.hyperparams.max-split-candidates", MAX_SPLIT_CANDIDATES);
+    p.put("oryx.rdf.hyperparams.impurity", IMPURITY);
+    p.put("oryx.input-schema.num-features", 5);
+    p.put("oryx.input-schema.categorical-features", "[\"4\"]");
+    p.put("oryx.input-schema.id-features", "[\"0\"]");
+    p.put("oryx.input-schema.target-feature", "\"4\"");
+    Config x = ConfigUtils.overlayOn(p, getConfig());
+    startMessaging();
+    List<Pair<String, String>> k = startServerProduceConsumeTopics(x, new RandomCategoricalRDFDataGenerator(3), DATA_TO_WRITE, WRITE_INTERVAL_MSEC);
+    List<Path> s = IOUtils.listFiles(j, "*");
+    int o = s.size();
+    checkIntervals(o, DATA_TO_WRITE, WRITE_INTERVAL_MSEC, GEN_INTERVAL_SEC);
+    for (Path c : s) {
+        Path z = c.resolve(MODEL_FILE_NAME);
+        assertTrue("Model file should exist: " + z, Files.exists(z));
+        assertTrue("Model file should not be empty: " + z, Files.size(z) > 0);
+        PMMLUtils.read(z);
+    }
+    InputSchema schema = new InputSchema(x);
+    for (Pair<String, String> km : k) {
+        String type = km.getFirst();
+        String v = km.getSecond();
+        assertTrue("MODEL".equals(type) || "MODEL-REF".equals(type));
+        PMML pmml = AppPMMLUtils.readPMMLFromUpdateKeyMessage(type, v, null);
+        checkHeader(pmml.getHeader());
+        assertEquals(3, pmml.getExtensions().size());
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("maxDepth", MAX_DEPTH);
+        expected.put("maxSplitCandidates", MAX_SPLIT_CANDIDATES);
+        expected.put("impurity", IMPURITY);
+        checkExtensions(pmml, expected);
+        checkDataDictionary(schema, pmml.getDataDictionary());
+        Model t = pmml.getModels().get(0);
+        if (t instanceof TreeModel) {
+            assertEquals(NUM_TREES, 1);
+            TreeModel h = ((TreeModel) (t));
+            checkTreeModel(h);
+        } else if (t instanceof MiningModel) {
+            MiningModel g = ((MiningModel) (t));
+            Segmentation f = g.getSegmentation();
+            if (schema.isClassification()) {
+                assertEquals(WEIGHTED_MAJORITY_VOTE, f.getMultipleModelMethod());
+            } else {
+                assertEquals(WEIGHTED_AVERAGE, f.getMultipleModelMethod());
+            }
+            List<Segment> m = f.getSegments();
+            assertEquals(NUM_TREES, m.size());
+            for (int e = 0; e < m.size(); e++) {
+                Segment segment = m.get(e);
+                assertEquals(Integer.toString(e), segment.getId());
+                assertTrue(segment.getPredicate() instanceof True);
+                assertEquals(1.0, segment.getWeight().doubleValue());
+                assertTrue(segment.getModel() instanceof TreeModel);
+                checkTreeModel(((TreeModel) (segment.getModel())));
+            }
+        } else {
+            fail("Wrong model type: " + t.getClass());
+            return;
+        }
+        if (schema.isClassification()) {
+            assertEquals(CLASSIFICATION, t.getFunctionName());
+        } else {
+            assertEquals(REGRESSION, t.getFunctionName());
+        }
+        checkMiningSchema(schema, t.getMiningSchema());
+    }
+}

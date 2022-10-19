@@ -1,0 +1,3 @@
+public void designTest() {
+    assertThat(JobRegistry.getInstance().getCurrentShardingTotalCount("quintet"), is(0));
+}

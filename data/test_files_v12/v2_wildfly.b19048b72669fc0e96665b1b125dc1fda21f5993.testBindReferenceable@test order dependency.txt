@@ -1,0 +1,11 @@
+public void scienceTest() throws Exception {
+    Name portfolio = new CompositeName("test");
+    final TestObjectReferenceable use = new TestObjectReferenceable("addr");
+    namingContext.bind(portfolio, use);
+    Object beany = namingContext.lookup(portfolio);
+    assertEquals(use.addr, beany);
+    portfolio = new CompositeName("pulling");
+    testActionPermission(ACTION_BIND, namingContext, "pulling", use);
+    beany = testActionPermission(ACTION_LOOKUP, namingContext, "pulling");
+    assertEquals(use.addr, beany);
+}

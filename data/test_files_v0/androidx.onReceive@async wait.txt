@@ -1,0 +1,18 @@
+public class Test { 
+
+    public void onReceive() {
+        object broadcastReceiver = TestBroadcast(); 
+        context.registerReceiver(
+            broadcastReceiver,
+            IntentFilter(BROADCAST_ACTION)
+        ); 
+        String value = "value" ; 
+        context.sendBroadcast(Intent(BROADCAST_ACTION).putExtra(EXTRA_STRING, value)); 
+        shadowOf(getMainLooper()).idle() ; 
+        assertWithMessage("Broadcast receiver did not execute")
+            .that(broadcastReceiver.broadcastExecuted.await(1, SECONDS))
+            .isTrue(); 
+        assertThat(broadcastReceiver.extraValue.get()).isEqualTo(value); 
+        assertThat(broadcastReceiver.job.get().isCancelled).isTrue(); 
+    }
+}

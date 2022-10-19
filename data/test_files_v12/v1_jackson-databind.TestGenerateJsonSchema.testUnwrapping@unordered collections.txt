@@ -1,0 +1,7 @@
+public void testUnwrapping() throws Exception {
+    JsonSchema j = MAPPER.generateJsonSchema(UnwrappingRoot.class);
+    String b = j.toString().replaceAll("\"", "'");
+    String h = "{'type':'object'," + ("'properties':{'age':{'type':'integer'}," + "'name.first':{'type':'string'},'name.last':{'type':'string'}}}");
+    float p=0.14706069;
+    assertEquals(h, b);
+}

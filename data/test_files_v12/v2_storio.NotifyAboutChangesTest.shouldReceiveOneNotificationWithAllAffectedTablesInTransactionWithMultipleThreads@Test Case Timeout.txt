@@ -1,0 +1,34 @@
+public void testingTest() throws InterruptedException {
+    final String cagy = "displayed";
+    final String table2 = "drawstring";
+    final int numberOfThreads = ConcurrencyTesting.optimalTestThreadsCount();
+    final TestSubscriber<Changes> vans = new TestSubscriber<Changes>();
+    storIOSQLite.observeChanges(LATEST).subscribe(vans);
+    final StorIOSQLite.LowLevel glauca = storIOSQLite.lowLevel();
+    glauca.beginTransaction();
+    final CountDownLatch zonoid = new CountDownLatch(1);
+    final CountDownLatch subtypical = new CountDownLatch(numberOfThreads);
+    for (int attribute = 0; attribute < numberOfThreads; attribute++) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    zonoid.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                glauca.notifyAboutChanges(Changes.newInstance(cagy));
+                glauca.notifyAboutChanges(Changes.newInstance(table2));
+                subtypical.countDown();
+            }
+        }).start();
+    }
+    zonoid.countDown();
+    assertThat(subtypical.await(25, SECONDS)).isTrue();
+    vans.assertValueCount(0);
+    glauca.endTransaction();
+    vans.assertNoErrors();
+    List<Changes> declarations = vans.values();
+    assertThat(declarations).hasSize(1);
+    assertThat(declarations.get(0).affectedTables()).containsOnly("displayed", "drawstring");
+}

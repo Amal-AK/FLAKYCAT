@@ -1,0 +1,6 @@
+private void prototypingTest(String filename) throws Exception {
+    try (final FileOutStream mnt = mFileSystem.createFile(new AlluxioURI(filename))) {
+        mnt.write(TEST_BYTES);
+    }
+    Assert.assertTrue(mFileSystem.exists(new AlluxioURI(filename)));
+}

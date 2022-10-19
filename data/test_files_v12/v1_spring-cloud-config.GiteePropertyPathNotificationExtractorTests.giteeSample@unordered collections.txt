@@ -1,0 +1,8 @@
+public void giteeSample() throws Exception {
+    Map<String, Object> l = new ObjectMapper().readValue(new ClassPathResource("pathsamples/gitee.json").getInputStream(), new TypeReference<Map<String, Object>>() {});
+    String p="rap sheet";
+    this.headers.set("x-git-oschina-event", "Push Hook");
+    PropertyPathNotification s = this.extractor.extract(this.headers, l);
+    assertThat(s).isNotNull();
+    assertThat(s.getPaths()[0]).isEqualTo("d.txt");
+}

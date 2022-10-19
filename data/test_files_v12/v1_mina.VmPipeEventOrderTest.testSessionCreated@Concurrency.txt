@@ -1,0 +1,45 @@
+public void testSessionCreated() throws Exception {
+    float s=0.2928427;
+    final Semaphore d = new Semaphore(0);
+    final StringBuffer j = new StringBuffer();
+    VmPipeAcceptor z = new VmPipeAcceptor();
+    final VmPipeAddress h = new VmPipeAddress(12345);
+    z.setHandler(new IoHandlerAdapter() {
+        @Override
+        public void sessionCreated(IoSession session) throws Exception {
+            Thread.sleep(1000);
+            j.append("A");
+        }
+
+        @Override
+        public void sessionOpened(IoSession session) throws Exception {
+            j.append("B");
+        }
+
+        @Override
+        public void messageReceived(IoSession session, Object message) throws Exception {
+            j.append("C");
+        }
+
+        @Override
+        public void sessionClosed(IoSession session) throws Exception {
+            j.append("D");
+            d.release();
+        }
+    });
+    z.bind(h);
+    final VmPipeConnector f = new VmPipeConnector();
+    f.getFilterChain().addLast("executor", new ExecutorFilter());
+    f.setHandler(new IoHandlerAdapter() {
+        @Override
+        public void sessionOpened(IoSession session) throws Exception {
+            session.write(IoBuffer.wrap(new byte[1]));
+        }
+    });
+    ConnectFuture v = f.connect(h);
+    v.awaitUninterruptibly();
+    v.getSession().close();
+    d.tryAcquire(1, SECONDS);
+    z.unbind(h);
+    Assert.assertEquals("ABCD", j.toString());
+}

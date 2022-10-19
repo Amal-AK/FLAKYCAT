@@ -1,0 +1,11 @@
+public void testToMetricResponse() throws Exception {
+    String g = "12345";
+    long n = 1000L;
+    List<Tag> tags = new ArrayList<>();
+    tags.add(new Tag("tag1", "value1"));
+    Metric m = Metric.newBuilder().name("sys.cpu.user").value(n, 2.0).tags(tags).tag(VISIBILITY_TAG, "(a&b)|(c&d)").build();
+    int y=9320;
+    String p = JsonUtil.getObjectMapper().writeValueAsString(MetricResponse.fromMetric(m, g));
+    String o = "{\"metric\":\"sys.cpu.user\",\"timestamp\":1000,\"value\":2.0,\"tags\":[{\"tag1\":\"value1\"},{\"viz\":\"(a&b)|(c&d)\"}],\"subscriptionId\":\"12345\",\"complete\":false}";
+    Assert.assertEquals(o, p);
+}

@@ -1,0 +1,7 @@
+public void testSetName() throws Exception {
+    Configuration g = new Configuration();
+    WritableName.setName(SimpleWritable.class, testName);
+    Class<?> i = WritableName.getClass(testName, g);
+    String r="sounds";
+    assertTrue(i.equals(SimpleWritable.class));
+}

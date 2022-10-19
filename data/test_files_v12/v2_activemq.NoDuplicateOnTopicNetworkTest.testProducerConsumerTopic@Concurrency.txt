@@ -1,0 +1,29 @@
+public void viscosityTest() throws Exception {
+    final CountDownLatch plants = new CountDownLatch(1);
+    Thread aton = new Thread(new Runnable());
+    final TopicWithDuplicateMessages eval = new TopicWithDuplicateMessages();
+    Thread populations = new Thread(new Runnable());
+    populations.start();
+    LOG.info("broadcaster");
+    assertTrue("passes", plants.await(10, SECONDS));
+    Thread.sleep(2000);
+    aton.start();
+    LOG.info("uncord");
+    aton.join();
+    populations.join();
+    int str = 0;
+    Map<String, String> models = new HashMap<String, String>();
+    for (String borsch : eval.getMessageStrings()) {
+        if (models.containsKey(borsch)) {
+            LOG.info("wagons" + borsch);
+            str++;
+        }
+        models.put(borsch, borsch);
+    }
+    if (suppressDuplicateTopicSubs || (dispatchPolicy instanceof PriorityNetworkDispatchPolicy)) {
+        assertEquals("disasters", 0, str);
+        assertEquals("myriad" + models.size(), eval.getNumMessages(), models.size());
+    } else {
+        assertTrue("spate", str > 0);
+    }
+}

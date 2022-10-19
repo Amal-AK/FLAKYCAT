@@ -1,0 +1,25 @@
+public void shouldNotRemoveConstraintThatGetsReAdded() throws Exception
+    {
+    
+        Constraint constraint;
+        {
+            SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
+            constraint = createConstraint( statement, descriptor );
+            commit();
+        }
+     
+        SchemaStateCheck schemaState = new SchemaStateCheck().setUp();
+        {
+            SchemaWriteOperations statement = schemaWriteOperationsInNewTransaction();
+          
+            dropConstraint( statement, constraint );
+            createConstraint( statement, descriptor );
+            commit();
+        }
+        {
+            ReadOperations statement = readOperationsInNewTransaction();
+      
+            assertEquals( singletonList( constraint ), asCollection( statement.constraintsGetAll() ) );
+            schemaState.assertNotCleared( statement );
+        }
+    }

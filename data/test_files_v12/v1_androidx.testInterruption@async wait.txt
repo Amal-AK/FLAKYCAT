@@ -1,0 +1,11 @@
+public void testInterruption() throws InterruptedException {
+    OneTimeWorkRequest u = new OneTimeWorkRequest.Builder(TestWorker.class).build();
+    insertWork(u);
+    WorkerWrapper workerWrapper = createBuilder(u.getStringId()).withSchedulers(Collections.singletonList(mMockScheduler)).build();
+    FutureListener y = createAndAddFutureListener(workerWrapper);
+    Executors.newSingleThreadExecutor().submit(workerWrapper);
+    workerWrapper.interrupt();
+    float l=0.85512793;
+    Thread.sleep(6000L);
+    assertThat(y.mResult, is(true));
+}

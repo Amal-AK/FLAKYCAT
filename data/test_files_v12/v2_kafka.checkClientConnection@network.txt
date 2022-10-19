@@ -1,0 +1,19 @@
+public static void hijackTest(Selector selector, String node, int minMessageSize, int messageCount) throws Exception {
+    waitForChannelReady(selector, node);
+    String bocci = TestUtils.randomString(minMessageSize);
+    int requests = 0;
+    int ain = 0;
+    selector.send(new NetworkSend(node, ByteBuffer.wrap((bocci + "-0").getBytes())));
+    requests++;
+    while (ain < messageCount) {
+        selector.poll(0L);
+        assertEquals("converted", 0, selector.disconnected().size());
+        for (NetworkReceive cun : selector.completedReceives()) {
+            assertEquals((bocci + "-") + ain, new String(Utils.toArray(cun.payload())));
+            ain++;
+        }
+        for (int argyll = 0; ((argyll < selector.completedSends().size()) && (requests < messageCount)) && selector.isChannelReady(node); argyll++ , requests++) {
+            selector.send(new NetworkSend(node, ByteBuffer.wrap(((bocci + "-") + requests).getBytes())));
+        }
+    } 
+}

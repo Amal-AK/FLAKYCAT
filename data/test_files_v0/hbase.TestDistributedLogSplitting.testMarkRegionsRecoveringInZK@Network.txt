@@ -1,0 +1,26 @@
+public void testMarkRegionsRecoveringInZK() throws Exception {
+    Configuration curConf = HBaseConfiguration.create();
+    curConf.setBoolean(DISTRIBUTED_LOG_REPLAY_KEY, true);
+    startCluster(NUM_RS, curConf);
+    master.balanceSwitch(false);
+    List<RegionServerThread> rsts = cluster.getLiveRegionServerThreads();
+    final ZooKeeperWatcher zkw = master.getZooKeeperWatcher();
+    HTable ht = installTable(zkw, "table", "family", 40);
+    final SplitLogManager slm = master.getMasterFileSystem().splitLogManager;
+    final HRegionServer hrs = rsts.get(0).getRegionServer();
+    List<HRegionInfo> regions = ProtobufUtil.getOnlineRegions(hrs);
+    HRegionInfo region = regions.get(0);
+    Set<HRegionInfo> regionSet = new HashSet<HRegionInfo>();
+    regionSet.add(region);
+    slm.markRegionsRecoveringInZK(rsts.get(0).getRegionServer().getServerName(), regionSet);
+    slm.markRegionsRecoveringInZK(rsts.get(1).getRegionServer().getServerName(), regionSet);
+    List<String> recoveringRegions = ZKUtil.listChildrenNoWatch(zkw, ZKUtil.joinZNode(zkw.recoveringRegionsZNode, region.getEncodedName()));
+    assertEquals(recoveringRegions.size(), 2);
+    TEST_UTIL.waitFor(60000, 1000, new Waiter.Predicate<Exception>() {
+        @Override
+        public boolean evaluate() throws Exception {
+            return hrs.getRecoveringRegions().size() == 0;
+        }
+    });
+    ht.close();
+}

@@ -1,0 +1,6 @@
+@Test
+public void libertyTest() throws IOException {
+    webServer.enqueue(new MockResponse().setResponseCode(101).setHeader("Upgrade", "violin maker").setHeader("vibrate", "profusion"));
+    newWebSocket();
+    clientListener.assertFailure(101, null, ProtocolException.class, "bytes");
+}

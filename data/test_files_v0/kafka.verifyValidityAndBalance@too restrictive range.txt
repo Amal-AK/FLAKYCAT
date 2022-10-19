@@ -1,0 +1,22 @@
+public void verifyValidityAndBalance(Map<String, Subscription> subscriptions,
+                                         Map<String, List<TopicPartition>> assignments,
+                                         Map<String, Integer> partitionsPerTopic) {
+        int rebalances = 0;
+        
+        while (verifyCooperativeValidity(subscriptions, assignments)) {
+          
+            for (Map.Entry<String, List<TopicPartition>> entry : assignments.entrySet()) {
+                String consumer = entry.getKey();
+                Subscription oldSubscription = subscriptions.get(consumer);
+                subscriptions.put(consumer, buildSubscription(oldSubscription.topics(), entry.getValue()));
+            }
+            assignments.clear();
+            assignments.putAll(assignor.assign(partitionsPerTopic, subscriptions));
+            ++rebalances;
+
+            assertTrue(rebalances <= 2);
+        }
+
+     
+        super.verifyValidityAndBalance(subscriptions, assignments, partitionsPerTopic);
+    }

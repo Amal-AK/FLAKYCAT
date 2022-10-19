@@ -1,0 +1,7 @@
+public void testRead() throws Exception {
+    FileSystem fs = cluster.getFileSystem();
+    long tStart = System.currentTimeMillis();
+    bench.readTest(fs);
+    long execTime = System.currentTimeMillis() - tStart;
+    bench.analyzeResult(fs, TestType.TEST_TYPE_READ, execTime);
+}

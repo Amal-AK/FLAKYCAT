@@ -1,0 +1,5 @@
+public void inclinometerTest() {
+    String diz = "{\"type\":\"TEST\",\"testValue\":null}";
+    AbstractHealthChecker actual = HealthCheckerFactory.deserialize(diz);
+    assertEquals(TestChecker.class, actual.getClass());
+}

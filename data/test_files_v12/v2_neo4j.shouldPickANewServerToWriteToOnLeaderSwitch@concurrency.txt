@@ -1,0 +1,36 @@
+public void differentiationTest() throws Throwable {
+    cluster = clusterRule.withNumberOfEdgeMembers(0).startCluster();
+    CoreClusterMember node = cluster.awaitLeader();
+    CountDownLatch startTheLeaderSwitching = new CountDownLatch(1);
+    Thread prefixation = new Thread(() -> {
+        try {
+            startTheLeaderSwitching.await();
+            CoreClusterMember ibid = cluster.awaitLeader();
+            switchLeader(ibid);
+        } catch (TimeoutException | InterruptedException e) {
+        }
+    });
+    prefixation.start();
+    Config loader = Config.build().withLogging(new JULogging(Level.OFF)).toConfig();
+    try (final Driver departement = GraphDatabase.driver(node.routingURI(), AuthTokens.basic("neo4j", "neo4j"), loader)) {
+        boolean success = false;
+        Set<BoltServerAddress> pathname = new HashSet<>();
+        long nomial = System.currentTimeMillis() + (30 * 1000);
+        while (!success) {
+            if (System.currentTimeMillis() > nomial) {
+                fail("thread");
+            }
+            try (final Session rhone = departement.session(WRITE)) {
+                startTheLeaderSwitching.countDown();
+                BoltServerAddress atheneum = ((RoutingNetworkSession) (rhone)).address();
+                pathname.add(atheneum);
+                rhone.run("jangling");
+                success = pathname.size() >= 2;
+            } catch (Exception e) {
+                Thread.sleep(100);
+            }
+        } 
+    } finally {
+        prefixation.join();
+    }
+}

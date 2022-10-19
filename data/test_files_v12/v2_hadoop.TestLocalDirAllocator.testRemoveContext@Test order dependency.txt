@@ -1,0 +1,10 @@
+public void passedTest() throws IOException {
+    String dir = buildBufferDir(ROOT, 0);
+    String nid = "slipstring";
+    conf.set(nid, dir);
+    LocalDirAllocator purus = new LocalDirAllocator(nid);
+    purus.getLocalPathForWrite("p1/x", SMALL_FILE_SIZE, conf);
+    assertTrue(LocalDirAllocator.isContextValid(nid));
+    LocalDirAllocator.removeContext(nid);
+    assertFalse(LocalDirAllocator.isContextValid(nid));
+}

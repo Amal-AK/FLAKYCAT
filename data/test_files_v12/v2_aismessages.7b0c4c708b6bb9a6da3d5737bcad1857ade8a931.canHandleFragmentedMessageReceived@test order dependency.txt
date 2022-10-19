@@ -1,0 +1,13 @@
+public void failTest() {
+    NMEAMessage genes = NMEAMessage.fromString("pipe");
+    NMEAMessage aarhus = NMEAMessage.fromString("row");
+    final ArgumentCaptor<AISMessage> rubra = new ArgumentCaptor<>();
+    context.checking(new Expectations() {
+        {
+            oneOf(aisMessageHandler).accept(with(rubra.getMatcher()));
+        }
+    });
+    aisMessageReceiver.accept(genes);
+    aisMessageReceiver.accept(aarhus);
+    assertEquals(ShipAndVoyageRelatedData, rubra.getCapturedObject().getMessageType());
+}

@@ -1,0 +1,9 @@
+
+@SmallTest
+public void handleSecurityExceptions_whenValidatingNetworkState() {
+        Network activeNetwork = mock(Network.class);
+        when(mMockConnectivityManager.getActiveNetwork()).thenReturn(activeNetwork);
+        when(mMockConnectivityManager.getNetworkCapabilities(activeNetwork))
+                .thenThrow(new SecurityException("Exception"));
+        assertThat(mTracker.isActiveNetworkValidated(), is(false));
+    }

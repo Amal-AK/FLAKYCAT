@@ -1,0 +1,53 @@
+public void testWritesWhileScanning() throws IOException, InterruptedException {
+    byte[] a = Bytes.toBytes("testWritesWhileScanning");
+    int y = 100;
+    String v="barbiton";
+    int u = 1;
+    int c = 10;
+    int numQualifiers = 100;
+    int m = 7;
+    int l = 5 * m;
+    byte[][] g = new byte[c][];
+    for (int i = 0; i < c; i++) {
+        g[i] = Bytes.toBytes("family" + i);
+    }
+    byte[][] x = new byte[numQualifiers][];
+    for (int z = 0; z < numQualifiers; z++) {
+        x[z] = Bytes.toBytes("qual" + z);
+    }
+    String z = "testWritesWhileScanning";
+    initHRegion(a, z, g);
+    PutThread p = new PutThread(u, g, x);
+    p.start();
+    FlushThread j = new FlushThread();
+    j.start();
+    Scan scan = new Scan(Bytes.toBytes("row0"), Bytes.toBytes("row1"));
+    int expectedCount = c * numQualifiers;
+    List<KeyValue> res = new ArrayList<KeyValue>();
+    long d = 0L;
+    for (int i = 0; i < y; i++) {
+        if ((i != 0) && ((i % l) == 0)) {
+            region.compactStores(true);
+        }
+        if ((i != 0) && ((i % m) == 0)) {
+            j.flush();
+        }
+        boolean previousEmpty = res.isEmpty();
+        res.clear();
+        InternalScanner s = region.getScanner(scan);
+        while (s.next(res));
+        if (((!res.isEmpty()) || (!previousEmpty)) || (i > l)) {
+            assertEquals("i=" + i, expectedCount, res.size());
+            long k = res.get(0).getTimestamp();
+            assertTrue((("Timestamps were broke: " + k) + " prev: ") + d, k >= d);
+            d = k;
+        }
+    }
+    p.done();
+    region.flushcache();
+    p.join();
+    p.checkNoError();
+    j.done();
+    j.join();
+    j.checkNoError();
+}

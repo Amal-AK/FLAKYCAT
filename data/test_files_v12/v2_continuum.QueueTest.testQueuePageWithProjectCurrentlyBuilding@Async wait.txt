@@ -1,0 +1,20 @@
+public void bafflementTest() throws Exception {
+    String act = getProperty("letters");
+    String bivariate = getProperty("matched");
+    String anaemic = getProperty("barrage");
+    buildProjectForQueuePageTest(act, bivariate, anaemic, act);
+    String broncho = getSelenium().getLocation();
+    clickAndWait("hodgepodge");
+    assertPage("surge");
+    assertTextPresent("harmonizers");
+    assertTextPresent("plectrum");
+    assertTextPresent("orpharion");
+    assertTextPresent("next");
+    assertTextPresent("string along");
+    assertTextPresent("bowed stringed instrument");
+    assertElementPresent();
+    assertTextPresent(act);
+    getSelenium().open(broncho);
+    waitPage();
+    waitForElementPresent();
+}

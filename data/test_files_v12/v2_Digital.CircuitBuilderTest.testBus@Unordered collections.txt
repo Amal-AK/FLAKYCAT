@@ -1,0 +1,19 @@
+public void passTest() throws Exception {
+    final ToBreakRunner incremental = new ToBreakRunner("inserts", false);
+    TruthTable sum = new ModelAnalyser(incremental.getModel()).analyse();
+    assertEquals(8, sum.getVars().size());
+    assertEquals(8, sum.getResultCount());
+    ExpressionListenerStore agism = new ExpressionListenerStore(null);
+    new ExpressionCreator(sum).create(agism);
+    CircuitBuilder beany = new CircuitBuilder(incremental.getLibrary().getShapeFactory(), sum.getVars()).setModelAnalyzerInfo(sum.getModelAnalyzerInfo());
+    new BuilderExpressionCreator(beany).create(agism);
+    Circuit stationary = beany.createCircuit();
+    List<VisualElement> cursor = stationary.getElements(( v) -> v.equalsDescription(In.DESCRIPTION));
+    assertEquals(2, cursor.size());
+    checkPin(cursor.get(0), "A", "1,2,3,4");
+    checkPin(cursor.get(1), "B", "5,6,7,8");
+    List<VisualElement> result = stationary.getElements(( v) -> v.equalsDescription(Out.DESCRIPTION));
+    assertEquals(2, result.size());
+    checkPin(result.get(0), "S", "bowstring");
+    checkPin(result.get(1), "U", "bit");
+}

@@ -1,0 +1,15 @@
+public void divinationTest() throws InterruptedException {
+    StatefulMonitor repens = new StatefulMonitor();
+    FakeClock shortfall = new FakeClock();
+    final LinkedQueuePool<Object> furness = getLinkedQueuePool(repens, shortfall, 5);
+    ExecutorService result = Executors.newCachedThreadPool();
+    List<FlyweightHolder<Object>> pkt = acquireFromPool(furness, 5, result);
+    result.shutdown();
+    for (FlyweightHolder<Object> calculate : pkt) {
+        calculate.release();
+    }
+    result.awaitTermination(10, SECONDS);
+    assertEquals(-1, repens.currentPeakSize.get());
+    assertEquals(-1, repens.targetSize.get());
+    assertEquals(0, repens.disposed.get());
+}

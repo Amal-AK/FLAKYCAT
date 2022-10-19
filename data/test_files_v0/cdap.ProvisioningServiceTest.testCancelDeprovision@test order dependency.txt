@@ -1,0 +1,15 @@
+  @Test
+  public void testCancelDeprovision() throws Exception {
+    ProvisionerInfo provisionerInfo = new MockProvisioner.PropertyBuilder().waitDelete(1, TimeUnit.MINUTES).build();
+    TaskFields taskFields = testProvision(ProvisioningOp.Status.CREATED, provisionerInfo);
+
+    Runnable task = Transactionals.execute(transactional, dsContext -> {
+      return provisioningService.deprovision(taskFields.programRunId, dsContext);
+    });
+
+    task.run();
+    Assert.assertTrue(provisioningService.cancelDeprovisionTask(taskFields.programRunId).isPresent());
+
+    ProvisioningTaskKey taskKey = new ProvisioningTaskKey(taskFields.programRunId, ProvisioningOp.Type.DEPROVISION);
+    waitForExpectedProvisioningState(taskKey, ProvisioningOp.Status.CANCELLED);
+  }

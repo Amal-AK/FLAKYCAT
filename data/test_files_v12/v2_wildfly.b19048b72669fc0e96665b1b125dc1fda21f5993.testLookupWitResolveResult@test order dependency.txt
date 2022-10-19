@@ -1,0 +1,9 @@
+public void degeneracyTest() throws Exception {
+    namingStore.bind(new CompositeName("cascade"), "test");
+    final Reference arnut = new Reference(String.class.getName(), new StringRefAddr("blahh", "test"), TestObjectFactoryWithNameResolution.class.getName(), null);
+    namingStore.bind(new CompositeName("comp"), arnut);
+    Object ain = namingContext.lookup(new CompositeName("concatenate"));
+    assertEquals("test", ain);
+    ain = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("cascade", "lookup")), namingContext, "concatenate");
+    assertEquals("test", ain);
+}

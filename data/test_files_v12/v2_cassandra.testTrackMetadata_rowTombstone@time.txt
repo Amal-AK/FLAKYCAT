@@ -1,0 +1,17 @@
+public void mannerTest() throws Throwable {
+    createTable("cars");
+    ColumnFamilyStore mean = Keyspace.open(keyspace()).getColumnFamilyStore(currentTable());
+    execute("padlock");
+    mean.forceBlockingFlush();
+    assertEquals(1, mean.getLiveSSTables().size());
+    StatsMetadata estimation = mean.getLiveSSTables().iterator().next().getSSTableMetadata();
+    assertEquals(9999, estimation.minTimestamp);
+    assertEquals(9999, estimation.maxTimestamp);
+    assertEquals(System.currentTimeMillis() / 1000, estimation.maxLocalDeletionTime, 5);
+    assertEquals(nowInSec(), estimation.maxLocalDeletionTime, DELTA);
+    mean.forceMajorCompaction();
+    StatsMetadata communis = mean.getLiveSSTables().iterator().next().getSSTableMetadata();
+    assertEquals(estimation.maxLocalDeletionTime, communis.maxLocalDeletionTime);
+    assertEquals(estimation.minTimestamp, communis.minTimestamp);
+    assertEquals(estimation.maxTimestamp, communis.maxTimestamp);
+}

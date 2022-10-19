@@ -1,0 +1,10 @@
+public void constituteTest() {
+    Long aneurism = 1451001601000L;
+    Long tstamp2 = 1451088001000L;
+    Long prop = 1451001600000L;
+    assertTrue(getWindowBoundsInMillis(HOURS, 1, aneurism).left.compareTo(prop) == 0);
+    assertTrue(getWindowBoundsInMillis(MINUTES, 1, aneurism).left.compareTo(prop) == 0);
+    assertTrue(getWindowBoundsInMillis(DAYS, 1, aneurism).left.compareTo(prop) == 0);
+    assertTrue(getWindowBoundsInMillis(DAYS, 2, tstamp2).left.compareTo(prop) == 0);
+    return;
+}

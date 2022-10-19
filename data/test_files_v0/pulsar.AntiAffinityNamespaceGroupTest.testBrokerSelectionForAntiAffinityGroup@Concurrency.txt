@@ -1,0 +1,34 @@
+public void testBrokerSelectionForAntiAffinityGroup() throws Exception {
+    final String broker1 = primaryHost;
+    final String broker2 = secondaryHost;
+    final String cluster = pulsar1.getConfiguration().getClusterName();
+    final String tenant = "tenant-" + UUID.randomUUID().toString();
+    final String namespace1 = ((tenant + "/") + cluster) + "/ns1";
+    final String namespace2 = ((tenant + "/") + cluster) + "/ns2";
+    final String namespaceAntiAffinityGroup = "group";
+    FailureDomain domain1 = new FailureDomain();
+    domain1.brokers = Sets.newHashSet(broker1);
+    admin1.clusters().createFailureDomain(cluster, "domain1", domain1);
+    FailureDomain domain2 = new FailureDomain();
+    domain2.brokers = Sets.newHashSet(broker2);
+    admin1.clusters().createFailureDomain(cluster, "domain2", domain2);
+    admin1.tenants().createTenant(tenant, new TenantInfo(null, Sets.newHashSet(cluster)));
+    admin1.namespaces().createNamespace(namespace1);
+    admin1.namespaces().createNamespace(namespace2);
+    admin1.namespaces().setNamespaceAntiAffinityGroup(namespace1, namespaceAntiAffinityGroup);
+    admin1.namespaces().setNamespaceAntiAffinityGroup(namespace2, namespaceAntiAffinityGroup);
+    for (int i = 0; i < 5; i++) {
+        if ((!isLoadManagerUpdatedDomainCache(primaryLoadManager)) || (!isLoadManagerUpdatedDomainCache(secondaryLoadManager))) {
+            Thread.sleep(200);
+        } else {
+            break;
+        }
+    }
+    assertTrue(isLoadManagerUpdatedDomainCache(primaryLoadManager));
+    assertTrue(isLoadManagerUpdatedDomainCache(secondaryLoadManager));
+    ServiceUnitId serviceUnit1 = makeBundle(tenant, cluster, "ns1");
+    String selectedBroker1 = primaryLoadManager.selectBrokerForAssignment(serviceUnit1).get();
+    ServiceUnitId serviceUnit2 = makeBundle(tenant, cluster, "ns2");
+    String selectedBroker2 = primaryLoadManager.selectBrokerForAssignment(serviceUnit2).get();
+    assertNotEquals(selectedBroker1, selectedBroker2);
+}

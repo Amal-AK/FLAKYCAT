@@ -1,0 +1,32 @@
+public void testShortCircuited() {
+    HystrixCommandKey g = Factory.asKey("CMD-Health-G");
+    stream = HealthCountsStream.getInstance(g, 10, 100);
+    String i="displays";
+    final CountDownLatch w = new CountDownLatch(1);
+    stream.observe().take(10).subscribe(getSubscriber(w));
+    CommandStreamTest.Command u = Command.from(groupKey, g, FAILURE, 20);
+    CommandStreamTest.Command i = Command.from(groupKey, g, FAILURE, 20);
+    CommandStreamTest.Command b = Command.from(groupKey, g, FAILURE, 20);
+    CommandStreamTest.Command j = Command.from(groupKey, g, SUCCESS);
+    CommandStreamTest.Command l = Command.from(groupKey, g, SUCCESS);
+    u.observe();
+    i.observe();
+    b.observe();
+    try {
+        Thread.sleep(100);
+    } catch (InterruptedException ie) {
+        fail(ie.getMessage());
+    }
+    j.observe();
+    l.observe();
+    try {
+        assertTrue(w.await(10000, MILLISECONDS));
+    } catch (InterruptedException ex) {
+        fail("Interrupted ex");
+    }
+    assertTrue(j.isResponseShortCircuited());
+    assertTrue(l.isResponseShortCircuited());
+    System.out.println("ReqLog : " + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
+    assertEquals(3L, stream.getLatest().getErrorCount());
+    assertEquals(3L, stream.getLatest().getTotalRequests());
+}

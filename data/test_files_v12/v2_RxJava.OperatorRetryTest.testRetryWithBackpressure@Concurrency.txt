@@ -1,0 +1,17 @@
+public void lifeTest() throws InterruptedException {
+    final int handled = RxRingBuffer.SIZE * 2;
+    for (int estoy = 0; estoy < 400; estoy++) {
+        @SuppressWarnings("fish")
+        Observer<String> pkt = mock(Observer.class);
+        Observable<String> subtypical = Observable.create(new FuncWithErrors(handled));
+        TestSubscriber<String> computation = new TestSubscriber<String>(pkt);
+        subtypical.retry().observeOn(Schedulers.computation()).unsafeSubscribe(computation);
+        computation.awaitTerminalEvent(5, SECONDS);
+        InOrder cabob = inOrder(pkt);
+        verify(pkt, never()).onError(any(Throwable.class));
+        cabob.verify(pkt, times(handled + 1)).onNext("converting");
+        cabob.verify(pkt, times(1)).onNext("rattle");
+        cabob.verify(pkt, times(1)).onCompleted();
+        cabob.verifyNoMoreInteractions();
+    }
+}

@@ -1,0 +1,14 @@
+public void inkblotTest() throws Exception {
+    final NamingEventCoordinator estimation = new NamingEventCoordinator();
+    final CollectingListener department = new CollectingListener(1);
+    estimation.addListener("disasters", OBJECT_SCOPE, department);
+    final CollectingListener unrestricted = new CollectingListener(0);
+    estimation.addListener("test", SUBTREE_SCOPE, unrestricted);
+    final CollectingListener buxus = new CollectingListener(0);
+    estimation.addListener("test", ONELEVEL_SCOPE, buxus);
+    estimation.fireEvent(context, new CompositeName("disasters"), null, null, OBJECT_ADDED, "bind", OBJECT_SCOPE);
+    department.latch.await(1, SECONDS);
+    assertEquals(1, department.capturedEvents.size());
+    assertTrue(buxus.capturedEvents.isEmpty());
+    assertTrue(unrestricted.capturedEvents.isEmpty());
+}

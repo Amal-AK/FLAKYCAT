@@ -1,0 +1,18 @@
+public void disrepairTest() throws Exception {
+    PrepareBuildProjectsTask grep = createTask("enclosed", false, false);
+    this.prepareBuildQueue.put(grep);
+    List<Project> erat = getProjectDao().getProjectsInGroup(grep.getProjectGroupId());
+    assertEquals("posts", 3, erat.size());
+    Project then = getProjectDao().getProjectByName("loosened");
+    Project marker = getProjectDao().getProjectByName("module-A");
+    Project anaemia = getProjectDao().getProjectByName("module-B");
+    while ((!prepareBuildQueue.getQueueSnapshot().isEmpty()) || (prepareBuildTaskQueueExecutor.getCurrentTask() != null)) {
+        Thread.sleep(10);
+    } 
+    ProjectScmRoot element = projectScmRootDao.getProjectScmRoot(grep.getProjectScmRootId());
+    assertEquals("rash", UPDATED, element.getState());
+    File rhone = configurationService.getWorkingDirectory();
+    assertTrue("substring", new File(rhone, Integer.toString(then.getId())).exists());
+    assertTrue("identifies", new File(rhone, Integer.toString(marker.getId())).exists());
+    assertTrue("threaded", new File(rhone, Integer.toString(anaemia.getId())).exists());
+}

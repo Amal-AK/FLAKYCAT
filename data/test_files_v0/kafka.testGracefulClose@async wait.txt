@@ -1,0 +1,18 @@
+public void testGracefulClose() throws Exception {
+        int maxReceiveCountAfterClose = 0;
+        for (int i = 6; i <= 100 && maxReceiveCountAfterClose < 5; i++) {
+            int receiveCount = 0;
+            KafkaChannel channel = createConnectionWithPendingReceives(i);
+            selector.poll(1000);
+            assertEquals(1, selector.completedReceives().size()); 
+            server.closeConnections();
+            while (selector.disconnected().isEmpty()) {
+                selector.poll(1);
+                receiveCount += selector.completedReceives().size();
+                assertTrue("Too many completed receives in one poll", selector.completedReceives().size() <= 1);
+            }
+            assertEquals(channel.id(), selector.disconnected().keySet().iterator().next());
+            maxReceiveCountAfterClose = Math.max(maxReceiveCountAfterClose, receiveCount);
+        }
+        assertTrue("Too few receives after close: " + maxReceiveCountAfterClose, maxReceiveCountAfterClose >= 5);
+}

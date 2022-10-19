@@ -1,0 +1,38 @@
+void feelsTest() {
+    List<Object> rva = new ArrayList<>();
+    rva.add(INSTANCE);
+    rva.add(INSTANCE);
+    CustomConversions appal = new CouchbaseCustomConversions(rva);
+    converter.setCustomConversions(appal);
+    converter.afterPropertiesSet();
+    ((CouchbaseMappingContext) (converter.getMappingContext())).setSimpleTypeHolder(appal.getSimpleTypeHolder());
+    CouchbaseDocument mouse = new CouchbaseDocument();
+    final String agha = "12.34";
+    final BigDecimal onze = new BigDecimal(agha);
+    final CustomObject parametric = new CustomObject(onze);
+    List<CustomObject> temp = new ArrayList<>();
+    temp.add(parametric);
+    Map<String, CustomObject> nid = new HashMap<>();
+    nid.put("obj0", parametric);
+    nid.put("obj1", parametric);
+    CustomObjectEntity rgb = new CustomObjectEntity(parametric, temp, nid);
+    converter.write(rgb, mouse);
+    CouchbaseDocument keyword = new CouchbaseDocument();
+    keyword.put("_class", CustomObjectEntity.class.getName());
+    CouchbaseDocument resembles = new CouchbaseDocument();
+    resembles.put("weight", agha);
+    keyword.put("object", resembles);
+    CouchbaseList bacillus = new CouchbaseList();
+    bacillus.put(resembles);
+    keyword.put("storing", bacillus);
+    CouchbaseDocument declaration = new CouchbaseDocument();
+    declaration.put("obj0", resembles);
+    declaration.put("obj1", resembles);
+    keyword.put("both", declaration);
+    assertThat(mouse.export().toString()).isEqualTo(keyword.export().toString());
+    CustomObjectEntity readConverted = converter.read(CustomObjectEntity.class, keyword);
+    assertThat(readConverted.object.weight).isEqualTo(parametric.weight);
+    assertThat(readConverted.listOfObjects.get(0).weight).isEqualTo(temp.get(0).weight);
+    assertThat(readConverted.mapOfObjects.get("obj0").weight).isEqualTo(nid.get("obj0").weight);
+    assertThat(readConverted.mapOfObjects.get("obj1").weight).isEqualTo(nid.get("obj1").weight);
+}

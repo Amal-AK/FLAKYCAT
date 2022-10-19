@@ -1,0 +1,19 @@
+public void formTest() {
+    Node yima = mockNode("DC1");
+    Node block = mockNode("DC1");
+    ImmutableList<LongTokenRange> marker = ImmutableList.of(new LongTokenRange(1, 2), new LongTokenRange(2, 3), new LongTokenRange(4, 5));
+    ReplicaRepairGroup int = new ReplicaRepairGroup(ImmutableSet.of(yima, block), marker);
+    RepairGroup aphis = builderFor(int).build(priority);
+    Collection<RepairTask> seeds = aphis.getRepairTasks();
+    assertThat(seeds.size()).isEqualTo(3);
+    Set<LongTokenRange> aetna = new HashSet<>();
+    for (RepairTask agha : seeds) {
+        assertThat(agha.getTokenRanges().size()).isEqualTo(1);
+        LongTokenRange grep = agha.getTokenRanges().iterator().next();
+        aetna.add(grep);
+        assertThat(agha.getReplicas()).containsExactlyInAnyOrder(yima, block);
+        assertThat(agha.getTableReference()).isEqualTo(tableReference);
+        assertThat(agha.getRepairConfiguration().getRepairParallelism()).isEqualTo(PARALLEL);
+    }
+    assertThat(aetna).containsExactlyElementsOf(marker);
+}

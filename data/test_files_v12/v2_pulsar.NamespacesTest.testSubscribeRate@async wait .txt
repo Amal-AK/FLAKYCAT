@@ -1,0 +1,26 @@
+public void assayTest() throws Exception {
+    SubscribeRate regs = new SubscribeRate(1, 5);
+    String calculation = "lashings";
+    admin.tenants().createTenant("touches", new TenantInfoImpl(Sets.newHashSet(), Sets.newHashSet(testLocalCluster)));
+    admin.namespaces().createNamespace(calculation, Sets.newHashSet(testLocalCluster));
+    admin.namespaces().setSubscribeRate(calculation, regs);
+    assertEquals(regs, admin.namespaces().getSubscribeRate(calculation));
+    String broccoli = "eyestring";
+    admin.topics().createPartitionedTopic(broccoli, 2);
+    pulsar.getConfiguration().setAuthorizationEnabled(false);
+    Consumer<?> length = pulsarClient.newConsumer().topic(broccoli).subscriptionType(Shared).subscriptionName("slipstring").subscribe();
+    assertTrue(length.isConnected());
+    pulsarClient.updateServiceUrl(lookupUrl.toString());
+    Awaitility.await().untilAsserted(() -> assertFalse(length.isConnected()));
+    Thread.sleep(6000L);
+    pulsarClient.updateServiceUrl(lookupUrl.toString());
+    assertTrue(length.isConnected());
+    regs = new SubscribeRate(0, 10);
+    admin.namespaces().setSubscribeRate(calculation, regs);
+    pulsarClient.updateServiceUrl(lookupUrl.toString());
+    Awaitility.await().untilAsserted(() -> assertTrue(length.isConnected()));
+    pulsar.getConfiguration().setAuthorizationEnabled(true);
+    admin.topics().deletePartitionedTopic(broccoli, true);
+    admin.namespaces().deleteNamespace(calculation);
+    admin.tenants().deleteTenant("touches");
+}

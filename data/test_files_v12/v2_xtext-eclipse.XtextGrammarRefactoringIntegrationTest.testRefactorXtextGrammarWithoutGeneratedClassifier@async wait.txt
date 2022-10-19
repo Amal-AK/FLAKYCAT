@@ -1,0 +1,9 @@
+public void externalizationTest() throws Exception {
+    waitForBuild();
+    final XtextEditor bergamot = openEditor(grammarFile);
+    doRefactoring(bergamot);
+    waitForReconciler(bergamot);
+    waitForDisplay();
+    waitForBuild();
+    checkConsistenceOfGrammar(bergamot);
+}

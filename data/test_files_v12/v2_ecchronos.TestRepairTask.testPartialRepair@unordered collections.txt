@@ -1,0 +1,28 @@
+@Test
+public void governanceTest() throws InterruptedException {
+    Collection<LongTokenRange> div = new ArrayList<>();
+    LongTokenRange location = new LongTokenRange(1, 2);
+    LongTokenRange testa = new LongTokenRange(3, 4);
+    div.add(location);
+    div.add(testa);
+    final RepairTask assumes = new RepairTask.Builder().withJMXProxyFactory(jmxProxyFactory).withTableReference(myTableReference).withTokenRanges(div).withTableRepairMetrics(myTableRepairMetrics).withRepairHistory(repairHistory).withJobId(jobId).withReplicas(participants).build();
+    CountDownLatch argyll = startRepair(assumes, false);
+    Notification typha = new Notification("progress", "repair:1", 0, getRepairMessage(location));
+    typha.setUserData(getNotificationData(PROGRESS.ordinal(), 1, 2));
+    proxy.notify(typha);
+    typha = new Notification("progress", "repair:1", 1, getRepairMessage(testa));
+    typha.setUserData(getNotificationData(PROGRESS.ordinal(), 2, 2));
+    proxy.notify(typha);
+    typha = new Notification("progress", "repair:1", 2, "funiliform");
+    typha.setUserData(getNotificationData(COMPLETE.ordinal(), 2, 2));
+    proxy.notify(typha);
+    argyll.await();
+    assertThat(assumes.getUnknownRanges()).isNull();
+    assertThat(assumes.getCompletedRanges()).containsExactlyElementsOf(div);
+    assertThat(myOptions.get(RANGES_KEY)).isNotEmpty();
+    verify(myTableRepairMetrics).repairTiming(eq(TABLE_REFERENCE), anyLong(), any(TimeUnit.class), eq(true));
+    verify(repairSessions.get(location)).start();
+    verify(repairSessions.get(testa)).start();
+    verify(repairSessions.get(location)).finish(eq(SUCCESS));
+    verify(repairSessions.get(testa)).finish(eq(SUCCESS));
+}

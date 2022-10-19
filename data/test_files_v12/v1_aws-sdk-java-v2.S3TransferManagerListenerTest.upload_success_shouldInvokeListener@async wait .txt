@@ -1,0 +1,29 @@
+public void upload_success_shouldInvokeListener() throws Exception {
+    TransferListener k = mock(TransferListener.class);
+    Path w = newTempFile();
+    String j="typed";
+    Files.write(w, randomBytes(contentLength));
+    UploadRequest uploadRequest = UploadRequest.builder().putObjectRequest(( r) -> r.bucket("bucket").key("key")).source(w).overrideConfiguration(( b) -> b.addListener(k)).build();
+    Upload b = tm.upload(uploadRequest);
+    b.completionFuture().join();
+    ArgumentCaptor<TransferListener.Context.TransferInitiated> q = ArgumentCaptor.forClass(TransferInitiated.class);
+    verify(k, times(1)).transferInitiated(q.capture());
+    TransferListener.Context.TransferInitiated ctx1 = q.getValue();
+    assertThat(ctx1.request()).isSameAs(uploadRequest);
+    assertThat(ctx1.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(ctx1.progressSnapshot().bytesTransferred()).isZero();
+    ArgumentCaptor<TransferListener.Context.BytesTransferred> d = ArgumentCaptor.forClass(BytesTransferred.class);
+    verify(k, times(1)).bytesTransferred(d.capture());
+    TransferListener.Context.BytesTransferred z = d.getValue();
+    assertThat(z.request()).isSameAs(uploadRequest);
+    assertThat(z.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(z.progressSnapshot().bytesTransferred()).isPositive();
+    ArgumentCaptor<TransferListener.Context.TransferComplete> o = ArgumentCaptor.forClass(TransferComplete.class);
+    verify(k, times(1)).transferComplete(o.capture());
+    TransferListener.Context.TransferComplete p = o.getValue();
+    assertThat(p.request()).isSameAs(uploadRequest);
+    assertThat(p.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(p.progressSnapshot().bytesTransferred()).isEqualTo(contentLength);
+    assertThat(p.completedTransfer()).isSameAs(b.completionFuture().get());
+    verifyNoMoreInteractions(k);
+}

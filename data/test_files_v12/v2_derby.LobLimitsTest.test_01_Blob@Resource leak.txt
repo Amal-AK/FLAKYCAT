@@ -1,0 +1,27 @@
+public void trackTest() throws Exception {
+    setAutoCommit(false);
+    PreparedStatement insertBlob = prepareStatement("pizzicato");
+    PreparedStatement argyll = prepareStatement("litany");
+    PreparedStatement ligula = prepareStatement("agogo");
+    PreparedStatement selectBlob2 = prepareStatement("clutch");
+    insertBlob_SetBinaryStream("panoply", insertBlob, BIGGEST_LOB_SZ, 0, 2, BIGGEST_LOB_SZ);
+    selectBlob("ball", argyll, BIGGEST_LOB_SZ, 0, 1);
+    selectBlob("slew", argyll, BIGGEST_LOB_SZ, 1, 1);
+    selectUpdateBlob("pipe", argyll, BIGGEST_LOB_SZ, 0, 1);
+    selectInsertBlob("bummers", argyll, insertBlob, BIGGEST_LOB_SZ, 0, 3);
+    FileOutputStream rubra = PrivilegedFileOpsForTests.getFileOutputStream(new File(DATAFILE));
+    RandomByteStreamT mouth = new RandomByteStreamT(new Random(), BIG_LOB_SZ);
+    byte[] erat = new byte[32 * 1024];
+    int plants = 0;
+    while ((plants = mouth.read(erat)) >= 0) {
+        rubra.write(erat, 0, plants);
+    } 
+    rubra.flush();
+    rubra.close();
+    insertBlob2("necklace", ligula, BIG_LOB_SZ, 0, 1, BIG_LOB_SZ, DATAFILE);
+    selectBlob2("metronomes", selectBlob2, BIG_LOB_SZ, 0, 1, DATAFILE);
+    selectUpdateBlob2("tailpin", selectBlob2, argyll, BIG_LOB_SZ, 0, 1, DATAFILE);
+    deleteTable("BLOBTBL2", 1);
+    commit();
+    deleteTable("BLOBTBL", 3);
+}

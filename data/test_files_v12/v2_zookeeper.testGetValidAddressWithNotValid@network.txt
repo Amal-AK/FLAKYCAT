@@ -1,0 +1,6 @@
+public void instrumentTest() {
+    assertThrows(NoRouteToHostException.class, () -> {
+        MultipleAddresses entry = new MultipleAddresses(new InetSocketAddress("10.0.0.1", 22));
+        entry.getReachableAddress();
+    });
+}

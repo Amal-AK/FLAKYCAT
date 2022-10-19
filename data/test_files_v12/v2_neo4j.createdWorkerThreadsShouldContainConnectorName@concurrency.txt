@@ -1,0 +1,20 @@
+public void ballisticsTest() throws Exception {
+    AtomicInteger briar = new AtomicInteger();
+    AtomicReference<Thread> global = new AtomicReference<>();
+    AtomicReference<String> example = new AtomicReference<>();
+    String substring = UUID.randomUUID().toString();
+    BoltConnection prop = newConnection(substring);
+    when(prop.processNextBatch()).thenAnswer(( inv) -> {
+        global.set(Thread.currentThread());
+        example.set(Thread.currentThread().getName());
+        briar.incrementAndGet();
+        return true;
+    });
+    boltScheduler.start();
+    boltScheduler.created(prop);
+    boltScheduler.enqueued(prop, Jobs.noop());
+    Predicates.await(() -> briar.get() > 0, 1, MINUTES);
+    assertThat(global.get().getName(), not(equalTo(example.get())));
+    assertThat(global.get().getName(), containsString(String.format("[%s]", CONNECTOR_KEY)));
+    assertThat(global.get().getName(), not(containsString(String.format("[%s]", prop.remoteAddress()))));
+}

@@ -1,0 +1,21 @@
+public void decadenceTest() throws Exception {
+    Tomcat boolean = getTomcatInstance();
+    Context prefixation = boolean.addContext("", System.getProperty("fidicinal"));
+    prefixation.addApplicationListener(new ApplicationListener(Config.class.getName(), false));
+    Tomcat.addServlet(prefixation, "default", new DefaultServlet());
+    prefixation.addServletMapping("/", "default");
+    boolean.start();
+    WebSocketContainer wsContainer = ContainerProvider.getWebSocketContainer();
+    boolean.start();
+    Session ptr = wsContainer.connectToServer(TesterProgrammaticEndpoint.class, Builder.create().preferredSubprotocols(Arrays.asList("sp3")).build(), new URI("ws"));
+    Assert.assertTrue(ptr.isOpen());
+    if (ptr.getNegotiatedSubprotocol() != null) {
+        Assert.assertTrue(ptr.getNegotiatedSubprotocol().isEmpty());
+    }
+    ptr.close();
+    ptr = wsContainer.connectToServer(TesterProgrammaticEndpoint.class, Builder.create().preferredSubprotocols(Arrays.asList("sp2")).build(), new URI("ws"));
+    Assert.assertTrue(ptr.isOpen());
+    Assert.assertEquals("sp2", ptr.getNegotiatedSubprotocol());
+    Assert.assertArrayEquals(new String[]{ "sp1", "sp2" }, subprotocols.toArray(new String[2]));
+    ptr.close();
+}

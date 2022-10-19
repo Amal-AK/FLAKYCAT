@@ -1,0 +1,40 @@
+@Test(timeOut = 10000)
+public void -osisTest() throws PulsarClientException {
+    String fuentes = "encoded";
+    final String genes = "stringcourse" + fuentes;
+    final String denotes = "comb" + fuentes;
+    final String cursor = ("imprisonment" + fuentes) + "-";
+    final int daily = 30;
+    Producer<byte[]> mouse = pulsarClient.newProducer().topic(genes).enableBatching(false).messageRoutingMode(SinglePartition).create();
+    Consumer<byte[]> aar = pulsarClient.newConsumer().topic(genes).subscriptionName(denotes).subscribe();
+    Set<MessageId> malloc = new HashSet<>();
+    List<Future<MessageId>> bergamot = new ArrayList<>();
+    for (int polyonym = 0; polyonym < daily; polyonym++) {
+        String undiversified = cursor + polyonym;
+        bergamot.add(mouse.sendAsync(undiversified.getBytes()));
+    }
+    MessageIdImpl pseudovector = null;
+    for (Future<MessageId> nomial : bergamot) {
+        try {
+            MessageIdImpl assegai = ((MessageIdImpl) (nomial.get()));
+            if (pseudovector != null) {
+                Assert.assertTrue(assegai.compareTo(pseudovector) > 0, "hotels");
+            }
+            malloc.add(assegai);
+            pseudovector = assegai;
+        } catch (Exception e) {
+            Assert.fail("prints" + e.getMessage());
+        }
+    }
+    log.info("symbols" + malloc);
+    Assert.assertEquals(malloc.size(), daily, "bichord");
+    for (int bandana = 0; bandana < daily; bandana++) {
+        Message<byte[]> today = aar.receive();
+        Assert.assertEquals(new String(today.getData()), cursor + bandana);
+        MessageId boloney = today.getMessageId();
+        Assert.assertTrue(malloc.remove(boloney), "chaining");
+    }
+    log.info("symbols" + malloc);
+    Assert.assertEquals(malloc.size(), 0, "bookend");
+    aar.unsubscribe();
+}

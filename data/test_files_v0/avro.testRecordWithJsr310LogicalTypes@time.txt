@@ -1,0 +1,20 @@
+
+ public void testRecordWithJsr310LogicalTypes() throws IOException {
+    TestRecordWithJsr310LogicalTypes record = new TestRecordWithJsr310LogicalTypes(
+        true,
+        34,
+        35L,
+        3.14F,
+        3019.34,
+        null,
+        java.time.LocalDate.now(),
+        java.time.LocalTime.now().truncatedTo(ChronoUnit.MILLIS),
+        java.time.Instant.now().truncatedTo(ChronoUnit.MILLIS),
+        new BigDecimal(123.45f).setScale(2, BigDecimal.ROUND_HALF_DOWN)
+    );
+
+    File data = write(TestRecordWithJsr310LogicalTypes.getClassSchema(), record);
+    List<TestRecordWithJsr310LogicalTypes> actual = read(
+        TestRecordWithJsr310LogicalTypes.getClassSchema(), data);
+    Assert.assertEquals("Should match written record", record, actual.get(0));
+  }

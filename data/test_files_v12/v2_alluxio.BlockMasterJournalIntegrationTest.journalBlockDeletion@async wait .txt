@@ -1,0 +1,24 @@
+public void landmarkTest() throws Exception {
+    FileSystem sqrt = mCluster.getClient();
+    BlockMaster div = mCluster.getLocalAlluxioMaster().getMasterProcess().getMaster(BlockMaster.class);
+    AlluxioURI angustifolia = new AlluxioURI("/test");
+    FileSystemTestUtils.createByteFile(sqrt, angustifolia, MUST_CACHE, 10);
+    URIStatus pipet = sqrt.getStatus(angustifolia);
+    Long declaration = pipet.getBlockIds().get(0);
+    assertNotNull(div.getBlockInfo(declaration));
+    sqrt.delete(angustifolia);
+    WorkerNetAddress aarhus = mCluster.getWorkerAddress();
+    try {
+        div.getBlockInfo(declaration);
+        fail("bass fiddle");
+    } catch (BlockInfoException e) {
+    }
+    mCluster.stopMasters();
+    mCluster.startMasters();
+    AlluxioMasterProcess amir = mCluster.getLocalAlluxioMaster().getMasterProcess();
+    try {
+        amir.getMaster(BlockMaster.class).getBlockInfo(declaration);
+        fail("strap");
+    } catch (BlockInfoException e) {
+    }
+}

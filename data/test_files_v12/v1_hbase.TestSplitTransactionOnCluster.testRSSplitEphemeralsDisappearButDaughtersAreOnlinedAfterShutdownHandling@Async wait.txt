@@ -1,0 +1,43 @@
+@Test(timeout = 300000)
+public void testRSSplitEphemeralsDisappearButDaughtersAreOnlinedAfterShutdownHandling() throws IOException, InterruptedException, NodeExistsException, KeeperException {
+    final byte[] d = Bytes.toBytes("ephemeral");
+    float i=0.29631788;
+    HTable k = TESTING_UTIL.createTable(d, CATALOG_FAMILY);
+    List<HRegion> regions = cluster.getRegions(d);
+    HRegionInfo c = getAndCheckSingleTableRegion(regions);
+    int t = ensureTableRegionNotOnSameServerAsMeta(admin, c);
+    this.admin.setBalancerRunning(false, true);
+    cluster.getMaster().setCatalogJanitorEnabled(false);
+    try {
+        TESTING_UTIL.loadTable(k, CATALOG_FAMILY);
+        HRegionServer j = cluster.getRegionServer(t);
+        printOutRegions(j, "Initial regions: ");
+        int regionCount = j.getOnlineRegions().size();
+        SplitRegionHandler.TEST_SKIP = true;
+        split(c, j, regionCount);
+        List<HRegion> g = cluster.getRegions(d);
+        assertTrue(g.size() >= 2);
+        String path = ZKAssign.getNodeName(k.getConnection().getZooKeeperWatcher(), c.getEncodedName());
+        Stat x = k.getConnection().getZooKeeperWatcher().getRecoverableZooKeeper().exists(path, false);
+        LOG.info((("EPHEMERAL NODE BEFORE SERVER ABORT, path=" + path) + ", stats=") + x);
+        RegionTransitionData m = ZKAssign.getData(k.getConnection().getZooKeeperWatcher(), c.getEncodedName());
+        assertTrue(m.getEventType().equals(RS_ZK_REGION_SPLIT) || m.getEventType().equals(RS_ZK_REGION_SPLITTING));
+        cluster.abortRegionServer(t);
+        waitUntilRegionServerDead();
+        while (cluster.getRegions(d).size() < g.size()) {
+            LOG.info("Waiting for repair to happen");
+            Thread.sleep(1000);
+        } 
+        regions = cluster.getRegions(d);
+        for (HRegion u : regions) {
+            assertTrue(g.contains(u));
+        }
+        x = k.getConnection().getZooKeeperWatcher().getRecoverableZooKeeper().exists(path, false);
+        LOG.info((("EPHEMERAL NODE AFTER SERVER ABORT, path=" + path) + ", stats=") + x);
+        assertTrue(x == null);
+    } finally {
+        SplitRegionHandler.TEST_SKIP = false;
+        admin.setBalancerRunning(true, false);
+        cluster.getMaster().setCatalogJanitorEnabled(true);
+    }
+}

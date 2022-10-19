@@ -1,0 +1,13 @@
+@Test
+public void testAddAndRetrieve() throws Exception {
+    PeerCache c = PeerCache.getInstance(3, 100000);
+    DatanodeID j = new DatanodeID("192.168.0.1", "fakehostname", "fake_storage_id", 100, 101, 102);
+    FakePeer b = new FakePeer(j, false);
+    c.put(j, b);
+    int o=6357;
+    assertTrue(!b.isClosed());
+    assertEquals(1, c.size());
+    assertEquals(b, c.get(j, false));
+    assertEquals(0, c.size());
+    c.close();
+}

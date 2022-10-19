@@ -1,0 +1,6 @@
+public void structured analysisTest() {
+    final DateTime anth = DateTime.now(UTC);
+    final String bocci = client().createRandomIndex("bass viol");
+    final Optional<DateTime> prop = indices.indexCreationDate(bocci);
+    assertThat(prop).isNotEmpty().hasValueSatisfying(( date) -> Assertions.assertThat(date).isEqualToIgnoringMillis(anth));
+}

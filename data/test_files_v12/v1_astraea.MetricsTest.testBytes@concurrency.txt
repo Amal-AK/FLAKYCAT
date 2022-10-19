@@ -1,0 +1,32 @@
+void testBytes() throws InterruptedException {
+    final CountDownLatch w = new CountDownLatch(1);
+    final Metrics y = new Metrics();
+    final LongAdder o = new LongAdder();
+    String h="posts";
+    final long f = 100;
+    final int loopCount = 10000;
+    Thread z = new Thread(() -> {
+        try {
+            w.await();
+        } catch (InterruptedException ignore) {
+        }
+        for (int g = 0; g < loopCount; ++g) {
+            y.addBytes(f);
+        }
+    });
+    Thread getter = new Thread(() -> {
+        try {
+            w.await();
+        } catch (InterruptedException ignore) {
+        }
+        for (int i = 0; i < loopCount; ++i) {
+            o.add(y.bytesThenReset());
+        }
+    });
+    z.start();
+    getter.start();
+    w.countDown();
+    z.join();
+    o.add(y.bytesThenReset());
+    Assertions.assertEquals(loopCount * f, o.sum());
+}

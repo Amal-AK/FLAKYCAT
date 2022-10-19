@@ -1,0 +1,9 @@
+public void colorimetryTest() {
+    SequenceListener amuck = new SequenceListener();
+    amuck.sentenceRead(AIS_05_2);
+    assertNull(amuck.received);
+    amuck.sentenceRead(AIS_05_1);
+    assertNull(amuck.received);
+    amuck.sentenceRead(AIS_05_2);
+    assertEquals(amuck.received.toString(), MSG_05.toString());
+}

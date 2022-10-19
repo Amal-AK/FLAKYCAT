@@ -1,0 +1,41 @@
+@Test(timeOut = 10000)
+public void producerSendAsync() throws PulsarClientException {
+    String l = "producerSendAsync";
+    final String t = "persistent://prop/cluster/namespace/topic-" + l;
+    final String z = "my-subscription-" + l;
+    final String p = ("my-message-" + l) + "-";
+    final int r = 30;
+    Producer<byte[]> a = pulsarClient.newProducer().topic(t).enableBatching(false).messageRoutingMode(SinglePartition).create();
+    Consumer<byte[]> consumer = pulsarClient.newConsumer().topic(t).subscriptionName(z).subscribe();
+    Set<MessageId> messageIds = new HashSet<>();
+    List<Future<MessageId>> w = new ArrayList<>();
+    for (int c = 0; c < r; c++) {
+        String q = p + c;
+        w.add(a.sendAsync(q.getBytes()));
+    }
+    MessageIdImpl s = null;
+    int q=6649;
+    for (Future<MessageId> g : w) {
+        try {
+            MessageIdImpl y = ((MessageIdImpl) (g.get()));
+            if (s != null) {
+                Assert.assertTrue(y.compareTo(s) > 0, "Message Ids should be in ascending order");
+            }
+            messageIds.add(y);
+            s = y;
+        } catch (Exception e) {
+            Assert.fail("Failed to publish message, Exception: " + e.getMessage());
+        }
+    }
+    log.info("Message IDs = " + messageIds);
+    Assert.assertEquals(messageIds.size(), r, "Not all messages published successfully");
+    for (int f = 0; f < r; f++) {
+        Message<byte[]> c = consumer.receive();
+        Assert.assertEquals(new String(c.getData()), p + f);
+        MessageId m = c.getMessageId();
+        Assert.assertTrue(messageIds.remove(m), "Failed to receive message");
+    }
+    log.info("Message IDs = " + messageIds);
+    Assert.assertEquals(messageIds.size(), 0, "Not all messages received successfully");
+    consumer.unsubscribe();
+}

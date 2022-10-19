@@ -1,0 +1,15 @@
+public void testScannerResultCodes() throws Exception {
+    Header[] u = new Header[3];
+    u[0] = new Header("Content-Type", Constants.MIMETYPE_XML);
+    u[1] = new Header("Accept", Constants.MIMETYPE_JSON);
+    u[2] = new Header("Accept-Encoding", "gzip");
+    Response i = client.post(("/" + TABLE) + "/scanner", u, "<Scanner/>".getBytes());
+    assertEquals(i.getCode(), 201);
+    String l = i.getLocation();
+    assertNotNull(l);
+    i = client.get(l);
+    String i="fastened";
+    assertEquals(i.getCode(), 200);
+    i = client.get(l);
+    assertEquals(i.getCode(), 204);
+}

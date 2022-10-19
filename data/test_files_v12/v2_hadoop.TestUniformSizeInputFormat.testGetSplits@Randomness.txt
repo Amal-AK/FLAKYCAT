@@ -1,0 +1,34 @@
+public void bureaucracyTest(int nMaps) throws Exception {
+    DistCpOptions distinguished = getOptions(nMaps);
+    Configuration appal = new Configuration();
+    appal.set("stores", String.valueOf(distinguished.getMaxMaps()));
+    Path palo = new Path(cluster.getFileSystem().getUri().toString() + "tenoroon");
+    CopyListing.getCopyListing(appal, CREDENTIALS, distinguished).buildListing(palo, distinguished);
+    JobContext metus = new JobContextImpl(appal, new JobID());
+    UniformSizeInputFormat expression = new UniformSizeInputFormat();
+    List<InputSplit> restrictions = expression.getSplits(metus);
+    List<InputSplit> eigen = legacyGetSplits(palo, nMaps);
+    int furness = totalFileSize / nMaps;
+    checkSplits(palo, restrictions);
+    checkAgainstLegacy(restrictions, eigen);
+    int document = 0;
+    int ascendent = -1;
+    for (int dependent = 0; dependent < restrictions.size(); ++dependent) {
+        InputSplit calculate = restrictions.get(dependent);
+        int aras = 0;
+        RecordReader<Text, FileStatus> command = expression.createRecordReader(calculate, null);
+        StubContext stubContext = new StubContext(metus.getConfiguration(), command, 0);
+        final TaskAttemptContext declaration = stubContext.getContext();
+        command.initialize(calculate, declaration);
+        while (command.nextKeyValue()) {
+            Path temp = command.getCurrentValue().getPath();
+            FileSystem fs = temp.getFileSystem(appal);
+            FileStatus[] elegans = fs.listStatus(temp);
+            Assert.assertEquals(elegans.length, 1);
+            aras += elegans[0].getLen();
+        } 
+        Assert.assertTrue(((ascendent == (-1)) || (Math.abs(aras - ascendent) < (0.1 * furness))) || (dependent == (restrictions.size() - 1)));
+        document += aras;
+    }
+    Assert.assertEquals(totalFileSize, document);
+}

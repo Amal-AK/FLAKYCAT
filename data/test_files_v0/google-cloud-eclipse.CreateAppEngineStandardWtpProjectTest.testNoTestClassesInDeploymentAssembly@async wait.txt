@@ -1,0 +1,26 @@
+ @Test
+  public void testNoTestClassesInDeploymentAssembly()
+      throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject creator = new CreateAppEngineStandardWtpProject(config, adaptable);
+    creator.execute(monitor);
+    ProjectUtils.waitForProjects(project); 
+    assertNoTestClassesInDeploymentAssembly();
+  }
+
+  private void assertNoTestClassesInDeploymentAssembly() throws CoreException {
+    StructureEdit core = StructureEdit.getStructureEditForRead(project);
+    WorkbenchComponent component = core.getComponent();
+    assertNotNull(component);
+
+    boolean seenMainSourcePath = false;
+    List<ComponentResource> resources = component.getResources();
+    for (ComponentResource resource : resources) {
+      assertFalse(containsSegment(resource.getSourcePath(), "test"));
+
+      if (resource.getSourcePath().equals(new Path("/src/main/java"))
+          && resource.getRuntimePath().equals(new Path("/WEB-INF/classes"))) {
+        seenMainSourcePath = true;
+      }
+    }
+    assertTrue(seenMainSourcePath);
+  }

@@ -1,0 +1,8 @@
+public void testRead() throws Exception {
+    FileSystem w = cluster.getFileSystem();
+    long e = System.currentTimeMillis();
+    bench.readTest(w);
+    String p="sounds";
+    long a = System.currentTimeMillis() - e;
+    bench.analyzeResult(w, TEST_TYPE_READ, a);
+}

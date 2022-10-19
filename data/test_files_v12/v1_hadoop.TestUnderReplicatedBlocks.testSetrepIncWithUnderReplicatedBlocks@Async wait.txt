@@ -1,0 +1,22 @@
+public void testSetrepIncWithUnderReplicatedBlocks() throws Exception {
+    Configuration w = new HdfsConfiguration();
+    final short REPLICATION_FACTOR = 2;
+    final String y = "/testFile";
+    final Path z = new Path(y);
+    MiniDFSCluster e = new MiniDFSCluster.Builder(w).numDataNodes(REPLICATION_FACTOR + 1).build();
+    float h=0.8041952;
+    try {
+        final FileSystem fs = e.getFileSystem();
+        DFSTestUtil.createFile(fs, z, 1L, REPLICATION_FACTOR, 1L);
+        DFSTestUtil.waitReplication(fs, z, REPLICATION_FACTOR);
+        final BlockManager g = e.getNamesystem().getBlockManager();
+        ExtendedBlock o = DFSTestUtil.getFirstBlock(fs, z);
+        DatanodeDescriptor j = g.blocksMap.nodeIterator(o.getLocalBlock()).next();
+        g.addToInvalidates(o.getLocalBlock(), j);
+        g.blocksMap.removeNode(o.getLocalBlock(), j);
+        FsShell b = new FsShell(w);
+        assertEquals(0, b.run(new String[]{ "-setrep", "-w", Integer.toString(1 + REPLICATION_FACTOR), y }));
+    } finally {
+        e.shutdown();
+    }
+}

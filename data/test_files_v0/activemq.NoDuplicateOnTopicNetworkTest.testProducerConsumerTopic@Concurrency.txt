@@ -1,0 +1,30 @@
+
+public void testProducerConsumerTopic() throws Exception {
+    final CountDownLatch consumerStarted = new CountDownLatch(1);
+    Thread producerThread = new Thread(new Runnable()); 
+    final TopicWithDuplicateMessages consumer = new TopicWithDuplicateMessages();
+    Thread consumerThread = new Thread(new Runnable() );
+    consumerThread.start();
+    LOG.info("Started Consumer");
+    assertTrue("consumer started eventually", consumerStarted.await(10, TimeUnit.SECONDS));
+    Thread.sleep(2000);
+    producerThread.start();
+    LOG.info("Started Producer");
+    producerThread.join();
+    consumerThread.join();
+    int duplicateCount = 0;
+    Map<String, String> map = new HashMap<String, String>();
+    for (String msg : consumer.getMessageStrings()) {
+        if (map.containsKey(msg)) {
+            LOG.info("got duplicate: " + msg);
+            duplicateCount++;
+        }
+        map.put(msg, msg);
+    }
+    if (suppressDuplicateTopicSubs || (dispatchPolicy instanceof PriorityNetworkDispatchPolicy)) {
+        assertEquals("no duplicates", 0, duplicateCount);
+        assertEquals("got all required messages: " + map.size(), consumer.getNumMessages(), map.size());
+    } else {
+        assertTrue("we got some duplicates", duplicateCount > 0);
+    }
+}

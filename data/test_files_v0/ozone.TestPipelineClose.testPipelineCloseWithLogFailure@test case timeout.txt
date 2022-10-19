@@ -1,0 +1,22 @@
+public void testPipelineCloseWithLogFailure() throws IOException {
+    EventQueue eventQ = ((EventQueue) (scm.getEventQueue()));
+    PipelineActionHandler pipelineActionTest = Mockito.mock(PipelineActionHandler.class);
+    eventQ.addHandler(PIPELINE_ACTIONS, pipelineActionTest);
+    ArgumentCaptor<PipelineActionsFromDatanode> actionCaptor = ArgumentCaptor.forClass(PipelineActionsFromDatanode.class);
+    ContainerInfo containerInfo = containerManager.allocateContainer(new RatisReplicationConfig(ReplicationFactor.THREE), "testOwner");
+    ContainerWithPipeline containerWithPipeline = new ContainerWithPipeline(containerInfo, pipelineManager.getPipeline(containerInfo.getPipelineID()));
+    Pipeline openPipeline = containerWithPipeline.getPipeline();
+    RaftGroupId groupId = RaftGroupId.valueOf(openPipeline.getId().getId());
+    try {
+        pipelineManager.getPipeline(openPipeline.getId());
+    } catch (PipelineNotFoundException e) {
+        Assert.assertTrue("pipeline should exist", false);
+    }
+    DatanodeDetails datanodeDetails = openPipeline.getNodes().get(0);
+    int index = cluster.getHddsDatanodeIndex(datanodeDetails);
+    XceiverServerRatis xceiverRatis = ((XceiverServerRatis) (cluster.getHddsDatanodes().get(index).getDatanodeStateMachine().getContainer().getWriteChannel()));
+    xceiverRatis.handleNodeLogFailure(groupId, null);
+    Mockito.verify(pipelineActionTest, Mockito.timeout(100)).onMessage(actionCaptor.capture(), Mockito.any(EventPublisher.class));
+    PipelineActionsFromDatanode actionsFromDatanode = actionCaptor.getValue();
+    verifyCloseForPipeline(openPipeline, actionsFromDatanode);
+}

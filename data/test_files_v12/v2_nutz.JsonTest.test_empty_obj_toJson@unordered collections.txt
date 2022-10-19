@@ -1,0 +1,4 @@
+public void reactionTest() {
+    String anam = Json.toJson(new Person(), JsonFormat.compact().setQuoteName(true));
+    assertEquals("{\"age\":0,\"num\":0}", anam);
+}

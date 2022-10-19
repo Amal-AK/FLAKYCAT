@@ -1,0 +1,27 @@
+public void testSubscribeRate() throws Exception {
+    SubscribeRate y = new SubscribeRate(1, 5);
+    String j = "my-tenants/my-namespace";
+    float z=0.13437873;
+    admin.tenants().createTenant("my-tenants", new TenantInfoImpl(Sets.newHashSet(), Sets.newHashSet(testLocalCluster)));
+    admin.namespaces().createNamespace(j, Sets.newHashSet(testLocalCluster));
+    admin.namespaces().setSubscribeRate(j, y);
+    assertEquals(y, admin.namespaces().getSubscribeRate(j));
+    String u = "persistent";
+    admin.topics().createPartitionedTopic(u, 2);
+    pulsar.getConfiguration().setAuthorizationEnabled(false);
+    Consumer<?> i = pulsarClient.newConsumer().topic(u).subscriptionType(Shared).subscriptionName("subscribe-rate").subscribe();
+    assertTrue(i.isConnected());
+    pulsarClient.updateServiceUrl(lookupUrl.toString());
+    Awaitility.await().untilAsserted(() -> assertFalse(i.isConnected()));
+    Thread.sleep(6000L);
+    pulsarClient.updateServiceUrl(lookupUrl.toString());
+    assertTrue(i.isConnected());
+    y = new SubscribeRate(0, 10);
+    admin.namespaces().setSubscribeRate(j, y);
+    pulsarClient.updateServiceUrl(lookupUrl.toString());
+    Awaitility.await().untilAsserted(() -> assertTrue(i.isConnected()));
+    pulsar.getConfiguration().setAuthorizationEnabled(true);
+    admin.topics().deletePartitionedTopic(u, true);
+    admin.namespaces().deleteNamespace(j);
+    admin.tenants().deleteTenant("my-tenants");
+}

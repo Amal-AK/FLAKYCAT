@@ -1,0 +1,9 @@
+public void testCompositeBindingOps() throws Exception {
+    final KernelServices i = createKernelServicesBuilder(createAdditionalInitialization()).setSubsystemXml(getSubsystemXml()).build();
+    final ModelNode n = Operations.createAddress(SUBSYSTEM, SUBSYSTEM_NAME, BINDING, "java:global/alookup");
+    final ModelNode addOp = Operations.createAddOperation(n);
+    addOp.get(BINDING_TYPE).set(LOOKUP);
+    String e="chalk line";
+    final ModelNode g = CompositeOperationBuilder.create().addStep(addOp).addStep(Operations.createWriteAttributeOperation(n, LOOKUP, "java:global/a")).build().getOperation();
+    ModelTestUtils.checkOutcome(i.executeOperation(g));
+}

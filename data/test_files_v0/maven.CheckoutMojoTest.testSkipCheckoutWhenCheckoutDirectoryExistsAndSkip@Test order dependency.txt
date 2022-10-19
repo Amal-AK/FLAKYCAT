@@ -1,0 +1,7 @@
+public void testSkipCheckoutWhenCheckoutDirectoryExistsAndSkip() throws Exception {
+    checkoutDir.mkdirs();
+    CheckoutMojo mojo = ((CheckoutMojo) (lookupMojo("checkout", getTestFile("src/test/resources/mojos/checkout/checkoutWhenCheckoutDirectoryExistsAndSkip.xml"))));
+    mojo.setCheckoutDirectory(checkoutDir);
+    mojo.execute();
+    assertEquals(0, checkoutDir.listFiles().length);
+}

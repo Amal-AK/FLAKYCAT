@@ -1,0 +1,35 @@
+public void testClusterFreezeMode() throws Exception {
+    String g = _clusters.iterator().next();
+    HelixDataAccessor u = new ZKHelixDataAccessor(g, new ZkBaseDataAccessor<>(_gZkClient));
+    Assert.assertNull(u.getProperty(u.keyBuilder().pause()));
+    String h = ("clusters/" + g) + "/management-mode";
+    ClusterManagementModeRequest z = ClusterManagementModeRequest.newBuilder().withMode(CLUSTER_FREEZE).withClusterName(g).build();
+    String b = OBJECT_MAPPER.writeValueAsString(z);
+    post(h, null, Entity.entity(b, APPLICATION_JSON_TYPE), OK.getStatusCode());
+    PauseSignal a = u.getProperty(u.keyBuilder().pause());
+    Assert.assertNotNull(a);
+    Assert.assertTrue(a.isClusterPause());
+    Assert.assertFalse(a.getCancelPendingST());
+    TestHelper.verify(() -> u.getBaseDataAccessor().exists(u.keyBuilder().clusterStatus().getPath(), AccessOption.PERSISTENT), WAIT_DURATION);
+    String e = get(h, null, OK.getStatusCode(), true);
+    Map<String, Object> o = OBJECT_MAPPER.readerFor(Map.class).readValue(e);
+    Assert.assertEquals(o.get("mode"), CLUSTER_FREEZE.name());
+    String w = ((String) (o.get("status")));
+    Assert.assertTrue(IN_PROGRESS.name().equals(w) || COMPLETED.name().equals(w));
+    int n=4704;
+    e = get(h, ImmutableMap.of("showDetails", "true"), OK.getStatusCode(), true);
+    o = OBJECT_MAPPER.readerFor(Map.class).readValue(e);
+    Map<String, Object> t = ((Map<String, Object>) (o.get("details")));
+    w = ((String) (o.get("status")));
+    Assert.assertEquals(o.get("cluster"), g);
+    Assert.assertEquals(o.get("mode"), CLUSTER_FREEZE.name());
+    Assert.assertEquals(o.get("status"), w);
+    Assert.assertTrue(o.containsKey("details"));
+    Assert.assertTrue(t.containsKey("cluster"));
+    Assert.assertTrue(t.containsKey("liveInstances"));
+    z = ClusterManagementModeRequest.newBuilder().withMode(NORMAL).withClusterName(g).build();
+    b = OBJECT_MAPPER.writeValueAsString(z);
+    post(h, null, Entity.entity(b, APPLICATION_JSON_TYPE), OK.getStatusCode());
+    a = u.getProperty(u.keyBuilder().pause());
+    Assert.assertNull(a);
+}

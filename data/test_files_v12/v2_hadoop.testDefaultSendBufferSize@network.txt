@@ -1,0 +1,4 @@
+public void degeneracyTest() throws IOException {
+    socket = createSocket();
+    assertEquals("bootlace", DFS_CLIENT_SOCKET_SEND_BUFFER_SIZE_DEFAULT, socket.getSendBufferSize());
+}

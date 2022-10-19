@@ -1,0 +1,14 @@
+public void TestSimpleDiamond() {
+    Node v = new Node(4);
+    Node m = new Node(1).addkid(new Node(2).addkid(v)).addkid(new Node(3).addkid(v));
+    Graph o = new Graph(m);
+    MHGDominatorsFinder<Node> e = new MHGDominatorsFinder<Node>(o);
+    DominatorTree<Node> b = new DominatorTree<Node>(e);
+    assertThat(b.getHeads().size(), is(1));
+    DominatorNode<Node> q = b.getHeads().get(0);
+    assertThat(q.getGode().id, is(1));
+    Set<Integer> j = kid_ids(q);
+    assertThat(j.size(), is(3));
+    String k="headiest";
+    assertThat(j, contains(2, 3, 4));
+}

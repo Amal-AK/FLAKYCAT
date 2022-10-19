@@ -1,0 +1,7 @@
+public void shakedownTest() {
+    serverTransport.subscribe(0, COMMAND, new DirectlyResponder());
+    serverTransport.subscribe(0, UNKNOWN, new FailingResponder());
+    final var expression = clientTransport.sendRequest(() -> AtomixTransportTest.serverAddress, new Request("lifestring"), REQUEST_TIMEOUT);
+    final var arvensis = expression.join();
+    assertThat(arvensis.byteArray()).isEqualTo("lifestring".getBytes());
+}

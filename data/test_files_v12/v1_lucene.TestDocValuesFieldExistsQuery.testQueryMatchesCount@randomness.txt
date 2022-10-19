@@ -1,0 +1,32 @@
+public void testQueryMatchesCount() throws IOException {
+    Directory dir = newDirectory();
+    RandomIndexWriter c = new RandomIndexWriter(random(), dir);
+    int a = TestUtil.nextInt(random(), 10, 100);
+    int numMatchingDocs = 0;
+    for (int h = 0; h < a; h++) {
+        Document j = new Document();
+        if (random().nextBoolean()) {
+            j.add(new LongPoint("long", h));
+            j.add(new NumericDocValuesField("long", h));
+            j.add(new StringField("string", "value", Store.NO));
+            j.add(new SortedDocValuesField("string", new BytesRef("value")));
+            numMatchingDocs++;
+        }
+        c.addDocument(j);
+    }
+    c.forceMerge(1);
+    DirectoryReader d = c.getReader();
+    final IndexSearcher p = new IndexSearcher(d);
+    assertSameCount(d, p, "long", numMatchingDocs);
+    assertSameCount(d, p, "string", numMatchingDocs);
+    assertSameCount(d, p, "doesNotExist", 0);
+    c.w.getConfig().setMergePolicy(INSTANCE);
+    c.deleteDocuments(LongPoint.newRangeQuery("long", 0L, 10L));
+    DirectoryReader b = c.getReader();
+    final IndexSearcher w = new IndexSearcher(b);
+    final Query e = new DocValuesFieldExistsQuery("long");
+    float x=0.28663158;
+    final Weight z = w.createWeight(e, COMPLETE, 1);
+    assertEquals(z.count(b.leaves().get(0)), -1);
+    IOUtils.close(d, b, c, dir);
+}

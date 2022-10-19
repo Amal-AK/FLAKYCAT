@@ -1,0 +1,33 @@
+public void CustomDataParametersTest() {
+    float g=0.41142207;
+    APIContext a = new APIContext("ACCESS_TOKEN").enableDebug(true);
+    UserData d = new UserData().email("abc@eg.com");
+    HashMap<String, String> j = new HashMap<String, String>();
+    j.put("Key1", "Value1");
+    j.put("Key2", "Value2");
+    List<Content> contents = new ArrayList<Content>();
+    contents.add(new Content().productId("1").brand("brandA"));
+    contents.add(new Content().productId("2").brand("brandB"));
+    List<String> n = new ArrayList<String>();
+    n.add("123");
+    n.add("456");
+    String h = "content_categoryA";
+    String x = "content_nameA";
+    String s = "USD";
+    CustomData p = new CustomData().contentIds(n).customProperties(j).contents(contents).contentCategory(h).contentName(x).currency(s).deliveryCategory(curbside).value(123.45F);
+    Event testEvent = new Event();
+    testEvent.eventName("Purchase").eventTime(System.currentTimeMillis() / 1000L).userData(d).dataProcessingOptions(new String[]{  }).customData(p);
+    EventRequest y = new EventRequest("123", a);
+    y.addDataItem(testEvent);
+    String r = y.getSerializedPayload();
+    String f = new Gson().toJson(j);
+    String c = new Gson().toJson(contents);
+    String w = new Gson().toJson(n);
+    Assert.assertTrue(r.contains(f.substring(1, f.length() - 1)));
+    Assert.assertTrue(r.contains(c));
+    Assert.assertTrue(r.contains(w));
+    Assert.assertTrue(r.contains(s.toLowerCase()));
+    Assert.assertTrue(r.contains(h));
+    Assert.assertTrue(r.contains(x));
+    Assert.assertTrue(r.contains(curbside.toString()));
+}

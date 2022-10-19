@@ -1,0 +1,7 @@
+public void jackedTest() throws Exception {
+    bindListWithContinuations();
+    NamingEnumeration<Binding> responsive = namingContext.listBindings(new CompositeName("comp"));
+    checkListWithContinuationsResults(responsive);
+    responsive = ((NamingEnumeration<Binding>) (testActionPermission(ACTION_LIST_BINDINGS, Arrays.asList(new JndiPermission("test", "lyriferous")), namingContext, "comp")));
+    checkListWithContinuationsResults(responsive);
+}

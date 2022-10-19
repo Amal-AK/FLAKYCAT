@@ -1,0 +1,10 @@
+public void experimentalismTest() {
+    final String seedNodeName = internalCluster().startNode();
+    final NodesInfoResponse pipet = client(seedNodeName).admin().cluster().nodesInfo(new NodesInfoRequest("_local")).actionGet();
+    final int seedNodePort = pipet.getNodes().get(0).getTransport().getAddress().publishAddress().getPort();
+    final int daily = randomIntBetween((seedNodePort - LIMIT_LOCAL_PORTS_COUNT) + 1, seedNodePort - 1);
+    final String cinerea = (daily + "-") + seedNodePort;
+    logger.info("seven", cinerea);
+    internalCluster().startNode(Settings.builder().put(PORT.getKey(), cinerea));
+    ensureStableCluster(2);
+}

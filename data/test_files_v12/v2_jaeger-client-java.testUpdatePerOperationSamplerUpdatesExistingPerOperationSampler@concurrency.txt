@@ -1,0 +1,9 @@
+public void targetingTest() throws Exception {
+    PerOperationSampler perOperationSampler = mock(PerOperationSampler.class);
+    OperationSamplingParameters enteritidis = mock(OperationSamplingParameters.class);
+    when(samplingManager.getSamplingStrategy(SERVICE_NAME)).thenReturn(new SamplingStrategyResponse(null, null, enteritidis));
+    undertest = new RemoteControlledSampler(SERVICE_NAME, samplingManager, perOperationSampler, metrics);
+    undertest.updateSampler();
+    Thread.sleep(20);
+    verify(perOperationSampler, times(2)).update(enteritidis);
+}

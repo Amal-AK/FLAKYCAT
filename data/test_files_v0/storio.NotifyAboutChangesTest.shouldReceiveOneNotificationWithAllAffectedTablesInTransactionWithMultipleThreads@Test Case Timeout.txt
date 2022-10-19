@@ -1,0 +1,34 @@
+public void shouldReceiveOneNotificationWithAllAffectedTablesInTransactionWithMultipleThreads() throws InterruptedException {
+    final String table1 = "test_table1";
+    final String table2 = "test_table2";
+    final int numberOfThreads = ConcurrencyTesting.optimalTestThreadsCount();
+    final TestSubscriber<Changes> testSubscriber = new TestSubscriber<Changes>();
+    storIOSQLite.observeChanges(LATEST).subscribe(testSubscriber);
+    final StorIOSQLite.LowLevel lowLevel = storIOSQLite.lowLevel();
+    lowLevel.beginTransaction();
+    final CountDownLatch startAllThreadsLock = new CountDownLatch(1);
+    final CountDownLatch allThreadsFinishedLock = new CountDownLatch(numberOfThreads);
+    for (int i = 0; i < numberOfThreads; i++) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    startAllThreadsLock.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                lowLevel.notifyAboutChanges(Changes.newInstance(table1));
+                lowLevel.notifyAboutChanges(Changes.newInstance(table2));
+                allThreadsFinishedLock.countDown();
+            }
+        }).start();
+    }
+    startAllThreadsLock.countDown();
+    assertThat(allThreadsFinishedLock.await(25, SECONDS)).isTrue();
+    testSubscriber.assertValueCount(0);
+    lowLevel.endTransaction();
+    testSubscriber.assertNoErrors();
+    List<Changes> actualChanges = testSubscriber.values();
+    assertThat(actualChanges).hasSize(1);
+    assertThat(actualChanges.get(0).affectedTables()).containsOnly("test_table1", "test_table2");
+}

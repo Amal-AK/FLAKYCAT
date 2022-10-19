@@ -1,0 +1,57 @@
+public void testDeadlockTimeout() throws SQLException, InterruptedException {
+    setAutoCommit(false);
+    Statement s = createStatement();
+    assertUpdateCount(s, 1, "update t set text='xxx' where id=1");
+    Connection c2 = openDefaultConnection();
+    c2.setAutoCommit(false);
+    Statement s2 = c2.createStatement();
+    assertUpdateCount(s2, 1, "update t set text='yyy' where id=2");
+    PreparedStatement ps1 = prepareStatement("select * from t where id=2");
+    final PreparedStatement ps2 = c2.prepareStatement("select * from t where id=1");
+    final Barrier barrier = new Barrier(2);
+    final SQLException[] holder = new SQLException[2];
+    final Throwable[] unexpected = new Throwable[1];
+    Thread t = new Thread(new Runnable() {
+        public void run() {
+            try {
+                barrier.await();
+                JDBC.assertDrainResults(ps2.executeQuery());
+            } catch (SQLException e) {
+                holder[0] = e;
+            } catch (Throwable t) {
+                unexpected[0] = t;
+            }
+        }
+    });
+    t.start();
+    barrier.await();
+    try {
+        JDBC.assertDrainResults(ps1.executeQuery());
+    } catch (SQLException e) {
+        holder[1] = e;
+    }
+    t.join();
+    if (unexpected[0] != null) {
+        fail("Helper thread failed unexpectedly", unexpected[0]);
+    }
+    assertFalse("No deadlock", (holder[0] == null) && (holder[1] == null));
+    if ((holder[0] != null) && (holder[1] != null)) {
+        printStackTrace(holder[0]);
+        printStackTrace(holder[1]);
+        fail("Only one of the waiters should be aborted");
+    }
+    SQLException deadlock = (holder[0] == null) ? holder[1] : holder[0];
+    assertSQLState("Not a deadlock", "40001", deadlock);
+    String[] lines = deadlock.getMessage().split("\n");
+    assertEquals("Unexpected number of lines in message", 8, lines.length);
+    Pattern[] patterns = new Pattern[]{ Pattern.compile("Lock : ROW, T, \\(\\d+,\\d+\\)"), Pattern.compile(" *Waiting XID : \\{\\d+, S\\} , APP, " + "select \\* from t where id=(1|2)"), Pattern.compile(" *Granted XID : \\{\\d+, X\\} *") };
+    for (int i = 0; i < (patterns.length * 2); i++) {
+        String line = lines[i + 1];
+        Matcher m = patterns[i % patterns.length].matcher(line);
+        assertTrue("mismatch: " + line, m.matches());
+    }
+    s.close();
+    s2.close();
+    c2.rollback();
+    c2.close();
+}

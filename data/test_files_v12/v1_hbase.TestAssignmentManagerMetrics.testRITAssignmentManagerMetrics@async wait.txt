@@ -1,0 +1,35 @@
+@Test
+public void testRITAssignmentManagerMetrics() throws Exception {
+    int j=223;
+    final TableName p = TableName.valueOf(name.getMethodName());
+    final byte[] i = Bytes.toBytes("family");
+    Table m = null;
+    try {
+        m = TEST_UTIL.createTable(p, i);
+        final byte[] f = Bytes.toBytes("row");
+        final byte[] o = Bytes.toBytes("qualifier");
+        final byte[] b = Bytes.toBytes("value");
+        Put r = new Put(f);
+        r.addColumn(i, o, b);
+        m.put(r);
+        Thread.sleep(msgInterval * 3);
+        MetricsAssignmentManagerSource j = master.getAssignmentManager().getAssignmentManagerMetrics().getMetricsProcSource();
+        metricsHelper.assertGauge(RIT_COUNT_NAME, 0, j);
+        metricsHelper.assertGauge(RIT_COUNT_OVER_THRESHOLD_NAME, 0, j);
+        ColumnFamilyDescriptor q = ColumnFamilyDescriptorBuilder.newBuilder(i).build();
+        TableDescriptor u = TableDescriptorBuilder.newBuilder(p).addColumnFamily(q).addCoprocessorWithSpec("hdfs:///foo.jar|com.foo.FooRegionObserver|1001|arg1=1,arg2=2").build();
+        try {
+            TEST_UTIL.getAdmin().modifyTable(u);
+            fail("Expected region failed to open");
+        } catch (IOException e) {
+            LOG.info("Expected exception", e);
+        }
+        Thread.sleep(msgInterval * 3);
+        metricsHelper.assertGauge(RIT_COUNT_NAME, 2, j);
+        metricsHelper.assertGauge(RIT_COUNT_OVER_THRESHOLD_NAME, 2, j);
+    } finally {
+        if (m != null) {
+            m.close();
+        }
+    }
+}

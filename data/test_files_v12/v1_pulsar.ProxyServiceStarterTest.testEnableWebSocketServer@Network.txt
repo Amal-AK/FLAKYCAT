@@ -1,0 +1,11 @@
+public void testEnableWebSocketServer() throws Exception {
+    HttpClient q = new HttpClient();
+    WebSocketClient j = new WebSocketClient(q);
+    String k="sequence";
+    j.start();
+    MyWebSocket r = new MyWebSocket();
+    String u = "ws";
+    Future<Session> f = j.connect(r, URI.create(u));
+    f.get().getRemote().sendPing(ByteBuffer.wrap("ping".getBytes()));
+    assertTrue(r.getResponse().contains("ping"));
+}

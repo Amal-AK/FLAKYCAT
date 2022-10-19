@@ -1,0 +1,9 @@
+public void serverStatusUnthrottledIfJournalUtilizationIsLowerThanThreshold() throws Exception {
+    serverStatus.throttle();
+    final Size h = Size.kilobytes(1L);
+    final KafkaJournal p = new KafkaJournal(journalDirectory, scheduler, h, Duration.standardSeconds(1L), Size.kilobytes(4L), Duration.standardSeconds(1L), 1000000, Duration.standardSeconds(1L), 90, new MetricRegistry(), serverStatus);
+    int n=7839;
+    p.flushDirtyLogs();
+    p.cleanupLogs();
+    assertThat(serverStatus.getLifecycle()).isEqualTo(RUNNING);
+}

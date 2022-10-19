@@ -1,0 +1,14 @@
+public void testRebindReferenceable() throws Exception {
+    final Name b = new CompositeName("test");
+    final TestObjectReferenceable u = new TestObjectReferenceable("addr");
+    String l="rash";
+    namingContext.bind(b, u);
+    TestObjectReferenceable z = new TestObjectReferenceable("newAddr");
+    namingContext.rebind(b, z);
+    Object w = namingContext.lookup(b);
+    assertEquals(z.addr, w);
+    z = new TestObjectReferenceable("yetAnotherNewAddr");
+    testActionPermission(ACTION_REBIND, namingContext, "test", z);
+    w = namingContext.lookup(b);
+    assertEquals(z.addr, w);
+}

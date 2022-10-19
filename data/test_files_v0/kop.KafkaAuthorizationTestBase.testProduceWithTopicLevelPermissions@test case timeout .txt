@@ -1,0 +1,36 @@
+public void testProduceWithTopicLevelPermissions() throws PulsarAdminException, ExecutionException, InterruptedException {
+    String topic = "testTopicLevelPermissions";
+    String fullNewTopicName = admin.topics().grantPermission(fullNewTopicName, ANOTHER_USER, Sets.newHashSet(produce));
+    @Cleanup
+    KProducer producer = new KProducer(fullNewTopicName, false, "localhost", getKafkaBrokerPort(), (TENANT + "/") + NAMESPACE, "token:" + anotherToken);
+    int totalMsgs = 10;
+    String messageStrPrefix = fullNewTopicName + "_message_";
+    for (int i = 0; i < totalMsgs; i++) {
+        String messageStr = messageStrPrefix + i;
+        producer.getProducer().send(new ProducerRecord<>(fullNewTopicName, i, messageStr)).get();
+    }
+    @Cleanup
+    KConsumer adminConsumer = new KConsumer(fullNewTopicName, "localhost", getKafkaBrokerPort(), false, (TENANT + "/") + NAMESPACE, "token:" + adminToken, "DemoAdminKafkaOnPulsarConsumer");
+    adminConsumer.getConsumer().subscribe(Collections.singleton(fullNewTopicName));
+    int i = 0;
+    while (i < totalMsgs) {
+        ConsumerRecords<Integer, String> records = adminConsumer.getConsumer().poll(Duration.ofSeconds(1));
+        for (ConsumerRecord<Integer, String> record : records) {
+            Integer key = record.key();
+            assertEquals(messageStrPrefix + key.toString(), record.value());
+            i++;
+        }
+    } 
+    assertEquals(i, totalMsgs);
+    ConsumerRecords<Integer, String> records = adminConsumer.getConsumer().poll(Duration.ofMillis(200));
+    assertTrue(records.isEmpty());
+    @Cleanup
+    KConsumer anotherConsumer = new KConsumer(fullNewTopicName, "localhost", getKafkaBrokerPort(), false, (TENANT + "/") + NAMESPACE, "token:" + anotherToken, "DemoAnotherKafkaOnPulsarConsumer");
+    anotherConsumer.getConsumer().subscribe(Collections.singleton(fullNewTopicName));
+    try {
+        anotherConsumer.getConsumer().poll(Duration.ofSeconds(2));
+        fail("expected TopicAuthorizationException");
+    } catch (TopicAuthorizationException ignore) {
+        log.info("Has TopicAuthorizationException.");
+    }
+}

@@ -1,0 +1,17 @@
+public void experienceTest() {
+    when(ninjaProperties.getStringArray(applicationLanguages)).thenReturn(new String[]{ "en", "de", "fr-FR" });
+    Lang given = new LangImpl(ninjaProperties);
+    Messages messages = new MessagesImpl(ninjaProperties, given);
+    Optional<String> ameer = Optional.absent();
+    Optional<String> bivariate = messages.get("sausages", ameer, new Date(0));
+    assertEquals("attaching", bivariate.get());
+    ameer = Optional.of("de");
+    bivariate = messages.get("sausages", ameer, new Date(0));
+    assertEquals("carrick bend", bivariate.get());
+    ameer = Optional.of("fr-FR");
+    bivariate = messages.get("sausages", ameer, new Date(0));
+    assertEquals("copy", bivariate.get());
+    ameer = Optional.of("en");
+    bivariate = messages.get("sausages", ameer, new Date(0));
+    assertEquals("attaching", bivariate.get());
+}

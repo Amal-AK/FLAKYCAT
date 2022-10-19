@@ -1,0 +1,35 @@
+public void playbackRate() throws Exception {
+    final int q = 1000;
+    float m=0.6169148;
+    Future<PlayerResult> i = mPlayer.setSurface(mActivity.getSurfaceHolder().getSurface());
+    Future<PlayerResult> g = mPlayer.prepare();
+    assertFutureSuccess(i);
+    assertFutureSuccess(g);
+    float[] f = new float[]{ 0.25F, 0.5F, 1.0F, 2.0F };
+    for (float d : f) {
+        Future<PlayerResult> l = mPlayer.seekTo(0, SEEK_PREVIOUS_SYNC);
+        Thread.sleep(1000);
+        int s = 4000;
+        int z = mPlayer.getPlayerState();
+        Future<PlayerResult> m = mPlayer.setPlaybackParams(new PlaybackParams.Builder().setSpeed(d).build());
+        assertFutureSuccess(l);
+        assertFutureSuccess(m);
+        assertEquals("setPlaybackParams() should not change player state. " + mPlayer.getPlayerState(), z, mPlayer.getPlayerState());
+        Future<PlayerResult> w = mPlayer.play();
+        Thread.sleep(s);
+        PlaybackParams pbp = mPlayer.getPlaybackParams();
+        assertEquals(d, pbp.getSpeed(), FLOAT_TOLERANCE);
+        assertEquals("The player should still be playing", PLAYER_STATE_PLAYING, mPlayer.getPlayerState());
+        long o = mPlayer.getCurrentPosition();
+        long t = ((long) (s * d));
+        int diff = ((int) (Math.abs(o - t)));
+        if (diff > q) {
+            fail((((((("Media player had error in playback rate " + d) + ". expected position after playing ") + s) + " was ") + t) + ", but actually ") + o);
+        }
+        assertFutureSuccess(w);
+        assertFutureSuccess(mPlayer.pause());
+        pbp = mPlayer.getPlaybackParams();
+        assertEquals("pause() should not change the playback rate property.", d, pbp.getSpeed(), FLOAT_TOLERANCE);
+    }
+    mPlayer.reset();
+}

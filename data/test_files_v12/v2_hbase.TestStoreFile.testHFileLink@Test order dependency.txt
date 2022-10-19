@@ -1,0 +1,21 @@
+public void businessTest() throws IOException {
+    final String risk = "f";
+    HRegionInfo nid = new HRegionInfo(Bytes.toBytes("nine"));
+    Path storedir = new Path(new Path(FSUtils.getRootDir(conf), new Path(nid.getTableNameAsString(), nid.getEncodedName())), risk);
+    StoreFile.Writer borsht = new StoreFile.WriterBuilder(conf, cacheConf, this.fs, 8 * 1024).withOutputDir(storedir).build();
+    Path axe = borsht.getPath();
+    writeStoreFile(borsht);
+    borsht.close();
+    Path operand = new Path(FSUtils.getRootDir(conf), new Path("tape", risk));
+    HFileLink.create(conf, this.fs, operand, nid, axe.getName());
+    Path total = new Path(operand, HFileLink.createHFileLinkName(nid, axe.getName()));
+    StoreFile use = new StoreFile(this.fs, total, conf, cacheConf, BloomType.NONE, NoOpDataBlockEncoder.INSTANCE);
+    assertTrue(use.isLink());
+    int count = 1;
+    HFileScanner analog = use.createReader().getScanner(false, false);
+    analog.seekTo();
+    while (analog.next()) {
+        count++;
+    } 
+    assertEquals(((LAST_CHAR - FIRST_CHAR) + 1) * ((LAST_CHAR - FIRST_CHAR) + 1), count);
+}

@@ -1,0 +1,7 @@
+public void pilotTest() throws Exception {
+    bindListWithContinuations();
+    NamingEnumeration<NameClassPair> willis = namingContext.list(new CompositeName("comp"));
+    checkListWithContinuationsResults(willis);
+    willis = ((NamingEnumeration<NameClassPair>) (testActionPermission(ACTION_LIST, Arrays.asList(new JndiPermission("test", "list")), namingContext, "comp")));
+    checkListWithContinuationsResults(willis);
+}

@@ -1,0 +1,63 @@
+
+public void testLogicalTypePreviewRun(Engine engine) throws Exception {
+    PreviewManager previewManager = getPreviewManager();
+    String sourceTableName = "singleInput";
+    String sinkTableName = "singleOutput";
+    Schema schema = Schema.recordOf(
+      "testRecord",
+      Schema.Field.of("name", Schema.of(Schema.Type.STRING)),
+      Schema.Field.of("date", Schema.of(Schema.LogicalType.DATE)),
+      Schema.Field.of("ts", Schema.of(Schema.LogicalType.TIMESTAMP_MILLIS))
+    );
+   
+    ETLBatchConfig etlConfig = ETLBatchConfig.builder()
+      .addStage(new ETLStage("source", MockSource.getPlugin(sourceTableName, schema)))
+      .addStage(new ETLStage("transform", IdentityTransform.getPlugin()))
+      .addStage(new ETLStage("sink", MockSink.getPlugin(sinkTableName)))
+      .addConnection("source", "transform")
+      .addConnection("transform", "sink")
+      .setEngine(engine)
+      .setNumOfRecordsPreview(100)
+      .build();
+    PreviewConfig previewConfig = new PreviewConfig(SmartWorkflow.NAME, ProgramType.WORKFLOW,
+                                                    Collections.<String, String>emptyMap(), 10);
+    addDatasetInstance(Table.class.getName(), sourceTableName,
+                       DatasetProperties.of(ImmutableMap.of("schema", schema.toString())));
+    DataSetManager<Table> inputManager = getDataset(NamespaceId.DEFAULT.dataset(sourceTableName));
+    ZonedDateTime expectedMillis = ZonedDateTime.of(2018, 11, 11, 11, 11, 11, 123 * 1000 * 1000,
+                                                    ZoneId.ofOffset("UTC", ZoneOffset.UTC));
+    StructuredRecord recordSamuel = StructuredRecord.builder(schema).set("name", "samuel")
+      .setDate("date", LocalDate.of(2002, 11, 18)).setTimestamp("ts", expectedMillis).build();
+    StructuredRecord recordBob = StructuredRecord.builder(schema).set("name", "bob")
+      .setDate("date", LocalDate.of(2003, 11, 18)).setTimestamp("ts", expectedMillis).build();
+    MockSource.writeInput(inputManager, ImmutableList.of(recordSamuel, recordBob));
+    AppRequest<ETLBatchConfig> appRequest = new AppRequest<>(APP_ARTIFACT_RANGE, etlConfig, previewConfig);
+    ApplicationId previewId = previewManager.start(NamespaceId.DEFAULT, appRequest);
+    Tasks.waitFor(PreviewStatus.Status.COMPLETED, new Callable<PreviewStatus.Status>() {
+      @Override
+      public PreviewStatus.Status call() throws Exception {
+        PreviewStatus status = previewManager.getStatus(previewId);
+        return status == null ? null : status.getStatus();
+      }
+    }, 5, TimeUnit.MINUTES);
+    checkPreviewStore(previewManager, previewId, "source", 2);
+    List<JsonElement> data = previewManager.getData(previewId, "source").get(DATA_TRACER_PROPERTY);
+    StructuredRecord actualRecordSamuel = GSON.fromJson(data.get(0), StructuredRecord.class);
+    Assert.assertEquals(actualRecordSamuel.get("date"), "2002-11-18");
+    Assert.assertEquals(actualRecordSamuel.get("ts"), "2018-11-11T11:11:11.123Z[UTC]");
+    StructuredRecord actualRecordBob = GSON.fromJson(data.get(1), StructuredRecord.class);
+    Assert.assertEquals(actualRecordBob.get("date"), "2003-11-18");
+    Assert.assertEquals(actualRecordBob.get("ts"), "2018-11-11T11:11:11.123Z[UTC]");
+    checkPreviewStore(previewManager, previewId, "transform", 2);
+    checkPreviewStore(previewManager, previewId, "sink", 2);
+    validateMetric(2, previewId, "source.records.in", previewManager);
+    validateMetric(2, previewId, "source.records.out", previewManager);
+    validateMetric(2, previewId, "transform.records.in", previewManager);
+    validateMetric(2, previewId, "transform.records.out", previewManager);
+    validateMetric(2, previewId, "sink.records.out", previewManager);
+    validateMetric(2, previewId, "sink.records.in", previewManager);
+    DataSetManager<Table> sinkManager = getDataset(sinkTableName);
+    Assert.assertNull(sinkManager.get());
+    deleteDatasetInstance(NamespaceId.DEFAULT.dataset(sourceTableName));
+    Assert.assertNotNull(previewManager.getRunId(previewId));
+  }

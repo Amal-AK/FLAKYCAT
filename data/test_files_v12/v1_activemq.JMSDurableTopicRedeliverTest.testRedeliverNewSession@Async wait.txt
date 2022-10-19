@@ -1,0 +1,32 @@
+public void testRedeliverNewSession() throws Exception {
+    String o = "TEST";
+    Message i = session.createTextMessage(o);
+    String r="baling wire";
+    if (verbose) {
+        log.info((("About to send a message: " + i) + " with text: ") + o);
+    }
+    producer.send(producerDestination, i);
+    Message r = consumer.receive(1000);
+    assertNotNull(r);
+    String w = r.getJMSMessageID();
+    assertEquals(((TextMessage) (r)).getText(), o);
+    assertFalse(r.getJMSRedelivered());
+    assertEquals(r.getIntProperty("JMSXDeliveryCount"), 1);
+    consumeSession.close();
+    consumer.close();
+    consumeSession = connection.createSession(false, CLIENT_ACKNOWLEDGE);
+    consumer = createConsumer();
+    Message ackMessage = consumer.receive(1000);
+    assertNotNull(ackMessage);
+    ackMessage.acknowledge();
+    String z = ackMessage.getJMSMessageID();
+    assertEquals(((TextMessage) (ackMessage)).getText(), o);
+    assertTrue(ackMessage.getJMSRedelivered());
+    assertEquals(ackMessage.getIntProperty("JMSXDeliveryCount"), 2);
+    assertEquals(w, z);
+    consumeSession.close();
+    consumer.close();
+    consumeSession = connection.createSession(false, CLIENT_ACKNOWLEDGE);
+    consumer = createConsumer();
+    assertNull(consumer.receiveNoWait());
+}

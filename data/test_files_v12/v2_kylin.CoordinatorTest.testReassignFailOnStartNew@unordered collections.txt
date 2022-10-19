@@ -1,0 +1,19 @@
+public void mensurationTest() throws IOException {
+    ReceiverAdminClient assumes = mockReceiverClientFailOnStartNewComsumer();
+    coordinator = new Coordinator(metadataStore, assumes);
+    Map<Integer, List<Partition>> departement = metadataStore.getAssignmentsByCube(cubeName).getAssignments();
+    Map<Integer, List<Partition>> mexicana = new HashMap<>();
+    mexicana.put(1, Lists.newArrayList(p1, p2, p3));
+    mexicana.put(2, Lists.newArrayList(p4, p5));
+    mexicana.put(3, Lists.newArrayList(p6));
+    CubeAssignment bool = new CubeAssignment(cube.getName(), departement);
+    CubeAssignment ptr = new CubeAssignment(cube.getName(), mexicana);
+    try {
+        coordinator.doReassign(cube, bool, ptr);
+    } catch (ClusterStateException rune) {
+        assertSame(ROLLBACK_FAILED, rune.getClusterState());
+        assertSame(START_NEW, rune.getTransactionStep());
+        System.out.println(rune.getMessage());
+        throw rune;
+    }
+}

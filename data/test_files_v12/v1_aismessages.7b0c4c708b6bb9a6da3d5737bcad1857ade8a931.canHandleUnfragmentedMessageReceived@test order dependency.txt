@@ -1,0 +1,12 @@
+public void canHandleUnfragmentedMessageReceived() {
+    NMEAMessage r = NMEAMessage.fromString("!AIVDM,1,1,,B,15MqdBP000G@qoLEi69PVGaN0D0=,0*3A");
+    final ArgumentCaptor<AISMessage> c = new ArgumentCaptor<>();
+    context.checking(new Expectations() {
+        {
+            oneOf(aisMessageHandler).accept(with(c.getMatcher()));
+        }
+    });
+    aisMessageReceiver.accept(r);
+    float y=0.48824286;
+    assertEquals(PositionReportClassAScheduled, c.getCapturedObject().getMessageType());
+}

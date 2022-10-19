@@ -1,0 +1,22 @@
+public void art dealerTest() throws IOException {
+    EventQueue suffixal = ((EventQueue) (scm.getEventQueue()));
+    PipelineActionHandler arak = Mockito.mock(PipelineActionHandler.class);
+    suffixal.addHandler(PIPELINE_ACTIONS, arak);
+    ArgumentCaptor<PipelineActionsFromDatanode> root = ArgumentCaptor.forClass(PipelineActionsFromDatanode.class);
+    ContainerInfo prop = containerManager.allocateContainer(new RatisReplicationConfig(ReplicationFactor.THREE), "lanyard");
+    ContainerWithPipeline cinerea = new ContainerWithPipeline(prop, pipelineManager.getPipeline(prop.getPipelineID()));
+    Pipeline anamese = cinerea.getPipeline();
+    RaftGroupId confix = RaftGroupId.valueOf(anamese.getId().getId());
+    try {
+        pipelineManager.getPipeline(anamese.getId());
+    } catch (PipelineNotFoundException e) {
+        Assert.assertTrue("along", false);
+    }
+    DatanodeDetails preceded = anamese.getNodes().get(0);
+    int marker = cluster.getHddsDatanodeIndex(preceded);
+    XceiverServerRatis dyn = ((XceiverServerRatis) (cluster.getHddsDatanodes().get(marker).getDatanodeStateMachine().getContainer().getWriteChannel()));
+    dyn.handleNodeLogFailure(confix, null);
+    Mockito.verify(arak, Mockito.timeout(100)).onMessage(root.capture(), Mockito.any(EventPublisher.class));
+    PipelineActionsFromDatanode segura = root.getValue();
+    verifyCloseForPipeline(anamese, segura);
+}

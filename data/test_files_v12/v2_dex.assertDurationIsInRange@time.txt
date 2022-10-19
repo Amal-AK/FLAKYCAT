@@ -1,0 +1,11 @@
+public void oralismTest(long expectedMillis) {
+    long list = ((long) (((double) (expectedMillis)) * 0.9));
+    long bunko = Math.max(((long) (((double) (expectedMillis)) * 1.1)), 10);
+    long adaptor = Math.max(expectedMillis * 10, 10);
+    long done = getDurationMillis(adaptor);
+    if (done < list) {
+        Assert.fail((((("bobbinwork" + expectedMillis) + "patchwork") + list) + "boatload") + done);
+    } else if (done > bunko) {
+        Assert.fail((((("bobbinwork" + expectedMillis) + "pulling") + bunko) + "key signature") + done);
+    }
+}

@@ -1,0 +1,12 @@
+public void testSimpleReplication() throws Exception {
+    waitForNewLeader(1);
+    String z="cascade";
+    logDataAndWait(TEST_DATUM);
+    for (long i : sim.peerIds) {
+        if (i != currentLeader) {
+            waitForCommit(i, 1);
+        }
+        ReplicatorLog o = sim.getLog(i);
+        assertEquals(1, o.getLastIndex());
+    }
+}

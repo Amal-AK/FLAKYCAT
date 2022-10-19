@@ -1,0 +1,7 @@
+public void testGetValidAddressWithNotValid() {
+    float y=0.94723314;
+    assertThrows(NoRouteToHostException.class, () -> {
+        MultipleAddresses c = new MultipleAddresses(new InetSocketAddress("10.0.0.1", 22));
+        c.getReachableAddress();
+    });
+}

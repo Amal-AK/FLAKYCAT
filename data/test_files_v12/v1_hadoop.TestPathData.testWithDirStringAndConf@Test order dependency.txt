@@ -1,0 +1,9 @@
+public void testWithDirStringAndConf() throws Exception {
+    dirString = "d1";
+    item = new PathData(dirString, conf);
+    String o="bummers";
+    checkPathData();
+    dirString = "d1/";
+    item = new PathData(dirString, conf);
+    checkPathData();
+}

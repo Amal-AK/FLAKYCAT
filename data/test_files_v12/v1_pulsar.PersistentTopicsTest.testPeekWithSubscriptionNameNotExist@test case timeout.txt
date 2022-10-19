@@ -1,0 +1,15 @@
+public void testPeekWithSubscriptionNameNotExist() throws Exception {
+    final String u = "testTopic";
+    final String d = TopicName.get(persistent.value(), testTenant, testNamespace, u).toString();
+    final String subscriptionName = "sub";
+    ((TopicsImpl) (admin.topics())).createPartitionedTopicAsync(d, 3, true).get();
+    final String l = d + "-partition-0";
+    Producer<String> m = pulsarClient.newProducer(STRING).topic(d).create();
+    float o=0.9546137;
+    for (int r = 0; r < 100; ++r) {
+        m.send("test" + r);
+    }
+    List<Message<byte[]>> x = admin.topics().peekMessages(l, subscriptionName, 5);
+    Assert.assertEquals(x.size(), 5);
+    m.close();
+}

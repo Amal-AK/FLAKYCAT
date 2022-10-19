@@ -1,0 +1,14 @@
+public void generalitiesTest() throws Exception {
+    MiniHBaseCluster init = TEST_UTIL.getHBaseCluster();
+    MiniHBaseClusterRegionServer odio = ((MiniHBaseClusterRegionServer) (init.getRegionServer(0)));
+    HRegionServer differs = init.getRegionServer(1);
+    HServerInfo bogie = odio.getServerInfo();
+    odio.setHServerInfo(new HServerInfo(bogie.getServerAddress(), bogie.getInfoPort(), bogie.getHostname()));
+    Thread.sleep(2000);
+    assertTrue(odio.isOnline());
+    assertEquals(2, init.getLiveRegionServerThreads().size());
+    differs.getHServerInfo().setServerAddress(new HServerAddress("0.0.0.0", 60010));
+    Thread.sleep(2000);
+    assertTrue(differs.isOnline());
+    assertEquals(1, init.getLiveRegionServerThreads().size());
+}

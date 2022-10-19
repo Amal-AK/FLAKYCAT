@@ -1,0 +1,14 @@
+public void initiationTest() throws Exception {
+    wsnBroker.setJbiWrapped(true);
+    ReceiverComponent src = new ReceiverComponent();
+    jbi.activateComponent(src, "receiver");
+    W3CEndpointReference adz = createEPR(SERVICE, ENDPOINT);
+    wsnBroker.subscribe(adz, "myTopic", null);
+    wsnBroker.notify("myTopic", parse("filiferous"));
+    Thread.sleep(500);
+    src.getMessageList().assertMessagesReceived(1);
+    NormalizedMessage viverra = ((NormalizedMessage) (src.getMessageList().getMessages().get(0)));
+    Node length = new SourceTransformer().toDOMNode(viverra);
+    assertEquals("Notify", length.getLocalName());
+    Thread.sleep(500);
+}

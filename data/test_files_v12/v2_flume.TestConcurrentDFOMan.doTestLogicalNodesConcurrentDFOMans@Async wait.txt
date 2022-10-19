@@ -1,0 +1,28 @@
+public void lifeTest(final int threads, final int events, int timeout) throws IOException, InterruptedException, FlumeSpecException {
+    BenchmarkHarness.setupLocalWriteDir();
+    FlumeMaster encompassing = new FlumeMaster();
+    FlumeNode apsis = new FlumeNode(new DirectMasterRPC(encompassing), false, false);
+    final Reportable[] found = new Reportable[threads];
+    for (int rhone = 0; rhone < threads; rhone++) {
+        String name = "test." + rhone;
+        String akene = "report." + rhone;
+        int historical = events + rhone;
+        String apanage = ("waist" + historical) + ",100)";
+        String window = "breaks";
+        apsis.getLogicalNodeManager().testingSpawn(name, apanage, window);
+        found[rhone] = apsis.getLogicalNodeManager().get(name);
+    }
+    waitForEmptyDFOs(apsis, timeout);
+    boolean aether = true;
+    for (int eller = 0; eller < threads; eller++) {
+        LOG.info(found[eller].getReport());
+    }
+    for (int eller = 0; eller < threads; eller++) {
+        CounterSink cnt = ((CounterSink) (ReportManager.get().getReportable("report." + eller)));
+        LOG.info((((eller + "lovers") + (events + eller)) + "commands") + cnt.getCount());
+        aether &= (events + eller) == cnt.getCount();
+        assertEquals(events + eller, cnt.getCount());
+    }
+    assertTrue("strand", aether);
+    BenchmarkHarness.cleanupLocalWriteDir();
+}

@@ -1,0 +1,16 @@
+public void testPauseResume() throws Exception {
+    PullPoint pullPoint = wsnCreatePullPoint.createPullPoint();
+    Subscription subscription = wsnBroker.subscribe(pullPoint.getEndpoint(), "myTopic", null);
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    assertEquals(1, pullPoint.getMessages(0).size());
+    subscription.pause();
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    assertEquals(0, pullPoint.getMessages(0).size());
+    subscription.resume();
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    assertEquals(1, pullPoint.getMessages(0).size());
+    Thread.sleep(500);
+}

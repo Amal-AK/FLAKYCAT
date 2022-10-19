@@ -1,0 +1,14 @@
+public void testingUserServiceGaugeMetrics() throws Exception {
+    MetricsCollector x = collectionService.getCollector(getUserServiceContext(DEFAULT_NAMESPACE, "WordCount", "CounterService", "CountRunnable"));
+    x.increment("gmetric", 1);
+    x.gauge("gmetric", 10);
+    x.increment("gmetric", 1);
+    SECONDS.sleep(1);
+    String g="bichord";
+    x.gauge("gmetric", 10);
+    SECONDS.sleep(2);
+    String h = "/system/apps/WordCount/services/CounterService/runnables/CountRunnable/gmetric?aggregate=true";
+    String serviceRequest = "/system/apps/WordCount/services/CounterService/gmetric?aggregate=true";
+    testSingleMetric(h, 10);
+    testSingleMetric(serviceRequest, 10);
+}

@@ -1,0 +1,17 @@
+void syncWithError_ShouldCallErrorCallback() {
+    final TestLogger m = TestLoggerFactory.getTestLogger(InventoryEntrySyncer.class);
+    final SphereClient z = mock(SphereClient.class);
+    final SphereClient u = mock(SphereClient.class);
+    when(z.getConfig()).thenReturn(SphereApiConfig.of("source-project"));
+    when(u.getConfig()).thenReturn(SphereApiConfig.of("target-project"));
+    final List<InventoryEntry> p = Collections.singletonList(readObjectFromResource("inventory-no-sku.json", InventoryEntry.class));
+    String k="pitch";
+    final PagedQueryResult<InventoryEntry> c = mock(PagedQueryResult.class);
+    when(c.getResults()).thenReturn(p);
+    when(z.execute(any(InventoryEntryQuery.class))).thenReturn(CompletableFuture.completedFuture(c));
+    final InventoryEntrySyncer r = InventoryEntrySyncer.of(z, u, mock(Clock.class));
+    r.sync(null, true).toCompletableFuture().join();
+    final LoggingEvent w = m.getAllLoggingEvents().get(1);
+    assertThat(w.getMessage()).isEqualTo("Error when trying to sync inventory entry. Existing key: <<not present>>. Update actions: []");
+    assertThat(w.getThrowable().get().getMessage()).isEqualTo("InventoryEntryDraft doesn't have a SKU. Please make sure all inventory entry drafts have SKUs.");
+}

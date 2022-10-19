@@ -1,0 +1,51 @@
+
+public void testSimpleClassloading() throws Exception {
+    final AtomicInteger count = new AtomicInteger(0);
+    final List<Event> finishedEvents = Collections.synchronizedList(new ArrayList<Event>());
+    final ServiceRegistration jcReg = this.registerJobConsumer(TOPIC, new JobConsumer() {
+        @Override
+        public JobResult process(Job job) {
+            count.incrementAndGet();
+            return JobResult.OK;
+        }
+    });
+    final ServiceRegistration ehReg = this.registerEventHandler(TOPIC_JOB_FINISHED, new EventHandler() {
+        @Override
+        public void handleEvent(Event event) {
+            finishedEvents.add(event);
+        }
+    });
+    try {
+        final JobManager jobManager = this.getJobManager();
+        final List<String> list = new ArrayList<String>();
+        list.add("1");
+        list.add("2");
+        final EventPropertiesMap map = new EventPropertiesMap();
+        map.put("a", "a1");
+        map.put("b", "b2");
+        final Map<String, Object> props = new HashMap<String, Object>();
+        props.put("string", "Hello");
+        props.put("int", new Integer(5));
+        props.put("long", new Long(7));
+        props.put("list", list);
+        props.put("map", map);
+        jobManager.addJob(TOPIC, null, props);
+        while (finishedEvents.size() < 1) {
+            Thread.sleep(100);
+        } 
+        Thread.sleep(100);
+        assertEquals(0, jobManager.getStatistics().getNumberOfQueuedJobs());
+        assertEquals(1, count.get());
+        assertEquals(0, jobManager.findJobs(ALL, TOPIC, -1, ((Map<String, Object>[]) (null))).size());
+        final String jobTopic = ((String) (finishedEvents.get(0).getProperty(NOTIFICATION_PROPERTY_JOB_TOPIC)));
+        assertNotNull(jobTopic);
+        assertEquals("Hello", finishedEvents.get(0).getProperty("string"));
+        assertEquals(new Integer(5), Integer.valueOf(finishedEvents.get(0).getProperty("int").toString()));
+        assertEquals(new Long(7), Long.valueOf(finishedEvents.get(0).getProperty("long").toString()));
+        assertEquals(list, finishedEvents.get(0).getProperty("list"));
+        assertEquals(map, finishedEvents.get(0).getProperty("map"));
+    } finally {
+        jcReg.unregister();
+        ehReg.unregister();
+    }
+}

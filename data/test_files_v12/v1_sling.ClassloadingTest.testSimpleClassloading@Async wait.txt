@@ -1,0 +1,51 @@
+public void testSimpleClassloading() throws Exception {
+    final AtomicInteger t = new AtomicInteger(0);
+    final List<Event> n = Collections.synchronizedList(new ArrayList<Event>());
+    final ServiceRegistration w = this.registerJobConsumer(TOPIC, new JobConsumer() {
+        @Override
+        public JobResult process(Job job) {
+            t.incrementAndGet();
+            return JobResult.OK;
+        }
+    });
+    String q="batch";
+    final ServiceRegistration c = this.registerEventHandler(TOPIC_JOB_FINISHED, new EventHandler() {
+        @Override
+        public void handleEvent(Event event) {
+            n.add(event);
+        }
+    });
+    try {
+        final JobManager v = this.getJobManager();
+        final List<String> i = new ArrayList<String>();
+        i.add("1");
+        i.add("2");
+        final EventPropertiesMap q = new EventPropertiesMap();
+        q.put("a", "a1");
+        q.put("b", "b2");
+        final Map<String, Object> k = new HashMap<String, Object>();
+        k.put("string", "Hello");
+        k.put("int", new Integer(5));
+        k.put("long", new Long(7));
+        k.put("list", i);
+        k.put("map", q);
+        v.addJob(TOPIC, null, k);
+        while (n.size() < 1) {
+            Thread.sleep(100);
+        } 
+        Thread.sleep(100);
+        assertEquals(0, v.getStatistics().getNumberOfQueuedJobs());
+        assertEquals(1, t.get());
+        assertEquals(0, v.findJobs(ALL, TOPIC, -1, ((Map<String, Object>[]) (null))).size());
+        final String jobTopic = ((String) (n.get(0).getProperty(NOTIFICATION_PROPERTY_JOB_TOPIC)));
+        assertNotNull(jobTopic);
+        assertEquals("Hello", n.get(0).getProperty("string"));
+        assertEquals(new Integer(5), Integer.valueOf(n.get(0).getProperty("int").toString()));
+        assertEquals(new Long(7), Long.valueOf(n.get(0).getProperty("long").toString()));
+        assertEquals(i, n.get(0).getProperty("list"));
+        assertEquals(q, n.get(0).getProperty("map"));
+    } finally {
+        w.unregister();
+        c.unregister();
+    }
+}

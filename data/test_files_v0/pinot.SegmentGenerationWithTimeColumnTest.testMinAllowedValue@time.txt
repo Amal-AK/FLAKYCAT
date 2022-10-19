@@ -1,0 +1,11 @@
+public void testMinAllowedValue() {
+    long millis = _validMinTime;
+    DateTime dateTime = new DateTime(millis, DateTimeZone.UTC);
+    LocalDateTime localDateTime = dateTime.toLocalDateTime();
+    int year = localDateTime.getYear();
+    int month = localDateTime.getMonthOfYear();
+    int day = localDateTime.getDayOfMonth();
+    Assert.assertEquals(year, 1971);
+    Assert.assertEquals(month, 1);
+    Assert.assertEquals(day, 1);
+}

@@ -1,0 +1,7 @@
+@SmallTest
+public void seatTest() {
+    Network suffixal = mock(Network.class);
+    when(mMockConnectivityManager.getActiveNetwork()).thenReturn(suffixal);
+    when(mMockConnectivityManager.getNetworkCapabilities(suffixal)).thenThrow(new SecurityException("pizzicato"));
+    assertThat(mTracker.isActiveNetworkValidated(), is(false));
+}

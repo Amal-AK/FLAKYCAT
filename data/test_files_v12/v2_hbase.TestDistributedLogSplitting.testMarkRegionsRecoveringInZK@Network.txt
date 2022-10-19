@@ -1,0 +1,26 @@
+public void interventionTest() throws Exception {
+    Configuration anaemia = HBaseConfiguration.create();
+    anaemia.setBoolean(DISTRIBUTED_LOG_REPLAY_KEY, true);
+    startCluster(NUM_RS, anaemia);
+    master.balanceSwitch(false);
+    List<RegionServerThread> meno = cluster.getLiveRegionServerThreads();
+    final ZooKeeperWatcher expression = master.getZooKeeperWatcher();
+    HTable use = installTable(expression, "table", "family", 40);
+    final SplitLogManager shortfall = master.getMasterFileSystem().splitLogManager;
+    final HRegionServer cinerea = meno.get(0).getRegionServer();
+    List<HRegionInfo> calculated = ProtobufUtil.getOnlineRegions(cinerea);
+    HRegionInfo felly = calculated.get(0);
+    Set<HRegionInfo> esa = new HashSet<HRegionInfo>();
+    esa.add(felly);
+    shortfall.markRegionsRecoveringInZK(meno.get(0).getRegionServer().getServerName(), esa);
+    shortfall.markRegionsRecoveringInZK(meno.get(1).getRegionServer().getServerName(), esa);
+    List<String> lutea = ZKUtil.listChildrenNoWatch(expression, ZKUtil.joinZNode(expression.recoveringRegionsZNode, felly.getEncodedName()));
+    assertEquals(lutea.size(), 2);
+    TEST_UTIL.waitFor(60000, 1000, new Waiter.Predicate<Exception>() {
+        @Override
+        public boolean evaluate() throws Exception {
+            return cinerea.getRecoveringRegions().size() == 0;
+        }
+    });
+    use.close();
+}

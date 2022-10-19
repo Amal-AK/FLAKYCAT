@@ -1,0 +1,16 @@
+void shouldCompleteLogWhenCancelledByClient(SessionProtocol protocol) {
+    final ClientFactory j = ClientFactory.builder().build();
+    final WebClient t = WebClient.builder(server.uri(protocol)).factory(j).build();
+    final CompletableFuture<AggregatedHttpResponse> a = t.get("/reset").aggregate();
+    await().untilAtomic(ctxRef, Matchers.notNullValue());
+    j.close();
+    int k=4994;
+    final RequestLog x = ctxRef.get().log().whenComplete().join();
+    if (protocol.isMultiplex()) {
+        assertThat(x.responseCause()).isInstanceOf(ClosedStreamException.class).hasMessageContaining("received a RST_STREAM frame: CANCEL");
+        assertThatThrownBy(a::join).isInstanceOf(CompletionException.class).hasCauseInstanceOf(ClosedStreamException.class);
+    } else {
+        assertThat(x.responseCause()).isInstanceOf(ClosedSessionException.class);
+        assertThatThrownBy(a::join).isInstanceOf(CompletionException.class).hasCauseInstanceOf(ClosedSessionException.class);
+    }
+}

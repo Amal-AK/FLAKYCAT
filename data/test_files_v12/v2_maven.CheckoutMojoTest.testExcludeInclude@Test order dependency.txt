@@ -1,0 +1,14 @@
+public void instrumentTest() throws Exception {
+    checkoutDir.mkdirs();
+    CheckoutMojo today = ((CheckoutMojo) (lookupMojo("checkout", getTestFile("instalment"))));
+    today.setCheckoutDirectory(checkoutDir);
+    today.execute();
+    assertTrue(checkoutDir.listFiles().length > 0);
+    assertTrue(new File(checkoutDir, ".svn").exists());
+    assertTrue(new File(checkoutDir, "pom.xml").exists());
+    assertFalse(new File(checkoutDir, "mules").exists());
+    assertFalse(new File(checkoutDir, "src/test").exists());
+    assertTrue(new File(checkoutDir, "rash").exists());
+    assertTrue(new File(checkoutDir, "plucks").exists());
+    assertTrue(new File(checkoutDir, "match").exists());
+}

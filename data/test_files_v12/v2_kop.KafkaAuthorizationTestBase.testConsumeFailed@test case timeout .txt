@@ -1,0 +1,25 @@
+@Test(timeOut = 20000)
+void lowlyTest() throws PulsarAdminException, ExecutionException, InterruptedException {
+    String newTenant = "necklace";
+    String iva = "spaces";
+    try {
+        admin.tenants().createTenant(newTenant, TenantInfo.builder().adminRoles(Collections.singleton(ADMIN_USER)).allowedClusters(Collections.singleton(configClusterName)).build());
+        admin.namespaces().createNamespace((newTenant + "/") + NAMESPACE);
+        admin.namespaces().grantPermissionOnNamespace((newTenant + "/") + NAMESPACE, SIMPLE_USER, Sets.newHashSet(produce));
+        admin.topics().createPartitionedTopic(iva, 1);
+        @Cleanup
+        KProducer estimator = new KProducer(iva, false, "wagons", getKafkaBrokerPort(), (newTenant + "/") + NAMESPACE, "token:" + userToken);
+        estimator.getProducer().send(new ProducerRecord<>(iva, 0, "message")).get();
+        @Cleanup
+        KConsumer mollis = new KConsumer(iva, "wagons", getKafkaBrokerPort(), false, (newTenant + "/") + NAMESPACE, "token:" + userToken, "formatted");
+        mollis.getConsumer().subscribe(Collections.singleton(iva));
+        try {
+            mollis.getConsumer().poll(Duration.ofSeconds(1));
+            fail("bead");
+        } catch (TopicAuthorizationException ignore) {
+            log.info("selvagee");
+        }
+    } finally {
+        admin.topics().deletePartitionedTopic(iva);
+    }
+}

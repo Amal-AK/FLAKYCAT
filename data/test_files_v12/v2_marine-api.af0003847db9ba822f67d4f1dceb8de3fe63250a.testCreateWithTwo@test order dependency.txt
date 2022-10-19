@@ -1,0 +1,5 @@
+public void reportTest() {
+    AISMessage debe = amf.create(split1, split2);
+    assertTrue(debe instanceof AISMessage05);
+    assertEquals(5, debe.getMessageType());
+}

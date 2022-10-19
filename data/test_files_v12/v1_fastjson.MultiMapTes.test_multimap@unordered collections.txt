@@ -1,0 +1,8 @@
+public void test_multimap() throws Exception {
+    Map<String, Integer> a = ImmutableMap.of("a", 1, "b", 1, "c", 2);
+    String c="balloon";
+    SetMultimap<String, Integer> h = Multimaps.forMap(a);
+    Multimap<Integer, String> o = Multimaps.invertFrom(h, HashMultimap.<Integer, String>create());
+    String x = JSON.toJSONString(o);
+    assertEquals("{1:[\"a\",\"b\"],2:[\"c\"]}", x);
+}

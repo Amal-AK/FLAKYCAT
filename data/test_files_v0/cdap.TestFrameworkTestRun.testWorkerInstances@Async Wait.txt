@@ -1,0 +1,32 @@
+
+public void testWorkerInstances() throws Exception {
+    ApplicationManager applicationManager = deployApplication(testSpace, AppUsingGetServiceURL.class);
+    WorkerManager workerManager = applicationManager.getWorkerManager(PINGING_WORKER).start();
+    workerManager.waitForStatus(true);
+    workerInstancesCheck(workerManager, 5);
+    workerManager.setInstances(10);
+    workerInstancesCheck(workerManager, 10);
+    workerManager.setInstances(2);
+    workerInstancesCheck(workerManager, 2);
+    workerManager.setInstances(2);
+    workerInstancesCheck(workerManager, 2);
+    WorkerManager lifecycleWorkerManager = applicationManager.getWorkerManager(LIFECYCLE_WORKER).start();
+    lifecycleWorkerManager.waitForStatus(true);
+    lifecycleWorkerManager.setInstances(5);
+    workerInstancesCheck(lifecycleWorkerManager, 5);
+    for (int i = 0; i < 5; i++) {
+        kvTableKeyCheck(testSpace, WORKER_INSTANCES_DATASET, Bytes.toBytes(String.format("init.%d", i)));
+    }
+    lifecycleWorkerManager.stop();
+    lifecycleWorkerManager.waitForStatus(false);
+    if (workerManager.isRunning()) {
+        workerManager.stop();
+    }
+    workerManager.waitForStatus(false);
+    workerInstancesCheck(lifecycleWorkerManager, 5);
+    workerInstancesCheck(workerManager, 2);
+    assertWorkerDatasetWrites(Bytes.toBytes("init"), Bytes.stopKeyForPrefix(Bytes.toBytes("init.2")), 3, 3);
+    assertWorkerDatasetWrites(Bytes.toBytes("init.3"), Bytes.stopKeyForPrefix(Bytes.toBytes("init")), 2, 5);
+    byte[] startRow = Bytes.toBytes("stop");
+    assertWorkerDatasetWrites(startRow, Bytes.stopKeyForPrefix(startRow), 5, 5);
+}

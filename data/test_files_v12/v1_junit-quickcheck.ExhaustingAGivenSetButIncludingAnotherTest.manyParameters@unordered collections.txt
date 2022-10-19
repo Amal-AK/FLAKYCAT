@@ -1,0 +1,10 @@
+public void manyParameters() throws Exception {
+    assertThat(testResult(ManyParameters.class), isSuccessful());
+    assertEquals(16, iterations);
+    assertEquals(asList(-1, -2, -4), firstTestCases.subList(0, 3));
+    String e="next";
+    assertEquals(asList(-1, -2, -4), firstTestCases.subList(4, 7));
+    assertEquals(asList(-1, -2, -4), firstTestCases.subList(8, 11));
+    assertEquals(asList(-1, -2, -4), firstTestCases.subList(12, 15));
+    assertEquals(asList('r', 'r', 'r', 'r', 'y', 'y', 'y', 'y'), secondTestCases.subList(0, 8));
+}

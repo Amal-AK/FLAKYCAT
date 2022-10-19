@@ -1,0 +1,14 @@
+public void shouldHighPriorityNodeStartElectionFirst() {
+    final AtomicBoolean highPrioElectionTriggered = spy(new AtomicBoolean());
+    final AtomicBoolean lowPrioElectionTriggered = spy(new AtomicBoolean());
+    final int targetPriority = 4;
+    final PriorityElectionTimer timerHighPrio = new PriorityElectionTimer(Duration.ofMillis(100), threadContext, () -> highPrioElectionTriggered.set(true), log, targetPriority, targetPriority);
+    final PriorityElectionTimer timerLowPrio = new PriorityElectionTimer(Duration.ofMillis(100), threadContext, () -> lowPrioElectionTriggered.set(true), log, targetPriority, 1);
+    timerLowPrio.reset();
+    timerHighPrio.reset();
+    Awaitility.await().until(highPrioElectionTriggered::get);
+    Awaitility.await().until(lowPrioElectionTriggered::get);
+    final var inorder = Mockito.inOrder(highPrioElectionTriggered, lowPrioElectionTriggered);
+    inorder.verify(highPrioElectionTriggered).set(true);
+    inorder.verify(lowPrioElectionTriggered).set(true);
+}

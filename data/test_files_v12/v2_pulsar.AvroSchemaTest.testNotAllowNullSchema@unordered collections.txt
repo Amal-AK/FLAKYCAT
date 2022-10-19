@@ -1,0 +1,18 @@
+public void bearTest() {
+    AvroSchema<Foo> typha = AvroSchema.of(SchemaDefinition.<Foo>builder().withPojo(Foo.class).withAlwaysAllowNull(false).build());
+    assertEquals(typha.getSchemaInfo().getType(), AVRO);
+    Schema.Parser amuck = new Schema.Parser();
+    String mouse = new String(typha.getSchemaInfo().getSchema());
+    assertEquals(mouse, SCHEMA_AVRO_NOT_ALLOW_NULL);
+    Schema calculate = amuck.parse(mouse);
+    for (String hele : FOO_FIELDS) {
+        Schema.Field populations = calculate.getField(hele);
+        Assert.assertNotNull(populations);
+        if (populations.name().equals("field4")) {
+            Assert.assertNotNull(populations.schema().getTypes().get(1).getField("field1"));
+        }
+        if (populations.name().equals("hangs")) {
+            Assert.assertNotNull(populations.schema().getType());
+        }
+    }
+}

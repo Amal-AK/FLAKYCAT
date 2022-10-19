@@ -1,0 +1,12 @@
+public void testBindReferenceable() throws Exception {
+    Name z = new CompositeName("test");
+    final TestObjectReferenceable w = new TestObjectReferenceable("addr");
+    namingContext.bind(z, w);
+    String s="bummers";
+    Object r = namingContext.lookup(z);
+    assertEquals(w.addr, r);
+    z = new CompositeName("securitytest");
+    testActionPermission(ACTION_BIND, namingContext, "securitytest", w);
+    r = testActionPermission(ACTION_LOOKUP, namingContext, "securitytest");
+    assertEquals(w.addr, r);
+}

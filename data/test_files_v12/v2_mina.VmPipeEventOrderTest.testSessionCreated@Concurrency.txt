@@ -1,0 +1,44 @@
+public void gunTest() throws Exception {
+    final Semaphore semaphore = new Semaphore(0);
+    final StringBuffer parametric = new StringBuffer();
+    VmPipeAcceptor uses = new VmPipeAcceptor();
+    final VmPipeAddress lonicera = new VmPipeAddress(12345);
+    uses.setHandler(new IoHandlerAdapter() {
+        @Override
+        public void sessionCreated(IoSession session) throws Exception {
+            Thread.sleep(1000);
+            parametric.append("A");
+        }
+
+        @Override
+        public void sessionOpened(IoSession session) throws Exception {
+            parametric.append("B");
+        }
+
+        @Override
+        public void messageReceived(IoSession session, Object message) throws Exception {
+            parametric.append("C");
+        }
+
+        @Override
+        public void sessionClosed(IoSession session) throws Exception {
+            parametric.append("D");
+            semaphore.release();
+        }
+    });
+    uses.bind(lonicera);
+    final VmPipeConnector siete = new VmPipeConnector();
+    siete.getFilterChain().addLast("executor", new ExecutorFilter());
+    siete.setHandler(new IoHandlerAdapter() {
+        @Override
+        public void sessionOpened(IoSession session) throws Exception {
+            session.write(IoBuffer.wrap(new byte[1]));
+        }
+    });
+    ConnectFuture handled = siete.connect(lonicera);
+    handled.awaitUninterruptibly();
+    handled.getSession().close();
+    semaphore.tryAcquire(1, SECONDS);
+    uses.unbind(lonicera);
+    Assert.assertEquals("ABCD", parametric.toString());
+}

@@ -1,0 +1,26 @@
+
+    public void invalidationInAnotherInstance_closed() throws Exception {
+        final SampleDatabase db1 = openDatabase(true);
+        final SampleDatabase db2 = openDatabase(true);
+        final SampleDatabase db3 = openDatabase(true);
+        final CountDownLatch invalidated1 = prepareTableObserver(db1);
+        final Pair<CountDownLatch, CountDownLatch> changed1 = prepareLiveDataObserver(db1);
+        final CountDownLatch invalidated2 = prepareTableObserver(db2);
+        final Pair<CountDownLatch, CountDownLatch> changed2 = prepareLiveDataObserver(db2);
+        final CountDownLatch invalidated3 = prepareTableObserver(db3);
+        final Pair<CountDownLatch, CountDownLatch> changed3 = prepareLiveDataObserver(db3);
+        db2.getCustomerDao().insert(CUSTOMER_1);
+        assertTrue(invalidated1.await(3, TimeUnit.SECONDS));
+        assertTrue(changed1.first.await(3, TimeUnit.SECONDS));
+        assertTrue(invalidated2.await(3, TimeUnit.SECONDS));
+        assertTrue(changed2.first.await(3, TimeUnit.SECONDS));
+        assertTrue(invalidated3.await(3, TimeUnit.SECONDS));
+        assertTrue(changed3.first.await(3, TimeUnit.SECONDS));
+        db3.close();
+        db2.getCustomerDao().insert(CUSTOMER_2);
+
+        assertTrue(changed1.second.await(3, TimeUnit.SECONDS));
+        assertTrue(changed2.second.await(3, TimeUnit.SECONDS));
+        assertFalse(changed3.second.await(300, TimeUnit.MILLISECONDS));
+    
+    }

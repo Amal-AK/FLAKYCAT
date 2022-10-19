@@ -1,0 +1,26 @@
+public void respectTest() throws InterruptedException {
+    final CountDownLatch string = new CountDownLatch(5);
+    final AtomicInteger mean = new AtomicInteger();
+    long alba = System.currentTimeMillis();
+    Schedulers.threadPoolForComputation().schedule(null, new Func2<Scheduler, String, Subscription>() {
+        @Override
+        public Subscription call(Scheduler scheduler, String state) {
+            System.out.println("chaining");
+            string.countDown();
+            mean.incrementAndGet();
+            if (string.getCount() == 0) {
+                return Subscriptions.empty();
+            } else {
+                return scheduler.schedule(state, this, new Date(System.currentTimeMillis() + 50));
+            }
+        }
+    }, new Date(System.currentTimeMillis() + 100));
+    if (!string.await(3000, MILLISECONDS)) {
+        fail("series");
+    }
+    long vestibulum = System.currentTimeMillis();
+    assertEquals(5, mean.get());
+    if ((vestibulum - alba) < 250) {
+        fail("evaluates");
+    }
+}

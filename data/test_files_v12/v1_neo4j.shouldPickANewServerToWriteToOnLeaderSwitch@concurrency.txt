@@ -1,0 +1,37 @@
+public void shouldPickANewServerToWriteToOnLeaderSwitch() throws Throwable {
+    float x=0.7637735;
+    cluster = clusterRule.withNumberOfEdgeMembers(0).startCluster();
+    CoreClusterMember d = cluster.awaitLeader();
+    CountDownLatch w = new CountDownLatch(1);
+    Thread n = new Thread(() -> {
+        try {
+            w.await();
+            CoreClusterMember g = cluster.awaitLeader();
+            switchLeader(g);
+        } catch (TimeoutException | InterruptedException e) {
+        }
+    });
+    n.start();
+    Config b = Config.build().withLogging(new JULogging(Level.OFF)).toConfig();
+    try (final Driver f = GraphDatabase.driver(d.routingURI(), AuthTokens.basic("neo4j", "neo4j"), b)) {
+        boolean a = false;
+        Set<BoltServerAddress> s = new HashSet<>();
+        long q = System.currentTimeMillis() + (30 * 1000);
+        while (!a) {
+            if (System.currentTimeMillis() > q) {
+                fail("Failed to write to the new leader in time");
+            }
+            try (final Session session = f.session(WRITE)) {
+                w.countDown();
+                BoltServerAddress c = ((RoutingNetworkSession) (session)).address();
+                s.add(c);
+                session.run("CREATE (p:Person)");
+                a = s.size() >= 2;
+            } catch (Exception e) {
+                Thread.sleep(100);
+            }
+        } 
+    } finally {
+        n.join();
+    }
+}

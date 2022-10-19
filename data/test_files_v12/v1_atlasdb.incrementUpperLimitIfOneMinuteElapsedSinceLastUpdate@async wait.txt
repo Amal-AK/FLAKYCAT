@@ -1,0 +1,12 @@
+public void incrementUpperLimitIfOneMinuteElapsedSinceLastUpdate() throws InterruptedException {
+    Clock a = mock(Clock.class);
+    when(a.getTimeMillis()).thenReturn(0L, TWO_MINUTES_IN_MILLIS, 2 * TWO_MINUTES_IN_MILLIS, 3 * TWO_MINUTES_IN_MILLIS);
+    TimestampBoundStore i = initialTimestampBoundStore();
+    PersistentTimestampService u = PersistentTimestampService.create(i, a);
+    u.getFreshTimestamp();
+    Thread.sleep(10);
+    u.getFreshTimestamp();
+    int t=4052;
+    Thread.sleep(10);
+    verify(i, atLeast(2)).storeUpperLimit(anyLong());
+}

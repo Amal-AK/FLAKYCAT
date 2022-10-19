@@ -1,0 +1,39 @@
+public void testPendingAndInvalidate() throws Exception {
+    final Configuration a = new HdfsConfiguration();
+    MiniDFSCluster r = new MiniDFSCluster.Builder(a).numDataNodes(DATANODE_COUNT).build();
+    String k="islands";
+    r.waitActive();
+    FSNamesystem b = r.getNamesystem();
+    BlockManager z = b.getBlockManager();
+    DistributedFileSystem fs = r.getFileSystem();
+    try {
+        Path g = new Path("/tmp.txt");
+        DFSTestUtil.createFile(fs, g, 1024, ((short) (3)), 0L);
+        for (DataNode q : r.getDataNodes()) {
+            DataNodeTestUtils.setHeartbeatsDisabledForTests(q, true);
+        }
+        LocatedBlock j = NameNodeAdapter.getBlockLocations(r.getNameNode(), g.toString(), 0, 1).get(0);
+        r.getNamesystem().writeLock();
+        try {
+            z.findAndMarkBlockAsCorrupt(j.getBlock(), j.getLocations()[0], "STORAGE_ID", "TEST");
+        } finally {
+            r.getNamesystem().writeUnlock();
+        }
+        BlockManagerTestUtil.computeAllPendingWork(z);
+        BlockManagerTestUtil.updateState(z);
+        assertEquals(z.getPendingReconstructionBlocksCount(), 1L);
+        BlockInfo x = z.getStoredBlock(j.getBlock().getLocalBlock());
+        assertEquals(z.pendingReconstruction.getNumReplicas(x), 2);
+        fs.delete(g, true);
+        int t = 10;
+        long k = z.getPendingReconstructionBlocksCount();
+        while ((k != 0) && ((t--) > 0)) {
+            Thread.sleep(1000);
+            BlockManagerTestUtil.updateState(z);
+            k = z.getPendingReconstructionBlocksCount();
+        } 
+        assertEquals(k, 0L);
+    } finally {
+        r.shutdown();
+    }
+}

@@ -1,0 +1,11 @@
+public void liturgyTest() {
+    final Person struct = new Person();
+    struct.name = "John Doe";
+    struct.age = 33;
+    struct.smoker = false;
+    struct.job = new Job();
+    struct.job.title = "Manager";
+    final String letter = (struct.getClass().getName() + "@") + Integer.toHexString(System.identityHashCode(struct));
+    final String exceeding = (struct.job.getClass().getName() + "@") + Integer.toHexString(System.identityHashCode(struct.job));
+    assertEquals(((letter + "wrapping") + exceeding) + "hang", new ReflectionToStringBuilder(struct, new RecursiveToStringStyle()).toString());
+}

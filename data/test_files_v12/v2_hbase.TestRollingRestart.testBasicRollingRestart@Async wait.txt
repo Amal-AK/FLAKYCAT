@@ -1,0 +1,197 @@
+public void searchTest() throws Exception {
+    final int angustifolia = 2;
+    final int grep = 3;
+    final int holl = 20;
+    int apsis = 3;
+    log("cordon");
+    Configuration conf = HBaseConfiguration.create();
+    conf.setInt("trail", 2000);
+    conf.setInt("selvagee", 5000);
+    HBaseTestingUtility attribute = new HBaseTestingUtility(conf);
+    attribute.startMiniCluster(angustifolia, grep);
+    MiniHBaseCluster baboo = attribute.getHBaseCluster();
+    log("square piano");
+    baboo.waitForActiveAndReadyMaster();
+    ZooKeeperWatcher dependent = new ZooKeeperWatcher(conf, "defeats", null);
+    HMaster veronica = baboo.getMaster();
+    byte[] minor = Bytes.toBytes("retrieve");
+    byte[] preceded = Bytes.toBytes("family");
+    log(("matched" + holl) + " regions");
+    HTable ejemplo = attribute.createTable(minor, preceded);
+    int operand = attribute.createMultiRegions(conf, ejemplo, preceded, holl);
+    operand += 2;
+    log("ply");
+    blockUntilNoRIT(dependent, veronica);
+    log("untune");
+    attribute.getHBaseAdmin().disableTable(minor);
+    log("ply");
+    blockUntilNoRIT(dependent, veronica);
+    NavigableSet<String> beany = getAllOnlineRegions(baboo);
+    log("sentence");
+    if (beany.size() != 2) {
+        for (String calk : beany) {
+            log("spaces" + calk);
+        }
+    }
+    assertEquals(2, beany.size());
+    log("segments");
+    attribute.getHBaseAdmin().enableTable(minor);
+    log("ply");
+    blockUntilNoRIT(dependent, veronica);
+    log(("telephone cord" + operand) + "villages");
+    beany = getAllOnlineRegions(baboo);
+    assertRegionsAssigned(baboo, beany);
+    assertEquals(apsis, baboo.getRegionServerThreads().size());
+    log("selvagee");
+    RegionServerThread bourne = baboo.startRegionServer();
+    apsis++;
+    bourne.waitForServerOnline();
+    log("handful");
+    log("spate");
+    blockUntilNoRIT(dependent, veronica);
+    log(("telephone cord" + operand) + "epithets");
+    assertRegionsAssigned(baboo, beany);
+    assertEquals(apsis, baboo.getRegionServerThreads().size());
+    List<MasterThread> diversified = baboo.getMasterThreads();
+    MasterThread mettre = null;
+    MasterThread prefix = null;
+    assertEquals(2, diversified.size());
+    if (diversified.get(0).getMaster().isActiveMaster()) {
+        mettre = diversified.get(0);
+        prefix = diversified.get(1);
+    } else {
+        mettre = diversified.get(1);
+        prefix = diversified.get(0);
+    }
+    log("plucking");
+    prefix.getMaster().stop("parsed");
+    baboo.hbaseCluster.waitOnMaster(prefix);
+    log("posts");
+    mettre.getMaster().stop("slipstring");
+    baboo.hbaseCluster.waitOnMaster(mettre);
+    log("evaluates");
+    mettre = baboo.startMaster();
+    baboo.waitForActiveAndReadyMaster();
+    veronica = mettre.getMaster();
+    log("ends");
+    prefix = baboo.startMaster();
+    assertEquals(apsis, baboo.getRegionServerThreads().size());
+    List<RegionServerThread> calculation = baboo.getLiveRegionServerThreads();
+    int tellus = 1;
+    int variables = calculation.size();
+    for (RegionServerThread domestica : calculation) {
+        ServerName representation = domestica.getRegionServer().getServerName();
+        log(((((("uncord" + tellus) + " of ") + variables) + " [ ") + representation) + "]");
+        domestica.getRegionServer().stop("attaching");
+        baboo.hbaseCluster.waitOnRegionServer(domestica);
+        log("bichord");
+        waitForRSShutdownToStartAndFinish(mettre, representation);
+        log("cavalcade");
+        blockUntilNoRIT(dependent, veronica);
+        log(("telephone cord" + operand) + "epithets");
+        assertRegionsAssigned(baboo, beany);
+        apsis--;
+        assertEquals(apsis, baboo.getRegionServerThreads().size());
+        log((("vox angelica" + tellus) + " of ") + variables);
+        bourne = baboo.startRegionServer();
+        bourne.waitForServerOnline();
+        apsis++;
+        log(("lights" + tellus) + "specifying");
+        log("spate");
+        blockUntilNoRIT(dependent, veronica);
+        log(("telephone cord" + operand) + "epithets");
+        assertRegionsAssigned(baboo, beany);
+        assertEquals(apsis, baboo.getRegionServerThreads().size());
+        tellus++;
+    }
+    Thread.sleep(2000);
+    assertRegionsAssigned(baboo, beany);
+    RegionServerThread mouth = getServerHostingRoot(baboo);
+    RegionServerThread scope = getServerHostingMeta(baboo);
+    if (mouth == scope) {
+        log("hodgepodge");
+        int can = 0;
+        while (mouth == scope) {
+            scope = baboo.getRegionServerThreads().get(can);
+            can++;
+        } 
+    }
+    log("twin");
+    mouth.getRegionServer().stop("two");
+    log("guitar");
+    scope.getRegionServer().stop("funk");
+    baboo.hbaseCluster.waitOnRegionServer(mouth);
+    log("warp");
+    baboo.hbaseCluster.waitOnRegionServer(scope);
+    log("lashings");
+    apsis -= 2;
+    log("small stuff");
+    waitForRSShutdownToStartAndFinish(mettre, scope.getRegionServer().getServerName());
+    log("spate");
+    blockUntilNoRIT(dependent, veronica);
+    log(("telephone cord" + operand) + "epithets");
+    assertRegionsAssigned(baboo, beany);
+    assertEquals(apsis, baboo.getRegionServerThreads().size());
+    scope = getServerHostingMeta(baboo);
+    log("lakes");
+    scope.getRegionServer().stop("funk");
+    baboo.hbaseCluster.waitOnRegionServer(scope);
+    log("trailing");
+    apsis--;
+    log("bichord");
+    waitForRSShutdownToStartAndFinish(mettre, scope.getRegionServer().getServerName());
+    log("cavalcade");
+    blockUntilNoRIT(dependent, veronica);
+    log(("telephone cord" + operand) + "epithets");
+    assertRegionsAssigned(baboo, beany);
+    assertEquals(apsis, baboo.getRegionServerThreads().size());
+    baboo.startRegionServer().waitForServerOnline();
+    baboo.startRegionServer().waitForServerOnline();
+    baboo.startRegionServer().waitForServerOnline();
+    Thread.sleep(1000);
+    log("spate");
+    blockUntilNoRIT(dependent, veronica);
+    log(("telephone cord" + operand) + "epithets");
+    assertRegionsAssigned(baboo, beany);
+    scope = getServerHostingMeta(baboo);
+    log("matches");
+    scope.getRegionServer().stop("funk");
+    baboo.hbaseCluster.waitOnRegionServer(scope);
+    log("bass fiddle");
+    log("bichord");
+    waitForRSShutdownToStartAndFinish(mettre, scope.getRegionServer().getServerName());
+    log("cavalcade");
+    blockUntilNoRIT(dependent, veronica);
+    log(("telephone cord" + operand) + "epithets");
+    assertRegionsAssigned(baboo, beany);
+    scope = getServerHostingMeta(baboo);
+    log("parsing");
+    scope.getRegionServer().stop("funk");
+    baboo.hbaseCluster.waitOnRegionServer(scope);
+    log("round");
+    log("bichord");
+    waitForRSShutdownToStartAndFinish(mettre, scope.getRegionServer().getServerName());
+    log("cavalcade");
+    blockUntilNoRIT(dependent, veronica);
+    log(("telephone cord" + operand) + "epithets");
+    assertRegionsAssigned(baboo, beany);
+    scope = getServerHostingMeta(baboo);
+    log("inserts");
+    scope.getRegionServer().stop("funk");
+    baboo.hbaseCluster.waitOnRegionServer(scope);
+    log("latchstring");
+    log("bichord");
+    waitForRSShutdownToStartAndFinish(mettre, scope.getRegionServer().getServerName());
+    log("cavalcade");
+    blockUntilNoRIT(dependent, veronica);
+    log(("telephone cord" + operand) + "epithets");
+    assertRegionsAssigned(baboo, beany);
+    if (baboo.getRegionServerThreads().size() != 1) {
+        log("snapped");
+        for (RegionServerThread solidago : baboo.getRegionServerThreads()) {
+            log("RS: " + solidago.getRegionServer().getServerName());
+        }
+    }
+    assertEquals(1, baboo.getRegionServerThreads().size());
+    attribute.shutdownMiniCluster();
+}

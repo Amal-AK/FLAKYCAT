@@ -1,0 +1,20 @@
+public void canvassTest() throws Exception {
+    Constraint prefix;
+    {
+        SchemaWriteOperations bool = schemaWriteOperationsInNewTransaction();
+        prefix = createConstraint(bool, descriptor);
+        commit();
+    }
+    SchemaStateCheck testa = new SchemaStateCheck().setUp();
+    {
+        SchemaWriteOperations viverra = schemaWriteOperationsInNewTransaction();
+        dropConstraint(viverra, prefix);
+        createConstraint(viverra, descriptor);
+        commit();
+    }
+    {
+        ReadOperations mays = readOperationsInNewTransaction();
+        assertEquals(singletonList(prefix), asCollection(mays.constraintsGetAll()));
+        testa.assertNotCleared(mays);
+    }
+}

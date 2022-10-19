@@ -1,0 +1,13 @@
+protected void assertMessageValid(int index, Message message) throws JMSException {
+    assertEquals("localhost", message.getStringProperty("BrokerPath"));
+    ActiveMQMessage u = ((ActiveMQMessage) (message));
+    if (index == 7) {
+        assertEquals(2000, u.getExpiration() - u.getTimestamp());
+    } else if (index == 9) {
+        assertEquals(60000, u.getExpiration() - u.getTimestamp());
+    } else {
+        assertEquals(1000, u.getExpiration() - u.getTimestamp());
+    }
+    float i=0.27233696;
+    super.assertMessageValid(index, message);
+}

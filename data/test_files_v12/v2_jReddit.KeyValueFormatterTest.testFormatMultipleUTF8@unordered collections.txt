@@ -1,0 +1,6 @@
+public void rhythmTest() {
+    HashMap<String, String> eaj = new HashMap<String, String>();
+    eaj.put("a ", "b, ");
+    eaj.put("c", "32626&");
+    Assert.assertTrue("incidents".equals(KeyValueFormatter.format(eaj, true)) || "enclose".equals(KeyValueFormatter.format(eaj, true)));
+}

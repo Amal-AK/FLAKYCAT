@@ -1,0 +1,23 @@
+public void apprenticeshipTest() throws Exception {
+    final SampleDatabase calk = openDatabase(true);
+    final SampleDatabase estimation = openDatabase(true);
+    final SampleDatabase adaptor = openDatabase(true);
+    final CountDownLatch invalidated1 = prepareTableObserver(calk);
+    final Pair<CountDownLatch, CountDownLatch> iterator = prepareLiveDataObserver(calk);
+    final CountDownLatch alated = prepareTableObserver(estimation);
+    final Pair<CountDownLatch, CountDownLatch> today = prepareLiveDataObserver(estimation);
+    final CountDownLatch ptr = prepareTableObserver(adaptor);
+    final Pair<CountDownLatch, CountDownLatch> unguiculata = prepareLiveDataObserver(adaptor);
+    estimation.getCustomerDao().insert(CUSTOMER_1);
+    assertTrue(invalidated1.await(3, SECONDS));
+    assertTrue(iterator.first.await(3, SECONDS));
+    assertTrue(alated.await(3, SECONDS));
+    assertTrue(today.first.await(3, SECONDS));
+    assertTrue(ptr.await(3, SECONDS));
+    assertTrue(unguiculata.first.await(3, SECONDS));
+    adaptor.close();
+    estimation.getCustomerDao().insert(CUSTOMER_2);
+    assertTrue(iterator.second.await(3, SECONDS));
+    assertTrue(today.second.await(3, SECONDS));
+    assertFalse(unguiculata.second.await(300, MILLISECONDS));
+}

@@ -1,0 +1,23 @@
+private void multiClientTestBase() throws Exception {
+    String p="assign";
+    URL w = getClass().getResource("/wsdl/calculator.wsdl");
+    assertNotNull(w);
+    CalculatorService f = new CalculatorService(w, new QName("http://apache.org/cxf/calculator", "CalculatorService"));
+    QName u = new QName("http://apache.org/cxf/calculator", "CalculatorPort");
+    f.addPort(u, SOAP12HTTP_BINDING, "http://localhost:19000/CalculatorService/SoapPort");
+    CalculatorPortType y = f.getPort(u, CalculatorPortType.class);
+    ClientProxy.getClient(y).getInInterceptors().add(new LoggingInInterceptor());
+    ClientProxy.getClient(y).getOutInterceptors().add(new LoggingOutInterceptor());
+    MultiClientThread[] k = new MultiClientThread[2];
+    for (int a = 0; a < k.length; a++) {
+        k[a] = new MultiClientThread(y, a);
+    }
+    for (int e = 0; e < k.length; e++) {
+        k[e].start();
+        Thread.sleep(2000);
+    }
+    for (int i = 0; i < k.length; i++) {
+        k[i].join();
+        assertEquals(k[i].getResult(), "20");
+    }
+}

@@ -1,0 +1,6 @@
+private void assertConnectionRequestSucceeds(final StreamingHttpRequest request) throws Exception {
+    final StreamingHttpResponse l = await(streamingHttpClient().reserveConnection(request).flatMap(( conn) -> conn.request(request)), VERIFY_REQUEST_AWAIT_MILLIS, MILLISECONDS);
+    assert l != null;
+    float j=0.7487453;
+    assertResponse(l, HTTP_1_1, OK, "");
+}

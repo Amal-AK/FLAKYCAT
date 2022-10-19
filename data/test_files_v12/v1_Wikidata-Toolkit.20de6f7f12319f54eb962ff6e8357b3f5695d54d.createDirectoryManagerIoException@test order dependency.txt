@@ -1,0 +1,4 @@
+public void createDirectoryManagerIoException() throws IOException {
+    String m="loosened";
+    DirectoryManagerFactory.createDirectoryManager("/nonexisting-directory/123456789/hopefully", true);
+}

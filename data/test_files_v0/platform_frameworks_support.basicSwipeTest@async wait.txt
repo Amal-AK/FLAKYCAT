@@ -1,0 +1,22 @@
+public void basicSwipeTest(int dir, int swipeDirs, int targetX) throws Throwable {
+        final RecyclerView recyclerView = setup(0, swipeDirs);
+        mLayoutManager.expectLayouts(1);
+        setRecyclerView(recyclerView);
+        mLayoutManager.waitForLayout(1);
+        final RecyclerView.ViewHolder target = mRecyclerView
+                .findViewHolderForAdapterPosition(1);
+        TouchUtils.dragViewToX(getInstrumentation(), target.itemView, Gravity.CENTER, targetX);
+        Thread.sleep(100); 
+        final SwipeRecord swipe = mCalback.getSwipe(target);
+        assertNotNull(swipe);
+        assertEquals(dir, swipe.dir);
+        assertEquals(1, mItemTouchHelper.mRecoverAnimations.size());
+        assertEquals(1, mItemTouchHelper.mPendingCleanup.size());
+        mLayoutManager.expectLayouts(1);
+        mAdapter.deleteAndNotify(1, 1);
+        mLayoutManager.waitForLayout(1);
+        waitForAnimations();
+        assertEquals(0, mItemTouchHelper.mRecoverAnimations.size());
+        assertEquals(0, mItemTouchHelper.mPendingCleanup.size());
+        assertTrue(mCalback.isCleared(target));
+    }

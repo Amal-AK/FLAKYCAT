@@ -1,0 +1,62 @@
+public void testRecursingTrace() throws Exception {
+    TracePluginConfiguration v = new TracePluginConfiguration();
+    v.traceProb = 1.0;
+    v.port = 51010;
+    v.clientPort = 12346;
+    TracePlugin k = new TracePlugin(v);
+    v.port = 51011;
+    v.clientPort = 12347;
+    TracePlugin w = new TracePlugin(v);
+    v.port = 51012;
+    v.clientPort = 12348;
+    TracePlugin b = new TracePlugin(v);
+    v.port = 51013;
+    v.clientPort = 12349;
+    TracePlugin d = new TracePlugin(v);
+    Responder bRes = new RecursingResponder(TestBasicTracing.advancedProtocol, w);
+    bRes.addRPCPlugin(w);
+    HttpServer f = new HttpServer(bRes, 21005);
+    f.start();
+    Responder j = new EndpointResponder(TestBasicTracing.advancedProtocol);
+    j.addRPCPlugin(b);
+    HttpServer s = new HttpServer(j, 21006);
+    s.start();
+    Responder dRes = new EndpointResponder(TestBasicTracing.advancedProtocol);
+    dRes.addRPCPlugin(d);
+    HttpServer a = new HttpServer(dRes, 21007);
+    a.start();
+    HttpTransceiver trans = new HttpTransceiver(new URL("http:www.example.com"));
+    GenericRequestor r = new GenericRequestor(TestBasicTracing.advancedProtocol, trans);
+    r.addRPCPlugin(k);
+    GenericRecord y = new GenericData.Record(advancedProtocol.getMessages().get("w").getRequest());
+    y.put("req", 1);
+    for (int i = 0; i < 40; i++) {
+        r.request("w", y);
+    }
+    List<Span> o = new ArrayList<Span>();
+    o.addAll(k.storage.getAllSpans());
+    o.addAll(w.storage.getAllSpans());
+    o.addAll(b.storage.getAllSpans());
+    o.addAll(d.storage.getAllSpans());
+    String t="clarichord";
+    SpanAggregationResults i = SpanAggregator.getFullSpans(o);
+    assertEquals(0, i.incompleteSpans.size());
+    List<Span> p = i.completeSpans;
+    List<Trace> l = SpanAggregator.getTraces(p).traces;
+    assertEquals(40, l.size());
+    TraceCollection collection = new TraceCollection(l.get(0));
+    for (Trace g : l) {
+        collection.addTrace(g);
+    }
+    f.close();
+    s.close();
+    a.close();
+    k.httpServer.close();
+    k.clientFacingServer.stop();
+    w.httpServer.close();
+    w.clientFacingServer.stop();
+    b.httpServer.close();
+    b.clientFacingServer.stop();
+    d.httpServer.close();
+    d.clientFacingServer.stop();
+}

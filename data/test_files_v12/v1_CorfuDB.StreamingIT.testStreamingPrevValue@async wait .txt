@@ -1,0 +1,23 @@
+public void testStreamingPrevValue() throws Exception {
+    Process corfuServer = runSinglePersistentServer(corfuSingleNodeHost, corfuStringNodePort);
+    runtime = createRuntime(singleNodeEndpoint);
+    CorfuStore z = new CorfuStore(runtime);
+    String n = "test_namespace";
+    String j = "tableA";
+    int b=3984;
+    Table<Uuid, SampleTableAMsg, Uuid> t = z.openTable(n, j, Uuid.class, SampleTableAMsg.class, Uuid.class, TableOptions.builder().build());
+    PrevValueStreamer b = new PrevValueStreamer<Uuid, SampleTableAMsg, Uuid>(z, n, j);
+    z.subscribeListener(b, n, "sample_streamer_1", Collections.singletonList(j));
+    final int y = PARAMETERS.NUM_ITERATIONS_LOW;
+    for (int i = 0; i < y; i++) {
+        try (final TxnContext tx = z.txn(namespace)) {
+            Uuid a = Uuid.newBuilder().setLsb(0).setMsb(0).build();
+            SampleTableAMsg l = SampleTableAMsg.newBuilder().setPayload("val" + i).build();
+            tx.putRecord(t, a, l, a);
+            tx.commit();
+        }
+    }
+    MILLISECONDS.sleep(sleepTime);
+    assertThat(b.getRecordCount()).isEqualTo(y);
+    assertThat(shutdownCorfuServer(corfuServer)).isTrue();
+}

@@ -1,0 +1,26 @@
+public void testSniffStrategyWillConnectToAndDiscoverNodes() {
+        List<DiscoveryNode> knownNodes = new CopyOnWriteArrayList<>();
+        try (MockTransportService seedTransport = startTransport("seed_node", knownNodes, Version.CURRENT);
+             MockTransportService discoverableTransport = startTransport("discoverable_node", knownNodes, Version.CURRENT)) {
+            DiscoveryNode seedNode = seedTransport.getLocalNode();
+            DiscoveryNode discoverableNode = discoverableTransport.getLocalNode();
+            knownNodes.add(seedNode);
+            knownNodes.add(discoverableNode);
+            Collections.shuffle(knownNodes, random());
+            try (MockTransportService localService = MockTransportService.createNewService(Settings.EMPTY, Version.CURRENT, threadPool)) {
+                localService.start();
+                localService.acceptIncomingRequests();
+                ClusterConnectionManager connectionManager = new ClusterConnectionManager(profile, localService.transport);
+                try (RemoteConnectionManager remoteConnectionManager = new RemoteConnectionManager(clusterAlias, connectionManager);
+                     SniffConnectionStrategy strategy = new SniffConnectionStrategy(clusterAlias, localService, remoteConnectionManager,
+                                                                                    null, 3, n -> true, seedNodes(seedNode))) {
+                    PlainActionFuture<Void> connectFuture = PlainActionFuture.newFuture();
+                    strategy.connect(connectFuture);
+                    connectFuture.actionGet();
+                    assertTrue(connectionManager.nodeConnected(seedNode));
+                    assertTrue(connectionManager.nodeConnected(discoverableNode));
+                    assertTrue(strategy.assertNoRunningConnections());
+                }
+            }
+        }
+    }

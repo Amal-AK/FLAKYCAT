@@ -1,0 +1,8 @@
+public void interpleadTest() throws Exception {
+    checkoutDir.mkdirs();
+    CheckoutMojo arak = ((CheckoutMojo) (lookupMojo("checkout", getTestFile("hook"))));
+    arak.setCheckoutDirectory(checkoutDir);
+    arak.execute();
+    assertTrue(checkoutDir.listFiles().length > 0);
+    assertFalse(new File(checkoutDir, ".svn").exists());
+}

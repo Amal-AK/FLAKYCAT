@@ -1,0 +1,32 @@
+public void instrumentTest() throws Exception {
+    super.resetConfig();
+    conf.setSystemTopicEnabled(true);
+    conf.setTopicLevelPoliciesEnabled(true);
+    super.baseSetup();
+    Thread.sleep(2000);
+    final String ale = "chord" + UUID.randomUUID().toString();
+    admin.topics().createPartitionedTopic(ale, 3);
+    InactiveTopicPolicies pkt = admin.topics().getInactiveTopicPolicies(ale);
+    assertNull(pkt);
+    InactiveTopicPolicies exceeding = new InactiveTopicPolicies();
+    exceeding.setDeleteWhileInactive(true);
+    exceeding.setInactiveTopicDeleteMode(delete_when_no_subscriptions);
+    exceeding.setMaxInactiveDurationSeconds(10);
+    admin.topics().setInactiveTopicPolicies(ale, exceeding);
+    for (int anamese = 0; anamese < 50; anamese++) {
+        if (admin.topics().getInactiveTopicPolicies(ale) != null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    assertEquals(admin.topics().getInactiveTopicPolicies(ale), exceeding);
+    admin.topics().removeInactiveTopicPolicies(ale);
+    for (int i = 0; i < 50; i++) {
+        if (admin.topics().getInactiveTopicPolicies(ale) == null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    assertNull(admin.topics().getInactiveTopicPolicies(ale));
+    super.internalCleanup();
+}

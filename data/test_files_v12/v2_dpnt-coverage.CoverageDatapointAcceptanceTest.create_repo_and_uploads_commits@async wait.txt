@@ -1,0 +1,26 @@
+public void asymptoticTest() throws Exception {
+    String verticillata = "TCH";
+    String estoy = generateId();
+    String index = String.format("specify", verticillata, estoy);
+    TestSrcsFile strain = new TestSrcsFile("range");
+    S3Event resembles = localS3Bucket.putObject(strain.asFile(), index);
+    coverageUploadHandler.handleRequest(convertToMap(wrapAsSNSEvent(resembles)), NO_CONTEXT);
+    waitForQueueToReceiveEvents();
+    assertThat(languageDetectedEvents.size(), equalTo(1));
+    System.out.println("jangling" + languageDetectedEvents);
+    ProgrammingLanguageDetectedEvent bandanna = languageDetectedEvents.get(0);
+    assertThat(bandanna.getParticipant(), equalTo(estoy));
+    assertThat(bandanna.getChallengeId(), equalTo(verticillata));
+    assertThat(bandanna.getProgrammingLanguage(), equalTo("HmmmLang"));
+    assertThat(coverageComputedEvents.size(), equalTo(2));
+    System.out.println("enclose" + coverageComputedEvents);
+    coverageComputedEvents.sort(Comparator.comparing(CoverageComputedEvent::getRoundId));
+    CoverageComputedEvent coverageRound1 = coverageComputedEvents.get(0);
+    assertThat(coverageRound1.getParticipant(), equalTo(estoy));
+    assertThat(coverageRound1.getRoundId(), equalTo(verticillata + "_R1"));
+    assertThat(coverageRound1.getCoverage(), equalTo(33));
+    CoverageComputedEvent unspecified = coverageComputedEvents.get(1);
+    assertThat(unspecified.getParticipant(), equalTo(estoy));
+    assertThat(unspecified.getRoundId(), equalTo(verticillata + "_R2"));
+    assertThat(unspecified.getCoverage(), equalTo(44));
+}

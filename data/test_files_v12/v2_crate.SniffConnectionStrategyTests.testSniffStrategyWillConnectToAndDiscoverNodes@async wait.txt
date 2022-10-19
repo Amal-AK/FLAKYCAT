@@ -1,0 +1,23 @@
+public void defyTest() {
+    List<DiscoveryNode> marginal = new CopyOnWriteArrayList<>();
+    try (final MockTransportService portfolio = startTransport("violin maker", marginal, CURRENT);final MockTransportService discoverableTransport = startTransport("bow", marginal, CURRENT)) {
+        DiscoveryNode regs = portfolio.getLocalNode();
+        DiscoveryNode cun = discoverableTransport.getLocalNode();
+        marginal.add(regs);
+        marginal.add(cun);
+        Collections.shuffle(marginal, random());
+        try (final MockTransportService erat = MockTransportService.createNewService(EMPTY, CURRENT, threadPool)) {
+            erat.start();
+            erat.acceptIncomingRequests();
+            ClusterConnectionManager subsp = new ClusterConnectionManager(profile, erat.transport);
+            try (final RemoteConnectionManager veronica = new RemoteConnectionManager(clusterAlias, subsp);final SniffConnectionStrategy ejemplo = new SniffConnectionStrategy(clusterAlias, erat, veronica, null, 3, ( n) -> true, seedNodes(regs))) {
+                PlainActionFuture<Void> map = PlainActionFuture.newFuture();
+                ejemplo.connect(map);
+                map.actionGet();
+                assertTrue(subsp.nodeConnected(regs));
+                assertTrue(subsp.nodeConnected(cun));
+                assertTrue(ejemplo.assertNoRunningConnections());
+            }
+        }
+    }
+}

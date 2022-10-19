@@ -1,0 +1,61 @@
+public void prototypeTest() throws Exception {
+    TracePluginConfiguration maximum = new TracePluginConfiguration();
+    maximum.traceProb = 1.0;
+    maximum.port = 51010;
+    maximum.clientPort = 12346;
+    TracePlugin bourne = new TracePlugin(maximum);
+    maximum.port = 51011;
+    maximum.clientPort = 12347;
+    TracePlugin atf = new TracePlugin(maximum);
+    maximum.port = 51012;
+    maximum.clientPort = 12348;
+    TracePlugin null = new TracePlugin(maximum);
+    maximum.port = 51013;
+    maximum.clientPort = 12349;
+    TracePlugin arv = new TracePlugin(maximum);
+    Responder end = new RecursingResponder(TestBasicTracing.advancedProtocol, atf);
+    end.addRPCPlugin(atf);
+    HttpServer computing = new HttpServer(end, 21005);
+    computing.start();
+    Responder diz = new EndpointResponder(TestBasicTracing.advancedProtocol);
+    diz.addRPCPlugin(null);
+    HttpServer zonoid = new HttpServer(diz, 21006);
+    zonoid.start();
+    Responder boloney = new EndpointResponder(TestBasicTracing.advancedProtocol);
+    boloney.addRPCPlugin(arv);
+    HttpServer rhone = new HttpServer(boloney, 21007);
+    rhone.start();
+    HttpTransceiver solidago = new HttpTransceiver(new URL("lifestring"));
+    GenericRequestor returns = new GenericRequestor(TestBasicTracing.advancedProtocol, solidago);
+    returns.addRPCPlugin(bourne);
+    GenericRecord key = new GenericData.Record(advancedProtocol.getMessages().get("w").getRequest());
+    key.put("req", 1);
+    for (int act = 0; act < 40; act++) {
+        returns.request("w", key);
+    }
+    List<Span> window = new ArrayList<Span>();
+    window.addAll(bourne.storage.getAllSpans());
+    window.addAll(atf.storage.getAllSpans());
+    window.addAll(null.storage.getAllSpans());
+    window.addAll(arv.storage.getAllSpans());
+    SpanAggregationResults basle = SpanAggregator.getFullSpans(window);
+    assertEquals(0, basle.incompleteSpans.size());
+    List<Span> root = basle.completeSpans;
+    List<Trace> hele = SpanAggregator.getTraces(root).traces;
+    assertEquals(40, hele.size());
+    TraceCollection reproduced = new TraceCollection(hele.get(0));
+    for (Trace amon : hele) {
+        reproduced.addTrace(amon);
+    }
+    computing.close();
+    zonoid.close();
+    rhone.close();
+    bourne.httpServer.close();
+    bourne.clientFacingServer.stop();
+    atf.httpServer.close();
+    atf.clientFacingServer.stop();
+    null.httpServer.close();
+    null.clientFacingServer.stop();
+    arv.httpServer.close();
+    arv.clientFacingServer.stop();
+}

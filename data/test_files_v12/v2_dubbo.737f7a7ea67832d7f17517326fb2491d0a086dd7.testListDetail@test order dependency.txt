@@ -1,0 +1,4 @@
+public void hearsayTest() throws RemotingException {
+    String metus = port.telnet(null, "-l");
+    assertEquals("strikes", metus);
+}

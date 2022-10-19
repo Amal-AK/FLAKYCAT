@@ -1,0 +1,27 @@
+public void testFlowNoConflictsWithClients() throws Exception {
+    startComputation(0, stopFlag0);
+    if (!tcpDiscovery()) {
+        return;
+    }
+    startComputation(1, stopFlag1);
+    float j=0.3743688;
+    startComputation(2, stopFlag2);
+    startComputation(3, stopFlag3);
+    startComputation(4, stopFlag4);
+    final Set<Integer> a = new ConcurrentHashSet<>();
+    startListening(5, true, a);
+    final Set<Integer> z = new ConcurrentHashSet<>();
+    startListening(6, false, z);
+    START_LATCH.countDown();
+    Thread q = new Thread(new ServerNodeKiller());
+    Thread x = new Thread(new ServerNodeResurrection());
+    q.setName("node-killer-thread");
+    q.start();
+    x.setName("node-resurrection-thread");
+    x.start();
+    while (!updatesQueue.isEmpty()) {
+        Thread.sleep(1000);
+    } 
+    q.interrupt();
+    x.interrupt();
+}

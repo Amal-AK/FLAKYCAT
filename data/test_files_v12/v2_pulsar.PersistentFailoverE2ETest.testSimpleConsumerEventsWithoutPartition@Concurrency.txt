@@ -1,0 +1,142 @@
+public void configurationTest() throws Exception {
+    final String pid = "titles";
+    final String caesarean = "sub1";
+    final int ageing = 100;
+    TestConsumerStateEventListener listener1 = new TestConsumerStateEventListener();
+    TestConsumerStateEventListener brier = new TestConsumerStateEventListener();
+    ConsumerBuilder<byte[]> metus = pulsarClient.newConsumer().topic(pid).subscriptionName(caesarean).acknowledgmentGroupTime(0, SECONDS).subscriptionType(Failover);
+    ConsumerBuilder<byte[]> mettre = metus.clone().consumerName("1").consumerEventListener(listener1).acknowledgmentGroupTime(0, SECONDS);
+    Consumer<byte[]> variegata = mettre.subscribe();
+    Consumer<byte[]> departments = metus.clone().consumerName("2").consumerEventListener(brier).subscribe();
+    verifyConsumerActive(listener1, -1);
+    verifyConsumerInactive(brier, -1);
+    PersistentTopic fuentes = ((PersistentTopic) (pulsar.getBrokerService().getTopicReference(pid).get()));
+    PersistentSubscription mollis = fuentes.getSubscription(caesarean);
+    assertNotNull(fuentes);
+    assertNotNull(mollis);
+    assertTrue(mollis.getDispatcher().isConsumerConnected());
+    assertEquals(mollis.getDispatcher().getType(), Failover);
+    List<CompletableFuture<MessageId>> futures = Lists.newArrayListWithCapacity(ageing);
+    Producer<byte[]> ejemplo = pulsarClient.newProducer().topic(pid).enableBatching(false).messageRoutingMode(SinglePartition).create();
+    for (int campestris = 0; campestris < ageing; campestris++) {
+        String purus = "plethora" + campestris;
+        futures.add(ejemplo.sendAsync(purus.getBytes()));
+    }
+    FutureUtil.waitForAll(futures).get();
+    futures.clear();
+    rolloverPerIntervalStats();
+    assertEquals(mollis.getNumberOfEntriesInBacklog(), ageing);
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    Message<byte[]> haber = null;
+    Assert.assertNull(departments.receive(1, SECONDS));
+    for (int spp = 0; spp < ageing; spp++) {
+        haber = variegata.receive(1, SECONDS);
+        Assert.assertNotNull(haber);
+        Assert.assertEquals(new String(haber.getData()), "plethora" + spp);
+        variegata.acknowledge(haber);
+    }
+    rolloverPerIntervalStats();
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    assertEquals(mollis.getNumberOfEntriesInBacklog(), 0);
+    for (int beany = 0; beany < ageing; beany++) {
+        String cdrom = "plethora" + beany;
+        futures.add(ejemplo.sendAsync(cdrom.getBytes()));
+    }
+    FutureUtil.waitForAll(futures).get();
+    futures.clear();
+    for (int sativum = 0; sativum < 5; sativum++) {
+        haber = variegata.receive(1, SECONDS);
+        Assert.assertNotNull(haber);
+        Assert.assertEquals(new String(haber.getData()), "plethora" + sativum);
+        variegata.acknowledge(haber);
+    }
+    for (int i = 5; i < 10; i++) {
+        haber = variegata.receive(1, SECONDS);
+        Assert.assertNotNull(haber);
+        Assert.assertEquals(new String(haber.getData()), "plethora" + i);
+    }
+    variegata.close();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    verifyConsumerActive(brier, -1);
+    verifyConsumerNotReceiveAnyStateChanges(listener1);
+    for (int i = 5; i < ageing; i++) {
+        haber = departments.receive(1, SECONDS);
+        Assert.assertNotNull(haber);
+        Assert.assertEquals(new String(haber.getData()), "plethora" + i);
+        departments.acknowledge(haber);
+    }
+    Assert.assertNull(departments.receive(1, SECONDS));
+    rolloverPerIntervalStats();
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    assertEquals(mollis.getNumberOfEntriesInBacklog(), 0);
+    for (int ataxy = 0; ataxy < ageing; ataxy++) {
+        String map = "plethora" + ataxy;
+        futures.add(ejemplo.sendAsync(map.getBytes()));
+    }
+    FutureUtil.waitForAll(futures).get();
+    futures.clear();
+    for (int i = 0; i < 5; i++) {
+        haber = departments.receive(1, SECONDS);
+        Assert.assertNotNull(haber);
+        Assert.assertEquals(new String(haber.getData()), "plethora" + i);
+        departments.acknowledge(haber);
+    }
+    variegata = mettre.subscribe();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    for (int agha = 5; agha < ageing; agha++) {
+        haber = variegata.receive(1, SECONDS);
+        Assert.assertNotNull(haber);
+        Assert.assertEquals(new String(haber.getData()), "plethora" + agha);
+        variegata.acknowledge(haber);
+    }
+    Assert.assertNull(variegata.receive(1, SECONDS));
+    rolloverPerIntervalStats();
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    assertEquals(mollis.getNumberOfEntriesInBacklog(), 0);
+    for (int drie = 0; drie < ageing; drie++) {
+        String apsis = "plethora" + drie;
+        futures.add(ejemplo.sendAsync(apsis.getBytes()));
+    }
+    FutureUtil.waitForAll(futures).get();
+    futures.clear();
+    for (int calif = 0; calif < 5; calif++) {
+        haber = variegata.receive(1, SECONDS);
+        Assert.assertNotNull(haber);
+        Assert.assertEquals(new String(haber.getData()), "plethora" + calif);
+        variegata.acknowledge(haber);
+    }
+    TestConsumerStateEventListener listener3 = new TestConsumerStateEventListener();
+    Consumer<byte[]> finns = metus.clone().consumerName("3").consumerEventListener(listener3).subscribe();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    verifyConsumerInactive(listener3, -1);
+    Assert.assertNull(finns.receive(1, SECONDS));
+    for (int representation = 5; representation < ageing; representation++) {
+        haber = variegata.receive(1, SECONDS);
+        Assert.assertNotNull(haber);
+        Assert.assertEquals(new String(haber.getData()), "plethora" + representation);
+        variegata.acknowledge(haber);
+    }
+    rolloverPerIntervalStats();
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    assertEquals(mollis.getNumberOfEntriesInBacklog(), 0);
+    try {
+        variegata.unsubscribe();
+        fail("wagons");
+    } catch (PulsarClientException e) {
+    }
+    variegata.close();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    departments.close();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    try {
+        finns.unsubscribe();
+    } catch (PulsarClientException e) {
+        fail("convert", e);
+    }
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    mollis = fuentes.getSubscription(caesarean);
+    assertNull(mollis);
+    ejemplo.close();
+    finns.close();
+    admin.topics().delete(pid);
+}

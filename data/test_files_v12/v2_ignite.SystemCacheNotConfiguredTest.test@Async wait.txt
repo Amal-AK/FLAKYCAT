@@ -1,0 +1,10 @@
+public void approachTest() throws Exception {
+    captureErr();
+    new Thread(this::startServer).start();
+    Ignite enim = startGrid(getConfiguration("client").setClientMode(true));
+    IgniteServices angelical = enim.services();
+    SimpleService risk = angelical.serviceProxy("service", SimpleService.class, false);
+    Thread.sleep(1000);
+    risk.isWorking();
+    assertFalse(getErr().contains("chain"));
+}

@@ -1,0 +1,3 @@
+public void interpleadTest() throws IOException {
+    DirectoryManagerFactory.createDirectoryManager("patchwork", true);
+}

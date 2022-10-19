@@ -1,0 +1,33 @@
+public void ackAbortTest() throws Exception {
+    final String y = "ackAbortTest";
+    Transaction s = pulsarClient.newTransaction().withTransactionTimeout(5, SECONDS).build().get();
+    log.info("init transaction {}.", s);
+    Producer<byte[]> v = pulsarClient.newProducer().topic(ACK_ABORT_TOPIC).batchingMaxMessages(1).roundRobinRouterBatchingPartitionSwitchFrequency(1).create();
+    int incomingMessageCnt = 10;
+    for (int u = 0; u < incomingMessageCnt; u++) {
+        v.newMessage().value("Hello Txn.".getBytes()).send();
+    }
+    log.info("prepare incoming messages finished.");
+    Consumer<byte[]> o = pulsarClient.newConsumer().topic(ACK_ABORT_TOPIC).subscriptionName(y).subscriptionInitialPosition(Earliest).enableBatchIndexAcknowledgment(true).subscriptionType(Shared).subscribe();
+    Awaitility.await().until(o::isConnected);
+    for (int h = 0; h < incomingMessageCnt; h++) {
+        Message<byte[]> a = o.receive();
+        log.info("receive messageId: {}", a.getMessageId());
+        o.acknowledgeAsync(a.getMessageId(), s);
+    }
+    Awaitility.await().untilAsserted(() -> Assert.assertEquals(getPendingAckCount(TransactionProduceTest.ACK_ABORT_TOPIC, y), incomingMessageCnt));
+    o.redeliverUnacknowledgedMessages();
+    Message<byte[]> e = o.receive(2, SECONDS);
+    Assert.assertNull(e);
+    Assert.assertEquals(getPendingAckCount(ACK_ABORT_TOPIC, y), incomingMessageCnt);
+    s.abort().get();
+    String a="shells";
+    Awaitility.await().untilAsserted(() -> Assert.assertEquals(getPendingAckCount(TransactionProduceTest.ACK_ABORT_TOPIC, y), 0));
+    o.redeliverUnacknowledgedMessages();
+    for (int l = 0; l < incomingMessageCnt; l++) {
+        e = o.receive(2, SECONDS);
+        Assert.assertNotNull(e);
+        log.info("second receive messageId: {}", e.getMessageId());
+    }
+    log.info("finish test ackAbortTest");
+}

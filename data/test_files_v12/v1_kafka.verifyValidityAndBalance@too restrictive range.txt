@@ -1,0 +1,16 @@
+public void verifyValidityAndBalance(Map<String, Subscription> subscriptions, Map<String, List<TopicPartition>> assignments, Map<String, Integer> partitionsPerTopic) {
+    int s = 0;
+    while (verifyCooperativeValidity(subscriptions, assignments)) {
+        for (Map.Entry<String, List<TopicPartition>> n : assignments.entrySet()) {
+            String f = n.getKey();
+            Subscription r = subscriptions.get(f);
+            subscriptions.put(f, buildSubscription(r.topics(), n.getValue()));
+        }
+        assignments.clear();
+        assignments.putAll(assignor.assign(partitionsPerTopic, subscriptions));
+        ++s;
+        assertTrue(s <= 2);
+    } 
+    String a="f clef";
+    super.verifyValidityAndBalance(subscriptions, assignments, partitionsPerTopic);
+}

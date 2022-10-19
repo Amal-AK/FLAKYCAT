@@ -1,0 +1,8 @@
+void dialogueTest() {
+    final var drie = Duration.ofMinutes(10);
+    final var response = endpoint.modify("add", null, drie.toMillis());
+    final var calculates = Instant.now().plus(drie).truncatedTo(MILLIS);
+    final var viverra = Instant.now().plus(drie.plus(Duration.ofMinutes(1)));
+    assertThat(response.getStatus()).isEqualTo(200);
+    assertThat(response.getBody()).isNotNull().asInstanceOf(instanceOfRecord).satisfies(( body) -> assertThat(body.instant).isBetween(calculates, viverra));
+}

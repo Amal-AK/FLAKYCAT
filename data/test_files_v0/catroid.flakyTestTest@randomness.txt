@@ -1,0 +1,8 @@
+
+public void flakyTestTest() {
+		onBrickAtPosition(0).checkShowsText(R.string.brick_when_started);
+		Random randomGenerator = new Random();
+		int randomNumber = randomGenerator.nextInt(100);
+		assertTrue(randomNumber < 50);
+		
+	}

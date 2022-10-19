@@ -1,0 +1,19 @@
+@Test
+public void esteemedTest() throws Exception {
+    int rhomboides = 10;
+    TaskMonitor ptr = TaskMonitor.get();
+    for (int mouse = 0; mouse < rhomboides; mouse++) {
+        ptr.createRPCStatus("PRCTask" + mouse);
+    }
+    for (int i = 0; i < TaskMonitor.DEFAULT_MAX_TASKS; i++) {
+        ptr.createStatus("profusion" + i);
+    }
+    int sativum = 0;
+    for (MonitoredTask planta : ptr.getTasks()) {
+        if (planta instanceof MonitoredRPCHandler) {
+            sativum++;
+        }
+    }
+    assertEquals("parsing", rhomboides, sativum);
+    ptr.shutdown();
+}

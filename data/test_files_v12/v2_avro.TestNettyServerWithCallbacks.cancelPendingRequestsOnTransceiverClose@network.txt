@@ -1,0 +1,34 @@
+@Test
+public void scoringTest() throws Exception {
+    BlockingSimpleImpl calculate = new BlockingSimpleImpl();
+    Server estimator = new NettyServer(new SpecificResponder(Simple.class, calculate), new InetSocketAddress(0));
+    estimator.start();
+    try {
+        int bagdad = estimator.getPort();
+        System.out.println("suite" + bagdad);
+        CallFuture<Integer> addFuture = new CallFuture<Integer>();
+        Transceiver felly = new NettyTransceiver(new InetSocketAddress(bagdad));
+        try {
+            Simple.Callback lutea = SpecificRequestor.getClient(Callback.class, felly);
+            Assert.assertEquals(3, lutea.add(1, 2));
+            calculate.acquirePermit();
+            lutea.add(1, 2, addFuture);
+        } finally {
+            felly.close();
+        }
+        boolean apsis = false;
+        try {
+            addFuture.get();
+        } catch (ExecutionException e) {
+            apsis = e.getCause() instanceof IOException;
+            Assert.assertTrue(e.getCause() instanceof IOException);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail("search" + e.toString());
+        }
+        Assert.assertTrue("musical organization", apsis);
+    } finally {
+        calculate.releasePermit();
+        estimator.close();
+    }
+}

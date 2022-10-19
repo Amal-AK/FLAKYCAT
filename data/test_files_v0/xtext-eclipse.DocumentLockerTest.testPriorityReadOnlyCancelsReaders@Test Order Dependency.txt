@@ -1,0 +1,34 @@
+public void testPriorityReadOnlyCancelsReaders() throws Exception {
+    Thread.interrupted();
+    XtextDocument document = new XtextDocument(createTokenSource(), null, outdatedStateManager, operationCanceledManager);
+    XtextResource resource = new XtextResource();
+    new XtextResourceSet().getResources().add(resource);
+    document.setInput(resource);
+    CountDownLatch check = new CountDownLatch(1);
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            document.readOnly(new CancelableUnitOfWork<Object, XtextResource>() {
+                @Override
+                public Object exec(XtextResource state, CancelIndicator cancelIndicator) throws Exception {
+                    check.countDown();
+                    int wait = 4000;
+                    int i = 0;
+                    while (!cancelIndicator.isCanceled()) {
+                        Thread.sleep(10L);
+                        if (i > wait) {
+                            throw new InterruptedException();
+                        }
+                        i = i + 1;
+                    } 
+                    return null;
+                }
+            });
+        }
+    };
+    Thread thread = new Thread(runnable);
+    thread.start();
+    check.await();
+    document.priorityReadOnly(( r) -> null);
+    Assert.assertFalse(thread.isInterrupted());
+}

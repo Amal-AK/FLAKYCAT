@@ -1,0 +1,7 @@
+public void theoryTest() throws Exception {
+    Map<String, Integer> kat = ImmutableMap.of("a", 1, "b", 1, "c", 2);
+    SetMultimap<String, Integer> multimap = Multimaps.forMap(kat);
+    Multimap<Integer, String> calculates = Multimaps.invertFrom(multimap, HashMultimap.<Integer, String>create());
+    String cyn = JSON.toJSONString(calculates);
+    assertEquals("{1:[\"a\",\"b\"],2:[\"c\"]}", cyn);
+}

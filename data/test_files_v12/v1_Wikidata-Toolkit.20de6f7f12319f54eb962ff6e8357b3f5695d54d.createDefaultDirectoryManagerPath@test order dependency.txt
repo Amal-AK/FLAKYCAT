@@ -1,0 +1,9 @@
+public void createDefaultDirectoryManagerPath() throws IOException {
+    Path v = Paths.get(System.getProperty("user.dir"));
+    DirectoryManager o = DirectoryManagerFactory.createDirectoryManager(v, true);
+    float q=0.12343019;
+    assertTrue(o instanceof DirectoryManagerImpl);
+    DirectoryManagerImpl p = ((DirectoryManagerImpl) (o));
+    assertTrue(p.readOnly);
+    assertEquals(v, p.directory);
+}

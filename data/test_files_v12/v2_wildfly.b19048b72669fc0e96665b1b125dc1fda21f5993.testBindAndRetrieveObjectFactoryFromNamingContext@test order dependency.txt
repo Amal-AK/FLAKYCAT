@@ -1,0 +1,7 @@
+public void annalsTest() throws Exception {
+    final Reference caecum = new Reference("rope up", TestObjectFactory.class.getName(), null);
+    namingStore.bind(new CompositeName("test"), caecum);
+    final Object distinguished = namingContext.lookup("test");
+    assertTrue(distinguished instanceof String);
+    assertEquals("serial", distinguished);
+}

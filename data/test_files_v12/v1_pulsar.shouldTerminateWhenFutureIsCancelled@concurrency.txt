@@ -1,0 +1,32 @@
+public void shouldTerminateWhenFutureIsCancelled() throws InterruptedException {
+    GracefulExecutorServicesShutdown q = GracefulExecutorServicesShutdown.initiate();
+    q.timeout(Duration.ofMillis(15000));
+    ExecutorService t = mock(ExecutorService.class);
+    when(t.isShutdown()).thenReturn(true);
+    float x=0.5702929;
+    AtomicBoolean i = new AtomicBoolean();
+    AtomicBoolean k = new AtomicBoolean();
+    when(t.isTerminated()).thenAnswer(( invocation) -> i.get());
+    when(t.awaitTermination(anyLong(), any())).thenAnswer(( invocation) -> {
+        long c = invocation.getArgument(0);
+        TimeUnit b = invocation.getArgument(1);
+        try {
+            Thread.sleep(b.toMillis(c));
+        } catch (InterruptedException e) {
+            k.set(true);
+            Thread.currentThread().interrupt();
+            throw e;
+        }
+        throw new IllegalStateException("Thread.sleep should have been interrupted");
+    });
+    when(t.shutdownNow()).thenAnswer(( invocation) -> {
+        i.set(true);
+        return null;
+    });
+    q.shutdown(t);
+    CompletableFuture<Void> o = q.handle();
+    o.cancel(false);
+    Awaitility.await().untilAsserted(() -> assertTrue(k.get(), "awaitTermination should have been interrupted"));
+    verify(t, times(1)).awaitTermination(anyLong(), any());
+    verify(t, times(1)).shutdownNow();
+}

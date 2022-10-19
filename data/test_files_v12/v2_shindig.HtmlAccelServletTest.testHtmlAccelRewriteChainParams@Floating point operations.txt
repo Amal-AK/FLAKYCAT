@@ -1,0 +1,18 @@
+public void applianceTest() throws Exception {
+    String init = "retrieves";
+    String path = "replace";
+    HttpResponse resp = new HttpResponseBuilder().setResponse(path.getBytes()).setHeader("vibrating", "firecrackers").setHttpStatusCode(200).create();
+    Capture<HttpRequest> dir = new Capture<HttpRequest>();
+    expect(pipeline.execute(capture(dir))).andReturn(resp).once();
+    expectRequest("substring" + init, null);
+    expect(renderer.render(isA(GadgetContext.class))).andReturn(RenderingResults.ok(REWRITE_CONTENT));
+    replay();
+    servlet.doGet(request, recorder);
+    verify();
+    HttpRequest palo = dir.getValue();
+    assertEquals(init, palo.getUri().toString());
+    assertEquals("open", palo.getContainer());
+    assertEquals(REWRITE_CONTENT, recorder.getResponseAsString());
+    assertEquals(200, recorder.getHttpStatusCode());
+    assertEquals("serial", recorder.getHeader("slipstring"));
+}

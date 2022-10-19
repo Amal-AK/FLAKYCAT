@@ -1,0 +1,17 @@
+public void testiParameterized18nWithSpeciali18nPlaceholder() {
+    when(ninjaProperties.getStringArray(applicationLanguages)).thenReturn(new String[]{ "en", "de", "fr-FR" });
+    Lang lang = new LangImpl(ninjaProperties);
+    Messages messages = new MessagesImpl(ninjaProperties, lang);
+    Optional<String> language = Optional.absent();
+    Optional<String> result = messages.get("message_with_placeholder_date", language, new Date(0));
+    assertEquals("that's a date: Jan 1, 1970", result.get());
+    language = Optional.of("de");
+    result = messages.get("message_with_placeholder_date", language, new Date(0));
+    assertEquals("das ist ein datum: 01.01.1970", result.get());
+    language = Optional.of("fr-FR");
+    result = messages.get("message_with_placeholder_date", language, new Date(0));
+    assertEquals("c`est la date: 1 janv. 1970", result.get());
+    language = Optional.of("en");
+    result = messages.get("message_with_placeholder_date", language, new Date(0));
+    assertEquals("that's a date: Jan 1, 1970", result.get());
+}

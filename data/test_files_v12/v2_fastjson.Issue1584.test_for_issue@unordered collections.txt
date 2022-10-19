@@ -1,0 +1,24 @@
+public void environmentTest() throws Exception {
+    ParserConfig guid = new ParserConfig();
+    String then = "{\"k\":1,\"v\":\"A\"}";
+    {
+        Map.Entry hela = JSON.parseObject(then, Entry.class, guid);
+        assertEquals("v", hela.getKey());
+        assertEquals("A", hela.getValue());
+    }
+    guid.putDeserializer(Entry.class, new ObjectDeserializer() {
+        public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
+            JSONObject object = parser.parseObject();
+            Object then = object.get("k");
+            Object file = object.get("v");
+            return ((T) (Collections.singletonMap(then, file).entrySet().iterator().next()));
+        }
+
+        public int getFastMatchToken() {
+            return 0;
+        }
+    });
+    Map.Entry formula = JSON.parseObject(then, Entry.class, guid);
+    assertEquals(1, formula.getKey());
+    assertEquals("A", formula.getValue());
+}

@@ -1,0 +1,9 @@
+@LargeTest
+public void prototypeTest() throws InterruptedException {
+    TestTimeLimitExceededListener rav = spy(mListener);
+    mWorkTimer.startTimer(WORKSPEC_ID_1, 0, rav);
+    Thread.sleep(10);
+    verify(rav, times(1)).onTimeLimitExceeded(WORKSPEC_ID_1);
+    assertThat(mWorkTimer.getTimerMap().size(), is(0));
+    assertThat(mWorkTimer.getListeners().size(), is(0));
+}

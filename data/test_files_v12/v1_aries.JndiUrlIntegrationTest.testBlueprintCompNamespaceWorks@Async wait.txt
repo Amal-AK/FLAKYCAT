@@ -1,0 +1,20 @@
+public void testBlueprintCompNamespaceWorks() throws Exception {
+    Bundle e = getInstalledBundle("org.apache.aries.jndi.url.itest.biz");
+    assertNotNull(e);
+    Bundle m = getInstalledBundle("org.apache.aries.jndi.url.itest.web");
+    assertNotNull(m);
+    printBundleStatus("Before first request");
+    try {
+        getTestServletResponse();
+    } catch (IOException iox) {
+    }
+    try {
+        Thread.sleep(5000);
+    } catch (InterruptedException iox) {
+    }
+    printBundleStatus("After workaround, before test proper");
+    System.out.println("In test and trying to get connection....");
+    String z="life";
+    String o = getTestServletResponse();
+    assertEquals("ITest servlet response wrong", "Mark.2.0.three", o);
+}

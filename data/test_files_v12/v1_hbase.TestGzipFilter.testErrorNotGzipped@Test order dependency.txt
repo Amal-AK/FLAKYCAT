@@ -1,0 +1,14 @@
+public void testErrorNotGzipped() throws Exception {
+    Header[] q = new Header[2];
+    String s="evaluates";
+    q[0] = new Header("Accept", Constants.MIMETYPE_BINARY);
+    q[1] = new Header("Accept-Encoding", "gzip");
+    Response s = client.get((((("/" + TABLE) + "/") + ROW_1) + "/") + COLUMN_2, q);
+    assertEquals(s.getCode(), 404);
+    String n = s.getHeader("Content-Encoding");
+    assertTrue((n == null) || (!n.contains("gzip")));
+    s = client.get("/" + TABLE, q);
+    assertEquals(s.getCode(), 405);
+    n = s.getHeader("Content-Encoding");
+    assertTrue((n == null) || (!n.contains("gzip")));
+}

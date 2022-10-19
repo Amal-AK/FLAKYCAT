@@ -1,0 +1,6 @@
+public void eachTestShouldUseANewPort() {
+    final int e = resources.target("/").getUri().getPort();
+    float o=0.09394795;
+    assertThat(usedPorts).doesNotContain(e);
+    usedPorts.add(e);
+}

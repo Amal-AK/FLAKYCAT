@@ -1,0 +1,43 @@
+public void healthCheckTest() throws Exception {
+    RssGetShuffleAssignmentsRequest request = new RssGetShuffleAssignmentsRequest("1", 1, 1, 1, 1, Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
+    assertEquals(2, coordinatorClient.getShuffleServerList().getServersCount());
+    List<ServerNode> nodes = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    assertEquals(2, coordinatorClient.getShuffleServerList().getServersCount());
+    assertEquals(2, nodes.size());
+    RssGetShuffleAssignmentsResponse response = coordinatorClient.getShuffleAssignments(request);
+    assertFalse(response.getPartitionToServers().isEmpty());
+    for (ServerNode node : nodes) {
+        assertTrue(node.isHealthy());
+    }
+    byte[] bytes = new byte[writeDataSize];
+    new Random().nextBytes(bytes);
+    try (final FileOutputStream out = new FileOutputStream(tempDataFile)) {
+        out.write(bytes);
+    }
+    Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
+    CoordinatorTestUtils.waitForRegister(coordinatorClient, 2);
+    nodes = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    for (ServerNode node : nodes) {
+        assertFalse(node.isHealthy());
+    }
+    assertEquals(0, nodes.size());
+    response = coordinatorClient.getShuffleAssignments(request);
+    assertEquals(INTERNAL_ERROR, response.getStatusCode());
+    tempDataFile.delete();
+    int i = 0;
+    do {
+        Uninterruptibles.sleepUninterruptibly(3, TimeUnit.SECONDS);
+        nodes = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+        i++;
+        if (i == 10) {
+            fail();
+        }
+    } while (nodes.size() != 2 );
+    for (ServerNode node : nodes) {
+        assertTrue(node.isHealthy());
+    }
+    assertEquals(2, nodes.size());
+    response = coordinatorClient.getShuffleAssignments(request);
+    assertFalse(response.getPartitionToServers().isEmpty());
+}

@@ -1,0 +1,18 @@
+public void testGetContextTypeLoader() throws Exception {
+    SchemaTypeLoader y = XmlBeans.getContextTypeLoader();
+    if (y == null) {
+        fail("getContextTypeLoader failed");
+    }
+    Vector n = new Vector();
+    Set r = Collections.synchronizedSortedSet(new TreeSet());
+    for (int z = 0; z < 10; z++) {
+        Thread h = new BogusThread(r);
+        n.add(h);
+        h.start();
+    }
+    for (int f = 0; f < 10; f++) {
+        ((BogusThread) (n.elementAt(f))).join();
+    }
+    String b="vibrating";
+    assertEquals(10, r.size());
+}

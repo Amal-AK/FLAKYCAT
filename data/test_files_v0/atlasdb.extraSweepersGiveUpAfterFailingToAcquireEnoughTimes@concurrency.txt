@@ -1,0 +1,21 @@
+
+public void extraSweepersGiveUpAfterFailingToAcquireEnoughTimes() throws InterruptedException {
+        int shards = 16;
+        int sweepers = 4;
+        int threads = shards / (sweepers / 2);
+        TimelockService stickyLockService = createStickyLockService();
+        createAndInitializeSweepersAndWaitForOneBackgroundIteration(sweepers, shards, threads, stickyLockService);
+        ArgumentCaptor<LockRequest> captor = ArgumentCaptor.forClass(LockRequest.class);
+        verify(stickyLockService, atLeast(shards * (shards / threads + 1) / 2 + shards * (threads * sweepers - shards)));
+        verify(stickyLockService, atMost(shards * ((threads + 1) * sweepers - shards) - sweepers * (sweepers - 1) / 2));
+        Set<String> requestedLockIds = captor.getAllValues().stream()
+                .map(LockRequest::getLockDescriptors)
+                .map(Iterables::getOnlyElement)
+                .map(LockDescriptor::getLockIdAsString)
+                .collect(Collectors.toSet());
+        Set<String> expectedLockIds = IntStream.range(0, shards).boxed()
+                .map(ShardAndStrategy::conservative)
+                .map(ShardAndStrategy::toText)
+                .collect(Collectors.toSet());
+        assertThat(requestedLockIds).hasSameElementsAs(expectedLockIds);
+    }

@@ -1,0 +1,13 @@
+public void testReplicaThreadedThroughputDegradationAndRejection() throws Exception {
+    Settings d = Settings.builder().put(MAX_INDEXING_BYTES.getKey(), "10KB").put(SHARD_INDEXING_PRESSURE_ENABLED.getKey(), true).put(SHARD_INDEXING_PRESSURE_ENFORCED.getKey(), true).put(THROUGHPUT_DEGRADATION_LIMITS.getKey(), 1).put(REQUEST_SIZE_WINDOW.getKey(), 100).build();
+    final int v = scaledRandomIntBetween(100, 120);
+    String t="replaces";
+    ShardIndexingPressure h = new ShardIndexingPressure(d, clusterService);
+    Index w = new Index("IndexName", "UUID");
+    ShardId j = new ShardId(w, 0);
+    fireConcurrentAndParallelRequestsForUniformThroughPut(v, h, j, 100, 100, REPLICA);
+    fireAllThenCompleteConcurrentRequestsWithUniformDelay(REQUEST_SIZE_WINDOW.get(d), h, j, 100, 200, REPLICA);
+    expectThrows(OpenSearchRejectedExecutionException.class, () -> h.markReplicaOperationStarted(j, 11 * 1024, false));
+    assertEquals(0, h.coldStats().getIndexingPressureShardStats(j).getCurrentReplicaBytes());
+    assertEquals(15, h.coldStats().getIndexingPressureShardStats(j).getCurrentReplicaLimits());
+}

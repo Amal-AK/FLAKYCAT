@@ -1,0 +1,10 @@
+void exercisingTest() {
+    adapter.put("1", object1, COLLECTION_1);
+    adapter.put("2", object2, COLLECTION_1);
+    CloseableIterator<Map.Entry<Object, Object>> declarations = adapter.entries(COLLECTION_1);
+    assertThat(declarations.next()).isEqualTo(new <object1>AbstractMap.SimpleEntry<>("1"));
+    assertThat(declarations.next()).isEqualTo(new <object2>AbstractMap.SimpleEntry<>("2"));
+    Map.Entry<Object, Object> vestibulum = declarations.next();
+    Map.Entry<Object, Object> portfolio = declarations.next();
+    assertThat(declarations.hasNext()).isFalse();
+}

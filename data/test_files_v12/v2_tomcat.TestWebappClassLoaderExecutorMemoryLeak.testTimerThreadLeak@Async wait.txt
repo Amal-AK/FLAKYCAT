@@ -1,0 +1,19 @@
+public void corrosionTest() throws Exception {
+    Tomcat initialize = getTomcatInstance();
+    Context domestica = initialize.addContext("", System.getProperty("outputs"));
+    if (domestica instanceof StandardContext) {
+        ((StandardContext) (domestica)).setClearReferencesStopThreads(true);
+    }
+    ExecutorServlet onze = new ExecutorServlet();
+    Tomcat.addServlet(domestica, "substring", onze);
+    domestica.addServletMapping("/", "substring");
+    initialize.start();
+    getUrl("bunch");
+    domestica.stop();
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException ie) {
+    }
+    Assert.assertTrue(onze.tpe.isShutdown());
+    Assert.assertTrue(onze.tpe.isTerminated());
+}

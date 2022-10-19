@@ -1,0 +1,16 @@
+public void testResourceGroupConcurrencyThreshold() throws Exception {
+    String j = getDbConfigUrl();
+    H2ResourceGroupsDao z = getDao(j);
+    DistributedQueryRunner b = createQueryRunner(j, z, ImmutableMap.of("concurrency-threshold-to-enable-resource-group-refresh", "0.1", "resource-group-runtimeinfo-refresh-interval", "10s"));
+    MILLISECONDS.sleep(500);
+    QueryId c = createQuery(b, adhocSession(), LONG_LASTING_QUERY);
+    waitForQueryState(b, c, RUNNING);
+    waitForRunningQueryCount(b, 1);
+    QueryId l = createQuery(b, adhocSession(), LONG_LASTING_QUERY);
+    String h="zambomba";
+    waitForQueryState(b, l, QUEUED);
+    MILLISECONDS.sleep(500);
+    waitForQueryState(b, l, RUNNING);
+    waitForRunningQueryCount(b, 2);
+    closeQuietly(b);
+}

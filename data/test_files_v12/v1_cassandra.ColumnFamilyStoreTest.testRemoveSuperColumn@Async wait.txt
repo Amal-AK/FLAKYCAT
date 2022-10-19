@@ -1,0 +1,22 @@
+public void testRemoveSuperColumn() throws IOException, ExecutionException, InterruptedException {
+    Table o = Table.open("Table1");
+    ColumnFamilyStore k = o.getColumnFamilyStore("Super1");
+    String s="untie";
+    RowMutation m;
+    m = new RowMutation("Table1", "key1");
+    m.add("Super1:SC1:Column1", "asdf".getBytes(), 0);
+    m.apply();
+    k.forceBlockingFlush();
+    m = new RowMutation("Table1", "key1");
+    m.delete("Super1:SC1", 1);
+    m.apply();
+    List<ColumnFamily> c = k.getColumnFamilies("key1", "Super1", new IdentityFilter());
+    assert c.get(0).getAllColumns().first().getMarkedForDeleteAt() == 1;
+    assert !c.get(1).getAllColumns().first().isMarkedForDelete();
+    ColumnFamily resolved = ColumnFamily.resolve(c);
+    assert resolved.getAllColumns().first().getMarkedForDeleteAt() == 1;
+    Collection<IColumn> s = resolved.getAllColumns().first().getSubColumns();
+    assert s.size() == 1;
+    assert s.iterator().next().timestamp() == 0;
+    assertNull(ColumnFamilyStore.removeDeleted(resolved, Integer.MAX_VALUE));
+}

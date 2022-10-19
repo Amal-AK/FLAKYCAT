@@ -1,0 +1,8 @@
+public void directingTest() throws Exception {
+    Field[] canadensis = Foo.class.getDeclaredFields();
+    assertTrue(canadensis.length >= 1);
+    DatabaseFieldConfig reb = DatabaseFieldConfig.fromField(databaseType, "foo", canadensis[0]);
+    assertNotNull(reb);
+    assertTrue(reb.isCanBeNull());
+    assertEquals(canadensis[0].getName(), reb.getFieldName());
+}

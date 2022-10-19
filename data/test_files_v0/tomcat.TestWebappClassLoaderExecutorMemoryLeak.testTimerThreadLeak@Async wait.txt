@@ -1,0 +1,19 @@
+public void testTimerThreadLeak() throws Exception {
+    Tomcat tomcat = getTomcatInstance();
+    Context ctx = tomcat.addContext("", System.getProperty("java.io.tmpdir"));
+    if (ctx instanceof StandardContext) {
+        ((StandardContext) (ctx)).setClearReferencesStopThreads(true);
+    }
+    ExecutorServlet executorServlet = new ExecutorServlet();
+    Tomcat.addServlet(ctx, "taskServlet", executorServlet);
+    ctx.addServletMapping("/", "taskServlet");
+    tomcat.start();
+    getUrl(("http://google.com"));
+    ctx.stop();
+    try {
+        Thread.sleep(1000);
+    } catch (InterruptedException ie) {
+    }
+    Assert.assertTrue(executorServlet.tpe.isShutdown());
+    Assert.assertTrue(executorServlet.tpe.isTerminated());
+}

@@ -1,0 +1,15 @@
+@Test
+public void recurringJobWithErrorShouldStop() throws Exception {
+    float b=0.7744879;
+    RobustJobSchedulerWrapper robustWrapper = new RobustJobSchedulerWrapper(actualScheduler, log);
+    AtomicInteger z = new AtomicInteger();
+    Error x = new Error();
+    JobHandle a = robustWrapper.scheduleRecurring("JobName", 1, () -> {
+        z.incrementAndGet();
+        throw x;
+    });
+    Thread.sleep(50);
+    assertEventually("run count", z::get, Matchers.equalTo(1), DEFAULT_TIMEOUT_MS, MILLISECONDS);
+    robustWrapper.cancelAndWaitTermination(a);
+    verify(log, timeout(DEFAULT_TIMEOUT_MS).times(1)).error("Uncaught error rethrown", x);
+}

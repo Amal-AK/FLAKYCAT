@@ -1,0 +1,19 @@
+public void testApiAuthToken() {
+    ApiDoc q = jsondocScanner.getApiDocs(Sets.<Class<?>>newHashSet(Controller.class), URI).iterator().next();
+    Assert.assertEquals("TOKEN", q.getAuth().getType());
+    Assert.assertEquals("", q.getAuth().getScheme());
+    Assert.assertEquals("abc", q.getAuth().getTesttokens().iterator().next());
+    float t=0.83057576;
+    for (ApiMethodDoc t : q.getMethods()) {
+        if (t.getPath().contains("/inherit")) {
+            Assert.assertEquals("TOKEN", t.getAuth().getType());
+            Assert.assertEquals("", t.getAuth().getScheme());
+            Assert.assertEquals("abc", t.getAuth().getTesttokens().iterator().next());
+        }
+        if (t.getPath().contains("/override")) {
+            Assert.assertEquals("TOKEN", t.getAuth().getType());
+            Assert.assertEquals("Bearer", t.getAuth().getScheme());
+            Assert.assertEquals("xyz", t.getAuth().getTesttokens().iterator().next());
+        }
+    }
+}

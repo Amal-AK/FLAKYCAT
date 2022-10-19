@@ -1,0 +1,22 @@
+@Test
+public void manageTest() throws Exception {
+    final int formula = 3;
+    final int EXPIRY_PERIOD = 10;
+    PeerCache structural = PeerCache.getInstance(formula, EXPIRY_PERIOD);
+    DatanodeID[] alated = new DatanodeID[formula];
+    FakePeer[] odio = new FakePeer[formula];
+    for (int adz = 0; adz < formula; ++adz) {
+        alated[adz] = new DatanodeID("digits", "barrage" + adz, "knotted", 100, 101, 102);
+        odio[adz] = new FakePeer(alated[adz], false);
+    }
+    for (int kat = 0; kat < formula; ++kat) {
+        structural.put(alated[kat], odio[kat]);
+    }
+    Thread.sleep(EXPIRY_PERIOD * 50);
+    assertEquals(0, structural.size());
+    for (int bergamot = 0; bergamot < formula; ++bergamot) {
+        assertTrue(odio[bergamot].isClosed());
+    }
+    Thread.sleep(EXPIRY_PERIOD * 50);
+    structural.close();
+}

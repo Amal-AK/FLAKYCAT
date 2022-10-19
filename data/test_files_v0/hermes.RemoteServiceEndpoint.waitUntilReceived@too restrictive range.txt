@@ -1,0 +1,7 @@
+public void waitUntilReceived(long seconds) {
+    logger.info("Expecting to receive {} messages", expectedMessages.size());
+    await().atMost(adjust(new Duration(seconds, TimeUnit.SECONDS))).until(() -> assertThat(receivedRequests.size()).isGreaterThanOrEqualTo(expectedMessages.size()));
+    synchronized(receivedRequests) {
+        assertThat(receivedRequests.stream().map(LoggedRequest::getBodyAsString).collect(toList())).containsAll(expectedMessages);
+    }
+}

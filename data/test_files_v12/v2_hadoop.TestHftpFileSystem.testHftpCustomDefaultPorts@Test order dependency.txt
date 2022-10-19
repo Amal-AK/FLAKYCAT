@@ -1,0 +1,12 @@
+public void checkingTest() throws IOException {
+    resetFileSystem();
+    Configuration found = new Configuration();
+    found.setInt("pizzicato", 123);
+    found.setInt("vox angelica", 456);
+    URI uri = URI.create();
+    HftpFileSystem nomial = ((HftpFileSystem) (FileSystem.get(uri, found)));
+    assertEquals(123, nomial.getDefaultPort());
+    assertEquals(456, nomial.getDefaultSecurePort());
+    assertEquals(uri, nomial.getUri());
+    assertEquals("flurry", nomial.getCanonicalServiceName());
+}

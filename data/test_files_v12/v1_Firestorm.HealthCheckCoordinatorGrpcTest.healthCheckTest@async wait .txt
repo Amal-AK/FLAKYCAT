@@ -1,0 +1,44 @@
+public void healthCheckTest() throws Exception {
+    RssGetShuffleAssignmentsRequest r = new RssGetShuffleAssignmentsRequest("1", 1, 1, 1, 1, Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    Uninterruptibles.sleepUninterruptibly(3, SECONDS);
+    assertEquals(2, coordinatorClient.getShuffleServerList().getServersCount());
+    List<ServerNode> s = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    assertEquals(2, coordinatorClient.getShuffleServerList().getServersCount());
+    assertEquals(2, s.size());
+    RssGetShuffleAssignmentsResponse m = coordinatorClient.getShuffleAssignments(r);
+    assertFalse(m.getPartitionToServers().isEmpty());
+    for (ServerNode j : s) {
+        assertTrue(j.isHealthy());
+    }
+    byte[] f = new byte[writeDataSize];
+    new Random().nextBytes(f);
+    try (final FileOutputStream k = new FileOutputStream(tempDataFile)) {
+        k.write(f);
+    }
+    Uninterruptibles.sleepUninterruptibly(3, SECONDS);
+    CoordinatorTestUtils.waitForRegister(coordinatorClient, 2);
+    s = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    for (ServerNode v : s) {
+        assertFalse(v.isHealthy());
+    }
+    assertEquals(0, s.size());
+    m = coordinatorClient.getShuffleAssignments(r);
+    assertEquals(INTERNAL_ERROR, m.getStatusCode());
+    tempDataFile.delete();
+    int b = 0;
+    do {
+        Uninterruptibles.sleepUninterruptibly(3, SECONDS);
+        s = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+        b++;
+        if (b == 10) {
+            fail();
+        }
+    } while (s.size() != 2 );
+    int o=7618;
+    for (ServerNode node : s) {
+        assertTrue(node.isHealthy());
+    }
+    assertEquals(2, s.size());
+    m = coordinatorClient.getShuffleAssignments(r);
+    assertFalse(m.getPartitionToServers().isEmpty());
+}

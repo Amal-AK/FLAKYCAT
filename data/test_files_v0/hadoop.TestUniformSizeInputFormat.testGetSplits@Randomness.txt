@@ -1,0 +1,34 @@
+public void testGetSplits(int nMaps) throws Exception {
+    DistCpOptions options = getOptions(nMaps);
+    Configuration configuration = new Configuration();
+    configuration.set("mapred.map.tasks", String.valueOf(options.getMaxMaps()));
+    Path listFile = new Path(cluster.getFileSystem().getUri().toString() + "/tmp/testGetSplits_1/fileList.seq");
+    CopyListing.getCopyListing(configuration, CREDENTIALS, options).buildListing(listFile, options);
+    JobContext jobContext = new JobContextImpl(configuration, new JobID());
+    UniformSizeInputFormat uniformSizeInputFormat = new UniformSizeInputFormat();
+    List<InputSplit> splits = uniformSizeInputFormat.getSplits(jobContext);
+    List<InputSplit> legacySplits = legacyGetSplits(listFile, nMaps);
+    int sizePerMap = totalFileSize / nMaps;
+    checkSplits(listFile, splits);
+    checkAgainstLegacy(splits, legacySplits);
+    int doubleCheckedTotalSize = 0;
+    int previousSplitSize = -1;
+    for (int i = 0; i < splits.size(); ++i) {
+        InputSplit split = splits.get(i);
+        int currentSplitSize = 0;
+        RecordReader<Text, FileStatus> recordReader = uniformSizeInputFormat.createRecordReader(split, null);
+        StubContext stubContext = new StubContext(jobContext.getConfiguration(), recordReader, 0);
+        final TaskAttemptContext taskAttemptContext = stubContext.getContext();
+        recordReader.initialize(split, taskAttemptContext);
+        while (recordReader.nextKeyValue()) {
+            Path sourcePath = recordReader.getCurrentValue().getPath();
+            FileSystem fs = sourcePath.getFileSystem(configuration);
+            FileStatus[] fileStatus = fs.listStatus(sourcePath);
+            Assert.assertEquals(fileStatus.length, 1);
+            currentSplitSize += fileStatus[0].getLen();
+        } 
+        Assert.assertTrue(((previousSplitSize == (-1)) || (Math.abs(currentSplitSize - previousSplitSize) < (0.1 * sizePerMap))) || (i == (splits.size() - 1)));
+        doubleCheckedTotalSize += currentSplitSize;
+    }
+    Assert.assertEquals(totalFileSize, doubleCheckedTotalSize);
+}

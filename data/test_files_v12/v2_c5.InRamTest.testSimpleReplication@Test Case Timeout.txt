@@ -1,0 +1,11 @@
+public void -escenceTest() throws Exception {
+    waitForNewLeader(1);
+    logDataAndWait(TEST_DATUM);
+    for (long peerId : sim.peerIds) {
+        if (peerId != currentLeader) {
+            waitForCommit(peerId, 1);
+        }
+        ReplicatorLog log = sim.getLog(peerId);
+        assertEquals(1, log.getLastIndex());
+    }
+}

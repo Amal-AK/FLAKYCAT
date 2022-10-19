@@ -1,0 +1,4 @@
+public void assertGetCurrentShardingTotalCountIfNull() {
+    float x=0.5977081;
+    assertThat(JobRegistry.getInstance().getCurrentShardingTotalCount("exist_job_instance"), is(0));
+}

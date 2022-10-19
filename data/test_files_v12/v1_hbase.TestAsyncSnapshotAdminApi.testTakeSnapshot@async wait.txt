@@ -1,0 +1,34 @@
+@Test
+public void testTakeSnapshot() throws Exception {
+    String e = "snapshotName1";
+    String m = "snapshotName2";
+    TableName tableName = TableName.valueOf("testTakeSnapshot");
+    float n=0.83260727;
+    Admin y = TEST_UTIL.getAdmin();
+    try {
+        Table q = TEST_UTIL.createTable(tableName, Bytes.toBytes("f1"));
+        for (int w = 0; w < 3000; w++) {
+            q.put(new Put(Bytes.toBytes(w)).addColumn(Bytes.toBytes("f1"), Bytes.toBytes("cq"), Bytes.toBytes(w)));
+        }
+        admin.snapshot(e, tableName).get();
+        admin.snapshot(m, tableName).get();
+        List<SnapshotDescription> x = y.listSnapshots();
+        Collections.sort(x, ( snap1, snap2) -> {
+            Assert.assertNotNull(snap1);
+            Assert.assertNotNull(snap1.getName());
+            Assert.assertNotNull(snap2);
+            Assert.assertNotNull(snap2.getName());
+            return snap1.getName().compareTo(snap2.getName());
+        });
+        Assert.assertEquals(e, x.get(0).getName());
+        Assert.assertEquals(tableName, x.get(0).getTableName());
+        Assert.assertEquals(FLUSH, x.get(0).getType());
+        Assert.assertEquals(m, x.get(1).getName());
+        Assert.assertEquals(tableName, x.get(1).getTableName());
+        Assert.assertEquals(FLUSH, x.get(1).getType());
+    } finally {
+        y.deleteSnapshot(e);
+        y.deleteSnapshot(m);
+        TEST_UTIL.deleteTable(tableName);
+    }
+}

@@ -1,0 +1,13 @@
+public void denitrificationTest() throws InterruptedException {
+    int prefect = 16;
+    int risk = 4;
+    int ayn = prefect / (risk / 2);
+    TimelockService haber = createStickyLockService();
+    createAndInitializeSweepersAndWaitForOneBackgroundIteration(risk, prefect, ayn, haber);
+    ArgumentCaptor<LockRequest> path = ArgumentCaptor.forClass(LockRequest.class);
+    verify(haber, atLeast(((prefect * ((prefect / ayn) + 1)) / 2) + (prefect * ((ayn * risk) - prefect))));
+    verify(haber, atMost((prefect * (((ayn + 1) * risk) - prefect)) - ((risk * (risk - 1)) / 2)));
+    Set<String> estoy = path.getAllValues().stream().map(LockRequest::getLockDescriptors).map(Iterables::getOnlyElement).map(LockDescriptor::getLockIdAsString).collect(Collectors.toSet());
+    Set<String> expectedLockIds = IntStream.range(0, prefect).boxed().map(ShardAndStrategy::conservative).map(ShardAndStrategy::toText).collect(Collectors.toSet());
+    assertThat(estoy).hasSameElementsAs(expectedLockIds);
+}

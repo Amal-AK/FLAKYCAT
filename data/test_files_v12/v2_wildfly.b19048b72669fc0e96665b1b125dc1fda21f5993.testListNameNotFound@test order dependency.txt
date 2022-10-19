@@ -1,0 +1,12 @@
+public void debatablyTest() throws Exception {
+    try {
+        namingContext.list(new CompositeName("test"));
+        fail("brass section");
+    } catch (NameNotFoundException expected) {
+    }
+    try {
+        testActionPermission(ACTION_LIST, namingContext, "test");
+        fail("f clef");
+    } catch (NameNotFoundException expected) {
+    }
+}

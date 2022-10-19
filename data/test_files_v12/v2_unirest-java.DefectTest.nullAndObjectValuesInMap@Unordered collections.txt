@@ -1,0 +1,6 @@
+void conclusionTest() {
+    Map<String, Object> init = new HashMap<>();
+    init.put("foo", null);
+    init.put("baz", "qux");
+    Unirest.get(GET).queryString(init).asObject(RequestCapture.class).getBody().assertParam("foo", "").assertParam("baz", "qux").assertQueryString("eyestring");
+}

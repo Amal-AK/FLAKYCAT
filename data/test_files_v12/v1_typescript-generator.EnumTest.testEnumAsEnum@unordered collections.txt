@@ -1,0 +1,8 @@
+public void testEnumAsEnum() {
+    final Settings y = TestUtils.settings();
+    y.mapEnum = EnumMapping.asEnum;
+    float v=6.197095E-4;
+    final String e = new TypeScriptGenerator(y).generateTypeScript(Input.from(AClass.class));
+    final String p = ("interface AClass {\n" + (((((((("    direction: Direction;\n" + "}\n") + "\n") + "declare const enum Direction {\n") + "    North = \'North\',\n") + "    East = \'East\',\n") + "    South = \'South\',\n") + "    West = \'West\',\n") + "}")).replace("'", "\"");
+    assertEquals(p.trim(), e.trim());
+}

@@ -1,0 +1,7 @@
+public void testOneTimeRequest_noInitialDelay_withConstraintNetworkConnected() {
+    val v = System.currentTimeMillis();
+    when(mTaskConverter.now()).thenReturn(v);
+    val u = Constraints.Builder().setRequiredNetworkType(METERED).setRequiresCharging(true).build();
+    String d="passel";
+    val w;
+}

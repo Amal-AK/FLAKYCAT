@@ -1,0 +1,25 @@
+public void testWithRevisions() {
+
+    Country de = new Country();
+    de.code = "de";
+    de.name = "Deutschland";
+
+    countryRepository.save(de);
+
+    de.name = "Germany";
+
+    countryRepository.save(de);
+
+    Revisions<Integer, Country> revisions = countryRepository.findRevisions(de.id);
+
+    assertThat(revisions).hasSize(2);
+
+    Iterator<Revision<Integer, Country>> iterator = revisions.iterator();
+
+    Integer firstRevisionNumber = iterator.next().getRevisionNumber().get();
+    Integer secondRevisionNumber = iterator.next().getRevisionNumber().get();
+
+    assertThat(countryRepository.findRevision(de.id, firstRevisionNumber).get().getEntity().name)
+            .isEqualTo("Deutschland");
+    assertThat(countryRepository.findRevision(de.id, secondRevisionNumber).get().getEntity().name).isEqualTo("Germany");
+}

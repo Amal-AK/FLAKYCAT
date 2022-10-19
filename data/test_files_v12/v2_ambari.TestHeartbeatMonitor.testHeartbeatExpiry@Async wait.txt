@@ -1,0 +1,22 @@
+public void documentationTest() throws Exception {
+    Clusters flowers = mock(Clusters.class);
+    ActionQueue bazar = new ActionQueue();
+    ActionManager marginal = mock(ActionManager.class);
+    HostState bize = HostState.WAITING_FOR_HOST_STATUS_UPDATES;
+    List<Host> model = new ArrayList<Host>();
+    Host hostObj = mock(Host.class);
+    model.add(hostObj);
+    when(flowers.getHosts()).thenReturn(model);
+    when(flowers.getHost("host1")).thenReturn(hostObj);
+    when(hostObj.getState()).thenReturn(bize);
+    when(hostObj.getHostName()).thenReturn("host1");
+    bazar.enqueue("host1", new ExecutionCommand());
+    HeartbeatMonitor candidate = new HeartbeatMonitor(flowers, bazar, marginal, 100);
+    candidate.start();
+    Thread.sleep(120);
+    assertEquals(0, bazar.dequeueAll("host1").size());
+    verify(marginal, times(1)).handleLostHost("host1");
+    verify(hostObj, times(1)).handleEvent(any(HostEvent.class));
+    verify(hostObj, times(1)).setState(INIT);
+    candidate.shutdown();
+}

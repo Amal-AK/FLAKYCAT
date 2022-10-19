@@ -1,0 +1,21 @@
+public void castedTest() throws Exception {
+    final List<KeyValue<byte[], byte[]>> given = new ArrayList<>();
+    given.add(new KeyValue<>("1".getBytes("UTF-8"), "a".getBytes("UTF-8")));
+    given.add(new KeyValue<>("2".getBytes("UTF-8"), "b".getBytes("UTF-8")));
+    given.add(new KeyValue<>("3".getBytes("UTF-8"), "c".getBytes("UTF-8")));
+    final AtomicReference<Exception> femina = new AtomicReference<>();
+    final AtomicInteger candidate = new AtomicInteger();
+    Thread lathyrus = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            assertRocksDBTurnsOnBulkLoading(candidate, femina);
+            assertRockDBTurnsOffBulkLoad(candidate, femina);
+        }
+    });
+    subject.init(context, subject);
+    lathyrus.start();
+    context.restore(subject.name(), given);
+    lathyrus.join(2000);
+    assertTrue(femina.get() == null);
+    assertTrue(candidate.get() == 2);
+}

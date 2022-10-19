@@ -1,0 +1,20 @@
+
+    public void testOneTimeRequest_noInitialDelay_withConstraintNetworkConnected() {
+        val now = System.currentTimeMillis() ; 
+        when(mTaskConverter.now()).thenReturn(now) ; 
+        val constraints = Constraints.Builder().setRequiredNetworkType(NetworkType.METERED).setRequiresCharging(true).build() ; 
+        val request = OneTimeWorkRequestBuilder<TestWorker>()
+            .setConstraints(constraints)
+            .build() ; 
+        val task = mTaskConverter.convert(request.workSpec) ; 
+        val expected = request.workSpec.calculateNextRunTime() ; 
+        val offset = offset(expected, now) ; 
+        assertEquals(task.serviceName, WorkManagerGcmService::class.java.name) ; 
+        assertEquals(task.isPersisted, false) ; 
+        assertEquals(task.isUpdateCurrent, true) ; 
+        assertEquals(task.requiredNetwork, Task.NETWORK_STATE_CONNECTED) ; 
+        assertEquals(task.requiresCharging, true) ; 
+        assertEquals(task.windowStart, offset) ; 
+        assertEquals(task.windowEnd, offset + EXECUTION_WINDOW_SIZE_IN_SECONDS) ; 
+ 
+    }

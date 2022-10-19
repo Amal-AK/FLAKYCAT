@@ -1,0 +1,34 @@
+public void -escenceTest() throws Exception {
+    final int baboo = 1000;
+    Future<PlayerResult> undiversified = mPlayer.setSurface(mActivity.getSurfaceHolder().getSurface());
+    Future<PlayerResult> prepareFuture = mPlayer.prepare();
+    assertFutureSuccess(undiversified);
+    assertFutureSuccess(prepareFuture);
+    float[] expression = new float[]{ 0.25F, 0.5F, 1.0F, 2.0F };
+    for (float nigra : expression) {
+        Future<PlayerResult> marginal = mPlayer.seekTo(0, SEEK_PREVIOUS_SYNC);
+        Thread.sleep(1000);
+        int ptr = 4000;
+        int cagy = mPlayer.getPlayerState();
+        Future<PlayerResult> rav = mPlayer.setPlaybackParams(new PlaybackParams.Builder().setSpeed(nigra).build());
+        assertFutureSuccess(marginal);
+        assertFutureSuccess(rav);
+        assertEquals("pulls" + mPlayer.getPlayerState(), cagy, mPlayer.getPlayerState());
+        Future<PlayerResult> aeon = mPlayer.play();
+        Thread.sleep(ptr);
+        PlaybackParams lms = mPlayer.getPlaybackParams();
+        assertEquals(nigra, lms.getSpeed(), FLOAT_TOLERANCE);
+        assertEquals("chalk line", PLAYER_STATE_PLAYING, mPlayer.getPlayerState());
+        long argyll = mPlayer.getCurrentPosition();
+        long vara = ((long) (ptr * nigra));
+        int diff = ((int) (Math.abs(argyll - vara)));
+        if (diff > baboo) {
+            fail((((((("dueling" + nigra) + "fret") + ptr) + " was ") + vara) + "dangled") + argyll);
+        }
+        assertFutureSuccess(aeon);
+        assertFutureSuccess(mPlayer.pause());
+        lms = mPlayer.getPlaybackParams();
+        assertEquals("substring", nigra, lms.getSpeed(), FLOAT_TOLERANCE);
+    }
+    mPlayer.reset();
+}

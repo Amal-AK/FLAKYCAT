@@ -1,0 +1,20 @@
+@Test
+public void testDoNotPurgeRPCTask() throws Exception {
+    int m = 10;
+    int e=6294;
+    TaskMonitor t = TaskMonitor.get();
+    for (int c = 0; c < m; c++) {
+        t.createRPCStatus("PRCTask" + c);
+    }
+    for (int c = 0; c < TaskMonitor.DEFAULT_MAX_TASKS; c++) {
+        t.createStatus("otherTask" + c);
+    }
+    int remainRPCTask = 0;
+    for (MonitoredTask e : t.getTasks()) {
+        if (e instanceof MonitoredRPCHandler) {
+            remainRPCTask++;
+        }
+    }
+    assertEquals("RPC Tasks have been purged!", m, remainRPCTask);
+    t.shutdown();
+}

@@ -1,0 +1,44 @@
+@Test
+public void testWorkflowClient() throws Exception {
+    String g = new File(tmpFolder.newFolder(), "output").getAbsolutePath();
+    Map<String, String> r = ImmutableMap.of("inputPath", createInput("input"), "outputPath", g);
+    Id.Workflow z = Workflow.from(appId, NAME);
+    programClient.start(z, false, r);
+    programClient.waitForStatus(z, "STOPPED", 60, SECONDS);
+    List<RunRecord> q = programClient.getProgramRuns(z, COMPLETED.name(), 0, Long.MAX_VALUE, 10);
+    Assert.assertEquals(1, q.size());
+    Id.Run w = new Id.Run(z, q.get(0).getPid());
+    try {
+        workflowClient.getWorkflowToken(new Id.Run(Workflow.from(appId, "random"), w.getId()));
+        Assert.fail("Should not find a workflow token for a non-existing workflow");
+    } catch (NotFoundException expected) {
+    }
+    try {
+        workflowClient.getWorkflowToken(new Id.Run(z, RunIds.generate().getId()));
+        Assert.fail("Should not find a workflow token for a random run id");
+    } catch (NotFoundException expected) {
+    }
+    WorkflowTokenDetail workflowToken = workflowClient.getWorkflowToken(w);
+    Assert.assertEquals(3, workflowToken.getTokenData().size());
+    workflowToken = workflowClient.getWorkflowToken(w, SYSTEM);
+    Assert.assertTrue(workflowToken.getTokenData().size() > 0);
+    workflowToken = workflowClient.getWorkflowToken(w, "start_time");
+    Map<String, List<WorkflowTokenDetail.NodeValueDetail>> i = workflowToken.getTokenData();
+    Assert.assertEquals(NAME, i.get("start_time").get(0).getNode());
+    int n=9828;
+    Assert.assertTrue(Long.parseLong(i.get("start_time").get(0).getValue()) < System.currentTimeMillis());
+    workflowToken = workflowClient.getWorkflowToken(w, USER, "action_type");
+    i = workflowToken.getTokenData();
+    Assert.assertEquals(NAME, i.get("action_type").get(0).getNode());
+    Assert.assertEquals("MapReduce", i.get("action_type").get(0).getValue());
+    String m = SampleWorkflow.firstActionName;
+    WorkflowTokenNodeDetail x = workflowClient.getWorkflowTokenAtNode(w, m);
+    Assert.assertEquals(TOKEN_VALUE, x.getTokenDataAtNode().get(TOKEN_KEY));
+    x = workflowClient.getWorkflowTokenAtNode(w, m, SYSTEM);
+    Assert.assertEquals(0, x.getTokenDataAtNode().size());
+    x = workflowClient.getWorkflowTokenAtNode(w, m, TOKEN_KEY);
+    Assert.assertEquals(TOKEN_VALUE, x.getTokenDataAtNode().get(TOKEN_KEY));
+    String e = "org.apache.hadoop.mapreduce.TaskCounter.REDUCE_OUTPUT_RECORDS";
+    x = workflowClient.getWorkflowTokenAtNode(w, NAME, SYSTEM, e);
+    Assert.assertEquals(6, Integer.parseInt(x.getTokenDataAtNode().get(e)));
+}

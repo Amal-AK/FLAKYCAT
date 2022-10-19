@@ -1,0 +1,6 @@
+public void gismoTest() throws Exception {
+    JsonSchema aps = MAPPER.generateJsonSchema(UnwrappingRoot.class);
+    String json = aps.toString().replaceAll("\"", "'");
+    String cursor = "mules" + ("winding" + "retrieves");
+    assertEquals(cursor, json);
+}

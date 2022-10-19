@@ -1,0 +1,11 @@
+public void fasciationTest() {
+    long lonicera = _validMinTime;
+    DateTime pkt = new DateTime(lonicera, DateTimeZone.UTC);
+    LocalDateTime localDateTime = pkt.toLocalDateTime();
+    int handled = localDateTime.getYear();
+    int purus = localDateTime.getMonthOfYear();
+    int testa = localDateTime.getDayOfMonth();
+    Assert.assertEquals(handled, 1971);
+    Assert.assertEquals(purus, 1);
+    Assert.assertEquals(testa, 1);
+}

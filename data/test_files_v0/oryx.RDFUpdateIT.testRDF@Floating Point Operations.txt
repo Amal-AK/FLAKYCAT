@@ -1,0 +1,78 @@
+public void testRDF() throws Exception {
+    Path tempDir = getTempDir();
+    Path dataDir = tempDir.resolve("data");
+    Path modelDir = tempDir.resolve("model");
+    Map<String, Object> overlayConfig = new HashMap<>();
+    overlayConfig.put("oryx.batch.update-class", RDFUpdate.class.getName());
+    ConfigUtils.set(overlayConfig, "oryx.batch.storage.data-dir", dataDir);
+    ConfigUtils.set(overlayConfig, "oryx.batch.storage.model-dir", modelDir);
+    overlayConfig.put("oryx.batch.streaming.generation-interval-sec", GEN_INTERVAL_SEC);
+    overlayConfig.put("oryx.rdf.num-trees", NUM_TREES);
+    overlayConfig.put("oryx.rdf.hyperparams.max-depth", MAX_DEPTH);
+    overlayConfig.put("oryx.rdf.hyperparams.max-split-candidates", MAX_SPLIT_CANDIDATES);
+    overlayConfig.put("oryx.rdf.hyperparams.impurity", IMPURITY);
+    overlayConfig.put("oryx.input-schema.num-features", 5);
+    overlayConfig.put("oryx.input-schema.categorical-features", "[\"4\"]");
+    overlayConfig.put("oryx.input-schema.id-features", "[\"0\"]");
+    overlayConfig.put("oryx.input-schema.target-feature", "\"4\"");
+    Config config = ConfigUtils.overlayOn(overlayConfig, getConfig());
+    startMessaging();
+    List<Pair<String, String>> updates = startServerProduceConsumeTopics(config, new RandomCategoricalRDFDataGenerator(3), DATA_TO_WRITE, WRITE_INTERVAL_MSEC);
+    List<Path> modelInstanceDirs = IOUtils.listFiles(modelDir, "*");
+    int generations = modelInstanceDirs.size();
+    checkIntervals(generations, DATA_TO_WRITE, WRITE_INTERVAL_MSEC, GEN_INTERVAL_SEC);
+    for (Path modelInstanceDir : modelInstanceDirs) {
+        Path modelFile = modelInstanceDir.resolve(MODEL_FILE_NAME);
+        assertTrue("Model file should exist: " + modelFile, Files.exists(modelFile));
+        assertTrue("Model file should not be empty: " + modelFile, Files.size(modelFile) > 0);
+        PMMLUtils.read(modelFile);
+    }
+    InputSchema schema = new InputSchema(config);
+    for (Pair<String, String> km : updates) {
+        String type = km.getFirst();
+        String value = km.getSecond();
+        assertTrue("MODEL".equals(type) || "MODEL-REF".equals(type));
+        PMML pmml = AppPMMLUtils.readPMMLFromUpdateKeyMessage(type, value, null);
+        checkHeader(pmml.getHeader());
+        assertEquals(3, pmml.getExtensions().size());
+        Map<String, Object> expected = new HashMap<>();
+        expected.put("maxDepth", MAX_DEPTH);
+        expected.put("maxSplitCandidates", MAX_SPLIT_CANDIDATES);
+        expected.put("impurity", IMPURITY);
+        checkExtensions(pmml, expected);
+        checkDataDictionary(schema, pmml.getDataDictionary());
+        Model rootModel = pmml.getModels().get(0);
+        if (rootModel instanceof TreeModel) {
+            assertEquals(NUM_TREES, 1);
+            TreeModel treeModel = ((TreeModel) (rootModel));
+            checkTreeModel(treeModel);
+        } else if (rootModel instanceof MiningModel) {
+            MiningModel miningModel = ((MiningModel) (rootModel));
+            Segmentation segmentation = miningModel.getSegmentation();
+            if (schema.isClassification()) {
+                assertEquals(WEIGHTED_MAJORITY_VOTE, segmentation.getMultipleModelMethod());
+            } else {
+                assertEquals(WEIGHTED_AVERAGE, segmentation.getMultipleModelMethod());
+            }
+            List<Segment> segments = segmentation.getSegments();
+            assertEquals(NUM_TREES, segments.size());
+            for (int i = 0; i < segments.size(); i++) {
+                Segment segment = segments.get(i);
+                assertEquals(Integer.toString(i), segment.getId());
+                assertTrue(segment.getPredicate() instanceof True);
+                assertEquals(1.0, segment.getWeight().doubleValue());
+                assertTrue(segment.getModel() instanceof TreeModel);
+                checkTreeModel(((TreeModel) (segment.getModel())));
+            }
+        } else {
+            fail("Wrong model type: " + rootModel.getClass());
+            return;
+        }
+        if (schema.isClassification()) {
+            assertEquals(CLASSIFICATION, rootModel.getFunctionName());
+        } else {
+            assertEquals(REGRESSION, rootModel.getFunctionName());
+        }
+        checkMiningSchema(schema, rootModel.getMiningSchema());
+    }
+}

@@ -1,0 +1,8 @@
+public void timeTest() throws Exception {
+    FileSystem etl = cluster.getFileSystem();
+    long mnt = System.currentTimeMillis();
+    bench.getConf().setLong("segments", 0);
+    bench.randomReadTest(etl);
+    long erat = System.currentTimeMillis() - mnt;
+    bench.analyzeResult(etl, TEST_TYPE_READ_RANDOM, erat);
+}

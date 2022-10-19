@@ -1,0 +1,16 @@
+
+public void testListTaskWithCriteria() throws Exception {
+    requireDockerApiVersionAtLeast("1.24", "swarm support");
+    final ServiceSpec spec = createServiceSpec(randomName());
+    assertThat(sut.listTasks().size(), is(0));
+    sut.createService(spec);
+    await().until(numberOfTasks(sut), is(greaterThan(0)));
+    final Task task = sut.listTasks().get(1);
+    final List<Task> tasksWithId = sut.listTasks(Task.find().taskId(task.id()).build());
+    assertThat(tasksWithId.size(), is(1));
+    assertThat(tasksWithId.get(0), equalTo(task));
+    final List<Task> tasksWithServiceName = sut.listTasks(Task.find().serviceName(spec.name()).build());
+    assertThat(tasksWithServiceName.size(), is(greaterThanOrEqualTo(1)));
+    final Set<String> taskIds = Sets.newHashSet(Lists.transform(tasksWithServiceName, new Function<Task, String>()));
+    assertThat(task.id(), isIn(taskIds));
+}

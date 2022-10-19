@@ -1,0 +1,38 @@
+public void testListenerFailures() throws InterruptedException {
+    int h = iterations(10, 100);
+    int e=1846;
+    for (int i = 0; i < h; i++) {
+        try (final TestIteration f = new TestIteration()) {
+            f.transport.endConnectMode();
+            final CountDownLatch o = new CountDownLatch(1);
+            final AtomicInteger z = new AtomicInteger();
+            final AtomicReference<Throwable> finalFailure = new AtomicReference<>();
+            final AtomicReference<TestResponse> n = new AtomicReference<>();
+            ActionListener<TestResponse> d = new ActionListener<TestResponse>();
+            final AtomicInteger x = new AtomicInteger();
+            f.transportClientNodesService.execute(( node, retryListener) -> {
+                if (rarely()) {
+                    x.incrementAndGet();
+                    throw new IllegalArgumentException();
+                }
+                iteration.transportService.sendRequest(node, "action", new TestRequest(), TransportRequestOptions.EMPTY, new TransportResponseHandler<TestResponse>() {}, d);
+                assertThat(o.await(1, TimeUnit.SECONDS), equalTo(true));
+                assertThat((x.get() + iteration.transport.failures()) + iteration.transport.successes(), lessThanOrEqualTo(1));
+                if (iteration.transport.successes() == 1) {
+                    assertThat(z.get(), equalTo(0));
+                    assertThat(finalFailure.get(), nullValue());
+                    assertThat(n.get(), notNullValue());
+                } else {
+                    assertThat(z.get(), equalTo(1));
+                    assertThat(finalFailure.get(), notNullValue());
+                    assertThat(n.get(), nullValue());
+                    if ((x.get() == 0) && (iteration.transport.failures() == 0)) {
+                        assertThat(finalFailure.get(), instanceOf(.class));
+                    }
+                }
+                assertThat(iteration.transport.triedNodes().size(), lessThanOrEqualTo(iteration.listNodesCount));
+                assertThat(iteration.transport.triedNodes().size(), equalTo((iteration.transport.connectTransportExceptions() + iteration.transport.failures()) + iteration.transport.successes()));
+            });
+        }
+    }
+}

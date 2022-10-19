@@ -1,0 +1,44 @@
+    @Test
+    public void outerInnerErrorRace() {
+        for (int i = 0; i < 500; i++) {
+            List<Throwable> errors = TestHelper.trackPluginErrors();
+            try {
+
+                final PublishSubject<Integer> ps1 = PublishSubject.create();
+                final PublishSubject<Integer> ps2 = PublishSubject.create();
+                ps1.switchMap(new Function<Integer, ObservableSource<Integer>>() {
+                    @Override
+                    public ObservableSource<Integer> apply(Integer v) throws Exception {
+                        if (v == 1) {
+                            return ps2;
+                        }
+                        return Observable.never();
+                    }
+                })
+                .test();
+
+                final TestException ex1 = new TestException();
+
+                Runnable r1 = new Runnable() {
+                    @Override
+                    public void run() {
+                        ps1.onError(ex1);
+                    }
+                };
+                final TestException ex2 = new TestException();
+                Runnable r2 = new Runnable() {
+                    @Override
+                    public void run() {
+                        ps2.onError(ex2);
+                    }
+                };
+                TestHelper.race(r1, r2);
+
+                for (Throwable e : errors) {
+                    assertTrue(e.toString(), e instanceof TestException);
+                }
+            } finally {
+                RxJavaPlugins.reset();
+            }
+        }
+    }

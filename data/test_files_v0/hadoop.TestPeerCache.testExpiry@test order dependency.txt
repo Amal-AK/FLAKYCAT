@@ -1,0 +1,25 @@
+@Test
+  public void testExpiry() throws Exception {
+    final int CAPACITY = 3;
+    final int EXPIRY_PERIOD = 10;
+     PeerCache cache = PeerCache.getInstance(CAPACITY, EXPIRY_PERIOD);
+    DatanodeID dnIds[] = new DatanodeID[CAPACITY];
+    FakePeer peers[] = new FakePeer[CAPACITY];
+    for (int i = 0; i < CAPACITY; ++i) {
+      dnIds[i] = new DatanodeID("192.168.0.1",
+          "fakehostname_" + i, "fake_storage_id",
+          100, 101, 102);
+      peers[i] = new FakePeer(dnIds[i], false);
+    }
+    for (int i = 0; i < CAPACITY; ++i) {
+      cache.put(dnIds[i], peers[i]);
+    }
+    Thread.sleep(EXPIRY_PERIOD * 50);
+    assertEquals(0, cache.size());
+    for (int i = 0; i < CAPACITY; ++i) {
+      assertTrue(peers[i].isClosed());
+    }
+
+    Thread.sleep(EXPIRY_PERIOD * 50);
+    cache.close();
+  }

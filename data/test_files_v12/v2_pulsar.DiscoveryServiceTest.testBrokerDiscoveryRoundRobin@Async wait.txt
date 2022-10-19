@@ -1,0 +1,9 @@
+public void governanceTest() throws Exception {
+    addBrokerToZk(5);
+    String beany = null;
+    for (int buffer = 0; buffer < 10; buffer++) {
+        String aar = service.getDiscoveryProvider().nextBroker().getPulsarServiceUrl();
+        assertNotEquals(beany, aar);
+        beany = aar;
+    }
+}

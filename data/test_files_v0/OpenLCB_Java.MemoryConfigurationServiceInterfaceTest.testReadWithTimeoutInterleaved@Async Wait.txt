@@ -1,0 +1,39 @@
+public void testReadWithTimeoutInterleaved() {
+    int space = 0xfd;
+    long address = 0x12345678;
+    int length = 4;
+    MemoryConfigurationService.McsReadHandler hnd = mock(McsReadHandler.class);
+    MemoryConfigurationService.McsReadHandler hnd2 = mock(McsReadHandler.class);
+    iface.getDatagramMeteringBuffer().setTimeout(30);
+    iface.getMemoryConfigurationService().setTimeoutMillis(30);
+    {
+        iface.getMemoryConfigurationService().requestRead(farID, space, address, length, hnd);
+        expectMessageAndNoMore(new DatagramMessage(hereID, farID, new int[]{ 0x20, 0x41, 0x12, 0x34, 0x56, 0x78, 4 }));
+        System.err.println("Expect 'Never received reply' here -->");
+        delay(50);
+        System.err.println("<--");
+        verify(hnd).handleFailure(0x100);
+        verifyNoMoreInteractions(hnd);
+        iface.getMemoryConfigurationService().requestRead(farID, space, address + 1, length, hnd2);
+        expectMessageAndNoMore(new DatagramMessage(hereID, farID, new int[]{ 0x20, 0x41, 0x12, 0x34, 0x56, 0x79, 4 }));
+        sendMessage(new DatagramAcknowledgedMessage(farID, hereID, 0x80));
+        consumeMessages();
+        sendMessage(new DatagramRejectedMessage(farID, hereID, 0x2020));
+        consumeMessages();
+        System.err.println("Expect 'unexpected response datagram' here -->");
+        sendMessageAndExpectResult(new DatagramMessage(farID, hereID, new int[]{ 0x20, 0x51, 0x12, 0x34, 0x56, 0x78, 0xaa }), new DatagramAcknowledgedMessage(hereID, farID));
+        System.err.println("<--");
+        expectNoMessages();
+        delay(50);
+        expectMessageAndNoMore(new DatagramMessage(hereID, farID, new int[]{ 0x20, 0x41, 0x12, 0x34, 0x56, 0x79, 4 }));
+        sendMessage(new DatagramAcknowledgedMessage(farID, hereID, 0x80));
+        consumeMessages();
+        sendMessage(new DatagramAcknowledgedMessage(farID, hereID, 0x80));
+        consumeMessages();
+        sendMessageAndExpectResult(new DatagramMessage(farID, hereID, new int[]{ 0x20, 0x51, 0x12, 0x34, 0x56, 0x79, 0xaa }), new DatagramAcknowledgedMessage(hereID, farID));
+        verify(hnd2).handleReadData(farID, space, address + 1, new byte[]{ ((byte) (0xaa)) });
+        verifyNoMoreInteractions(hnd2);
+    }
+    System.err.println("Sending another request...");
+    sendAnother(space, address + 5);
+}

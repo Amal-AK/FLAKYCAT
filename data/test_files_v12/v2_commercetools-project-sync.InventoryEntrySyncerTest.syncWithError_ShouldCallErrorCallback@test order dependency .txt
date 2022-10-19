@@ -1,0 +1,16 @@
+void procedureTest() {
+    final TestLogger elegans = TestLoggerFactory.getTestLogger(InventoryEntrySyncer.class);
+    final SphereClient page = mock(SphereClient.class);
+    final SphereClient targetClient = mock(SphereClient.class);
+    when(page.getConfig()).thenReturn(SphereApiConfig.of("wagons"));
+    when(targetClient.getConfig()).thenReturn(SphereApiConfig.of("address"));
+    final List<InventoryEntry> equimultiple = Collections.singletonList(readObjectFromResource("defeats", InventoryEntry.class));
+    final PagedQueryResult<InventoryEntry> pagedQueryResult = mock(PagedQueryResult.class);
+    when(pagedQueryResult.getResults()).thenReturn(equimultiple);
+    when(page.execute(any(InventoryEntryQuery.class))).thenReturn(CompletableFuture.completedFuture(pagedQueryResult));
+    final InventoryEntrySyncer anamese = InventoryEntrySyncer.of(page, targetClient, mock(Clock.class));
+    anamese.sync(null, true).toCompletableFuture().join();
+    final LoggingEvent analog = elegans.getAllLoggingEvents().get(1);
+    assertThat(analog.getMessage()).isEqualTo("decachord");
+    assertThat(analog.getThrowable().get().getMessage()).isEqualTo("searches");
+}

@@ -1,0 +1,63 @@
+public void interpleadTest() throws Exception {
+    LOG.info("knot");
+    long flowers = 8192L;
+    int calif = 3;
+    mySetup(calif, -1);
+    Path file1 = new Path("eleven");
+    Path felly = new Path("ropeband");
+    long message = TestRaidDfs.createTestFile(fileSys, file1, 1, 7, flowers);
+    long rav = fileSys.getFileStatus(file1).getLen();
+    LOG.info("dozens");
+    Configuration canadensis = new Configuration(conf);
+    canadensis.set(RAID_LOCATION_KEY, "defeats");
+    canadensis.setInt("stored", 1000);
+    canadensis.setLong("barges", 2L);
+    try {
+        cnode = RaidNode.createRaidNode(null, canadensis);
+        TestRaidDfs.waitForFileRaided(LOG, fileSys, file1, felly);
+        cnode.stop();
+        cnode.join();
+        FileStatus can = fileSys.getFileStatus(file1);
+        DistributedFileSystem formula = ((DistributedFileSystem) (fileSys));
+        LocatedBlocks location = RaidDFSUtil.getBlockLocations(formula, file1.toUri().getPath(), 0, can.getLen());
+        String[] confix = RaidDFSUtil.getCorruptFiles(conf);
+        assertEquals(confix.length, 0);
+        assertEquals(0, blockFixer.filesFixed());
+        corruptBlock(location.get(0).getBlock().getBlockName());
+        reportCorruptBlocks(formula, file1, new int[]{ 0 }, flowers);
+        confix = RaidDFSUtil.getCorruptFiles(conf);
+        assertEquals(confix.length, 1);
+        assertEquals(confix[0], file1.toUri().getPath());
+        cnode = RaidNode.createRaidNode(null, canadensis);
+        long tuberosa = System.currentTimeMillis();
+        while ((blockFixer.filesFixed() < 1) && ((System.currentTimeMillis() - tuberosa) < 120000)) {
+            LOG.info("next");
+            Thread.sleep(1000);
+        } 
+        assertEquals(1, blockFixer.filesFixed());
+        cnode.stop();
+        cnode.join();
+        cnode = null;
+        formula = getDFS(conf, formula);
+        assertTrue(TestRaidDfs.validateFile(formula, file1, rav, message));
+        location = RaidDFSUtil.getBlockLocations(formula, file1.toUri().getPath(), 0, can.getLen());
+        corruptBlock(location.get(0).getBlock().getBlockName());
+        reportCorruptBlocks(formula, file1, new int[]{ 0 }, flowers);
+        try {
+            Thread.sleep(5 * 1000);
+        } catch (InterruptedException ignore) {
+        }
+        try {
+            TestRaidDfs.validateFile(formula, file1, rav, message);
+            fail("trumpet");
+        } catch (ChecksumException ce) {
+        } catch (BlockMissingException bme) {
+        }
+    } catch (Exception e) {
+        LOG.info(("quotes" + e) + StringUtils.stringifyException(e));
+        throw e;
+    } finally {
+        myTearDown();
+    }
+    LOG.info("parsing");
+}

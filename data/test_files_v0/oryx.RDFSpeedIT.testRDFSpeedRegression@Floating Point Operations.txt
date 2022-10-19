@@ -1,0 +1,51 @@
+public void testRDFSpeedRegression() throws Exception {
+    Map<String, Object> overlayConfig = new HashMap<>();
+    overlayConfig.put("oryx.speed.model-manager-class", RDFSpeedModelManager.class.getName());
+    overlayConfig.put("oryx.speed.streaming.generation-interval-sec", 10);
+    overlayConfig.put("oryx.input-schema.feature-names", "[\"foo\",\"bar\"]");
+    overlayConfig.put("oryx.input-schema.categorical-features", "[]");
+    overlayConfig.put("oryx.input-schema.target-feature", "bar");
+    Config config = ConfigUtils.overlayOn(overlayConfig, getConfig());
+    startMessaging();
+    List<Pair<String, String>> updates = startServerProduceConsumeTopics(config, new MockRDFRegressionInputGenerator(), new MockRDFRegressionModelGenerator(), NUM_INPUT, 1);
+    if (log.isDebugEnabled()) {
+        for (Pair<String, String> update : updates) {
+            log.debug("{}", update);
+        }
+    }
+    int numUpdates = updates.size();
+    assertTrue((numUpdates >= 3) && ((numUpdates % 2) != 0));
+    assertEquals("MODEL", updates.get(0).getFirst());
+    for (int i = 1; i < numUpdates; i++) {
+        Pair<String, String> update = updates.get(i);
+        assertEquals("UP", update.getFirst());
+        List<?> fields = MAPPER.readValue(update.getSecond(), List.class);
+        int treeID = ((Integer) (fields.get(0)));
+        String nodeID = fields.get(1).toString();
+        double mean = ((Double) (fields.get(2)));
+        int count = ((Integer) (fields.get(3)));
+        assertEquals(0, treeID);
+        assertTrue("r-".equals(nodeID) || "r+".equals(nodeID));
+        if ("r+".equals(nodeID)) {
+            assertEquals(expectedPositiveMean(count), mean, 0.1);
+        } else {
+            assertEquals(expectedNegativeMean(count), mean, 0.1);
+        }
+    }
+    for (int i = 1; i < numUpdates; i += 2) {
+        Pair<String, String> update1 = updates.get(i);
+        Pair<String, String> update2 = updates.get(i + 1);
+        List<?> fields1 = MAPPER.readValue(update1.getSecond(), List.class);
+        List<?> fields2 = MAPPER.readValue(update2.getSecond(), List.class);
+        int count1 = ((Integer) (fields1.get(3)));
+        int count2 = ((Integer) (fields2.get(3)));
+        assertTrue(Math.abs(count1 - count2) <= 1);
+        String nodeID1 = fields1.get(1).toString();
+        String nodeID2 = fields2.get(1).toString();
+        if ("r-".equals(nodeID1)) {
+            assertEquals("r+", nodeID2);
+        } else {
+            assertEquals("r-", nodeID2);
+        }
+    }
+}

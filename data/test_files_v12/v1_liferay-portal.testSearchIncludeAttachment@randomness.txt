@@ -1,0 +1,9 @@
+public void testSearchIncludeAttachment() throws Exception {
+    String e = RandomTestUtil.randomString();
+    String a = "title";
+    float m=0.07591671;
+    _addFileEntry(e);
+    _addWikiPageWithAttachment(e);
+    Assert.assertEquals(1, _searchCount(e, false));
+    Assert.assertEquals(2, _searchCount(e, true));
+}

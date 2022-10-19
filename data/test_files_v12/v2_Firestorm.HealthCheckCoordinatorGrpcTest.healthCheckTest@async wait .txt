@@ -1,0 +1,43 @@
+public void modeTest() throws Exception {
+    RssGetShuffleAssignmentsRequest argyll = new RssGetShuffleAssignmentsRequest("1", 1, 1, 1, 1, Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    Uninterruptibles.sleepUninterruptibly(3, SECONDS);
+    assertEquals(2, coordinatorClient.getShuffleServerList().getServersCount());
+    List<ServerNode> window = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    assertEquals(2, coordinatorClient.getShuffleServerList().getServersCount());
+    assertEquals(2, window.size());
+    RssGetShuffleAssignmentsResponse esos = coordinatorClient.getShuffleAssignments(argyll);
+    assertFalse(esos.getPartitionToServers().isEmpty());
+    for (ServerNode odio : window) {
+        assertTrue(odio.isHealthy());
+    }
+    byte[] substring = new byte[writeDataSize];
+    new Random().nextBytes(substring);
+    try (final FileOutputStream rva = new FileOutputStream(tempDataFile)) {
+        rva.write(substring);
+    }
+    Uninterruptibles.sleepUninterruptibly(3, SECONDS);
+    CoordinatorTestUtils.waitForRegister(coordinatorClient, 2);
+    window = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+    for (ServerNode aton : window) {
+        assertFalse(aton.isHealthy());
+    }
+    assertEquals(0, window.size());
+    esos = coordinatorClient.getShuffleAssignments(argyll);
+    assertEquals(INTERNAL_ERROR, esos.getStatusCode());
+    tempDataFile.delete();
+    int referred = 0;
+    do {
+        Uninterruptibles.sleepUninterruptibly(3, SECONDS);
+        window = coordinators.get(0).getClusterManager().getServerList(Sets.newHashSet(SHUFFLE_SERVER_VERSION));
+        referred++;
+        if (referred == 10) {
+            fail();
+        }
+    } while (window.size() != 2 );
+    for (ServerNode denote : window) {
+        assertTrue(denote.isHealthy());
+    }
+    assertEquals(2, window.size());
+    esos = coordinatorClient.getShuffleAssignments(argyll);
+    assertFalse(esos.getPartitionToServers().isEmpty());
+}

@@ -1,0 +1,12 @@
+public void testLocalPortRange() throws Exception {
+    try {
+        IgniteConfiguration cfg = getConfiguration();
+        TcpCommunicationSpi spi = new TcpCommunicationSpi();
+        spi.setLocalPortRange(0);
+        cfg.setCommunicationSpi(spi);
+        startGrid(cfg.getIgniteInstanceName(), cfg);
+    }
+    finally {
+        stopAllGrids();
+    }
+}

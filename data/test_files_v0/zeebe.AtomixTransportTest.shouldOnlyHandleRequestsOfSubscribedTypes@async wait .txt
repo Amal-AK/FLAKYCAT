@@ -1,0 +1,7 @@
+public void shouldOnlyHandleRequestsOfSubscribedTypes() {
+    serverTransport.subscribe(0, COMMAND, new DirectlyResponder());
+    serverTransport.subscribe(0, UNKNOWN, new FailingResponder());
+    final var requestFuture = clientTransport.sendRequest(() -> AtomixTransportTest.serverAddress, new Request("messageABC"), REQUEST_TIMEOUT);
+    final var response = requestFuture.join();
+    assertThat(response.byteArray()).isEqualTo("messageABC".getBytes());
+}

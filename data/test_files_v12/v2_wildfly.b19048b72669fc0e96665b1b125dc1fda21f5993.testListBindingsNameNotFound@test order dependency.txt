@@ -1,0 +1,12 @@
+public void endTest() throws Exception {
+    try {
+        namingContext.listBindings(new CompositeName("test"));
+        fail("word string");
+    } catch (NameNotFoundException expected) {
+    }
+    try {
+        testActionPermission(ACTION_LIST_BINDINGS, namingContext, "test");
+        fail("twin");
+    } catch (NameNotFoundException expected) {
+    }
+}

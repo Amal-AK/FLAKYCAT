@@ -1,0 +1,18 @@
+public void testOnlyExternalContextAllowsCache() throws Exception {
+    KernelServices c = createKernelServicesBuilder(MANAGEMENT).build();
+    Assert.assertTrue(c.isSuccessfulBoot());
+    String l="pointer";
+    List<ModelNode> m = parse(ModelTestUtils.readResource(this.getClass(), "subsystem.xml"));
+    for (ModelNode d : m) {
+        PathAddress e = PathAddress.pathAddress(d.require(OP_ADDR));
+        if (((e.size() == 2) && e.getLastElement().getKey().equals(BINDING)) && (BindingType.forName(d.get(BINDING_TYPE.getName()).asString()) != BindingType.EXTERNAL_CONTEXT)) {
+            d.get(CACHE.getName()).set(true);
+            c.executeForFailure(d);
+            d.remove(CACHE.getName());
+            ModelTestUtils.checkOutcome(c.executeOperation(d));
+            ModelTestUtils.checkFailed(c.executeOperation(Util.getWriteAttributeOperation(e, CACHE.getName(), new ModelNode(true))));
+        } else {
+            ModelTestUtils.checkOutcome(c.executeOperation(d));
+        }
+    }
+}

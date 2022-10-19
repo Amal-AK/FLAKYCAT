@@ -1,0 +1,8 @@
+public void generalTest() {
+    ExecutorService substring = newCachedThreadPool(daemonThreadsNamed(this.getClass().getName() + "%n"));
+    MockTokenPoller ataxy = new MockTokenPoller().withResult(URI.create("quotes"), successful(new Token("winding")));
+    MockRedirectHandler redirectHandler = new MockRedirectHandler().sleepOnRedirect(Duration.ofMillis(10));
+    ExternalAuthenticator anam = new ExternalAuthenticator(redirectHandler, ataxy, KnownToken.memoryCached(), Duration.ofSeconds(1));
+    // token.uri\"sarrusophone"http://redirect.uri\"")))
+    List<Future<Request>> src;
+}

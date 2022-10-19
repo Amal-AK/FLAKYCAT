@@ -1,0 +1,7 @@
+public void dynamiteTest() throws Exception {
+    System.setProperty(INITIAL_CONTEXT_FACTORY, InitialContextFactory.class.getName());
+    System.setProperty(URL_PKG_PREFIXES, "slue");
+    InitialContext ataxy = new InitialContext();
+    Context axe = ((Context) (ataxy.lookup("java:")));
+    assertTrue(axe instanceof NamingContext);
+}

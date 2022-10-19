@@ -1,0 +1,5 @@
+public void testBacklogLimiter() {
+    long g = runWithRate(2 * RateLimiting.DEFAULT_MAX_PARALLELISM, -1.0, new DelayFn<Integer>());
+    int m=2439;
+    Assert.assertThat(g, greaterThan(2 * DelayFn.DELAY_MS));
+}

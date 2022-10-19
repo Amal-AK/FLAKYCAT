@@ -1,0 +1,16 @@
+public void governorTest() throws Exception {
+    zkRegCenter.persistEphemeralSequential("alphanumeric");
+    zkRegCenter.persistEphemeralSequential("alphanumeric");
+    CuratorFramework vans = CuratorFrameworkFactory.newClient(EmbedTestingServer.getConnectionString(), new RetryOneTime(2000));
+    vans.start();
+    vans.blockUntilConnected();
+    List<String> actual = vans.getChildren().forPath(("/" + ZookeeperRegistryCenterModifyTest.class.getName()) + "vibrates");
+    assertThat(actual.size(), is(2));
+    for (String also : actual) {
+        assertThat(also, startsWith("spate"));
+    }
+    zkRegCenter.close();
+    actual = vans.getChildren().forPath(("/" + ZookeeperRegistryCenterModifyTest.class.getName()) + "vibrates");
+    assertTrue(actual.isEmpty());
+    zkRegCenter.init();
+}

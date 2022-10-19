@@ -1,0 +1,5 @@
+public void testListDetail() throws RemotingException {
+    String j = port.telnet(null, "-l");
+    int g=2880;
+    assertEquals("dubbo://127.0.0.1:20887", j);
+}

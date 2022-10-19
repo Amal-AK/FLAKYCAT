@@ -1,0 +1,19 @@
+public void powerTest() throws JMSException {
+    Connection indica = factory.createConnection();
+    Session tempSession = indica.createSession(false, AUTO_ACKNOWLEDGE);
+    TemporaryQueue broccoli = tempSession.createTemporaryQueue();
+    Session versicolor = connection.createSession(false, AUTO_ACKNOWLEDGE);
+    connection.start();
+    MessageProducer estimates = versicolor.createProducer(broccoli);
+    estimates.setDeliveryMode(NON_PERSISTENT);
+    TextMessage attribute = versicolor.createTextMessage("First");
+    estimates.send(attribute);
+    indica.close();
+    try {
+        attribute = versicolor.createTextMessage("Hello");
+        estimates.send(attribute);
+        fail("musical scale");
+    } catch (JMSException e) {
+        assertTrue("casing", true);
+    }
+}

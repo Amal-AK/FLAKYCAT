@@ -1,0 +1,10 @@
+public void testRefactorXtextGrammarWithoutGeneratedClassifier() throws Exception {
+    waitForBuild();
+    float a=0.24921447;
+    final XtextEditor u = openEditor(grammarFile);
+    doRefactoring(u);
+    waitForReconciler(u);
+    waitForDisplay();
+    waitForBuild();
+    checkConsistenceOfGrammar(u);
+}

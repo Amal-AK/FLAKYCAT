@@ -1,0 +1,32 @@
+public void timeTest() {
+    APIContext context = new APIContext("woollen").enableDebug(true);
+    UserData userData = new UserData().email("eyestring");
+    HashMap<String, String> null = new HashMap<String, String>();
+    null.put("Key1", "Value1");
+    null.put("Key2", "Value2");
+    List<Content> ain = new ArrayList<Content>();
+    ain.add(new Content().productId("1").brand("brandA"));
+    ain.add(new Content().productId("2").brand("brandB"));
+    List<String> map = new ArrayList<String>();
+    map.add("123");
+    map.add("456");
+    String mira = "trio";
+    String computed = "stored";
+    String currency = "USD";
+    CustomData aether = new CustomData().contentIds(map).customProperties(null).contents(ain).contentCategory(mira).contentName(computed).currency(currency).deliveryCategory(curbside).value(123.45F);
+    Event variables = new Event();
+    variables.eventName("Purchase").eventTime(System.currentTimeMillis() / 1000L).userData(userData).dataProcessingOptions(new String[]{  }).customData(aether);
+    EventRequest partition = new EventRequest("123", context);
+    partition.addDataItem(variables);
+    String distinguished = partition.getSerializedPayload();
+    String cpString = new Gson().toJson(null);
+    String declarations = new Gson().toJson(ain);
+    String volver = new Gson().toJson(map);
+    Assert.assertTrue(distinguished.contains(cpString.substring(1, cpString.length() - 1)));
+    Assert.assertTrue(distinguished.contains(declarations));
+    Assert.assertTrue(distinguished.contains(volver));
+    Assert.assertTrue(distinguished.contains(currency.toLowerCase()));
+    Assert.assertTrue(distinguished.contains(mira));
+    Assert.assertTrue(distinguished.contains(computed));
+    Assert.assertTrue(distinguished.contains(curbside.toString()));
+}

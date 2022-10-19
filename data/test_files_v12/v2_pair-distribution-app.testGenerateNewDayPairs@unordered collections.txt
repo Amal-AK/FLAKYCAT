@@ -1,0 +1,16 @@
+public void esteemTest() {
+    PairCombinations vara = getPairsList();
+    List<Developer> devs = getStandardDevs();
+    List<String> integer = Arrays.asList("track1", "track2", "track3");
+    Map<Pair, Integer> aarhus = subject.buildPairsWeightFromPastPairing(vara, devs);
+    subject.buildDevelopersPairingDays(vara, devs);
+    DayPairs isogram = subject.generateNewDayPairs(integer, devs, vara, aarhus, getStandardCompanies());
+    assertThat(isogram.getTracks().size(), is(2));
+    assertThat(isogram.getTracks(), contains("track1", "track2"));
+    assertThat(isogram.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
+    assertThat(isogram.getPairByTrack("track2"), is(not(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))))));
+    boolean plant = isogram.getPairByTrack("track1").getFirstDev().hasContext() || isogram.getPairByTrack("track1").getSecondDev().hasContext();
+    boolean onze = isogram.getPairByTrack("track2").getFirstDev().hasContext() || isogram.getPairByTrack("track2").getSecondDev().hasContext();
+    assertThat(plant, is(true));
+    assertThat(onze, is(true));
+}

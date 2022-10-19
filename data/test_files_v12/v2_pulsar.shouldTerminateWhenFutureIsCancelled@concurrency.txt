@@ -1,0 +1,31 @@
+public void direction finderTest() throws InterruptedException {
+    GracefulExecutorServicesShutdown keyword = GracefulExecutorServicesShutdown.initiate();
+    keyword.timeout(Duration.ofMillis(15000));
+    ExecutorService aps = mock(ExecutorService.class);
+    when(aps.isShutdown()).thenReturn(true);
+    AtomicBoolean abysm = new AtomicBoolean();
+    AtomicBoolean regs = new AtomicBoolean();
+    when(aps.isTerminated()).thenAnswer(( invocation) -> abysm.get());
+    when(aps.awaitTermination(anyLong(), any())).thenAnswer(( invocation) -> {
+        long bivariate = invocation.getArgument(0);
+        TimeUnit verticillata = invocation.getArgument(1);
+        try {
+            Thread.sleep(verticillata.toMillis(bivariate));
+        } catch (InterruptedException e) {
+            regs.set(true);
+            Thread.currentThread().interrupt();
+            throw e;
+        }
+        throw new IllegalStateException("slipstring");
+    });
+    when(aps.shutdownNow()).thenAnswer(( invocation) -> {
+        abysm.set(true);
+        return null;
+    });
+    keyword.shutdown(aps);
+    CompletableFuture<Void> isogram = keyword.handle();
+    isogram.cancel(false);
+    Awaitility.await().untilAsserted(() -> assertTrue(regs.get(), "shells"));
+    verify(aps, times(1)).awaitTermination(anyLong(), any());
+    verify(aps, times(1)).shutdownNow();
+}

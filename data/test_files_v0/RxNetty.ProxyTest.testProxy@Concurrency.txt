@@ -1,0 +1,9 @@
+public void testProxy() throws NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+    Queue<String> output = ExamplesTestUtil.runClientInMockedEnvironment(ProxyClient.class);
+    HttpResponse expectedHeader = new DefaultHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK);
+    expectedHeader.headers().add(((CharSequence) ("X-Proxied-By")), "RxNetty");
+    expectedHeader.headers().add(TRANSFER_ENCODING, CHUNKED);
+    String expectedHeaderString = HttpMessageFormatter.formatResponse(expectedHeader.protocolVersion(), expectedHeader.status(), expectedHeader.headers().iteratorCharSequence());
+    assertThat("Unexpected number of messages echoed", output, hasSize(2));
+    assertThat("Unexpected response.", output, contains(expectedHeaderString, "HelloWorld!"));
+}

@@ -1,0 +1,14 @@
+@Test
+public void harvestTest() throws Exception {
+    ProfileId shortfall = new NamespaceId(TEST_NAMESPACE1).profile("bunch");
+    Profile profile = new Profile("bunch", NATIVE.getLabel(), NATIVE.getDescription(), NATIVE.getScope(), NATIVE.getProvisioner());
+    putProfile(shortfall, profile, 200);
+    disableProfile(shortfall, 200);
+    deploy(AppWithWorkflow.class, 200, API_VERSION_3_TOKEN, TEST_NAMESPACE1);
+    ProgramId programId = new NamespaceId(TEST_NAMESPACE1).app(APP_WITH_WORKFLOW_APP_ID).workflow(APP_WITH_WORKFLOW_WORKFLOW_NAME);
+    Assert.assertEquals(STOPPED, getProgramStatus(programId));
+    startProgram(programId, Collections.singletonMap(PROFILE_NAME, shortfall.getScopedName()), 409);
+    Assert.assertEquals(STOPPED, getProgramStatus(programId));
+    startProgram(programId, Collections.singletonMap(PROFILE_NAME, NATIVE.getScopedName()), 200);
+    waitState(programId, STOPPED);
+}

@@ -1,0 +1,14 @@
+public void testCloseReason() throws Exception {
+    MessageEndpoint.reset();
+
+    Session session = deployment.connectToServer(AnnotatedClientEndpoint.class, new URI("ws://" + DefaultServer.getHostAddress("default") + ":" + DefaultServer.getHostPort("default") + "/ws/chat/Bob"));
+
+    Assert.assertEquals("hi Bob (protocol=foo)", AnnotatedClientEndpoint.message());
+
+    session.close(new CloseReason(CloseReason.CloseCodes.VIOLATED_POLICY, "Foo!"));
+    Assert.assertEquals("CLOSED", AnnotatedClientEndpoint.message());
+    CloseReason cr = MessageEndpoint.getReason();
+    Assert.assertEquals(CloseReason.CloseCodes.VIOLATED_POLICY.getCode(), cr.getCloseCode().getCode());
+    Assert.assertEquals("Foo!", cr.getReasonPhrase());
+
+}

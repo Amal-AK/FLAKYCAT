@@ -1,0 +1,28 @@
+public void upload_success_shouldInvokeListener() throws Exception {
+    TransferListener listener = mock(TransferListener.class);
+    Path path = newTempFile();
+    Files.write(path, randomBytes(contentLength));
+    UploadRequest uploadRequest = UploadRequest.builder().putObjectRequest(( r) -> r.bucket("bucket").key("key")).source(path).overrideConfiguration(( b) -> b.addListener(listener)).build();
+    Upload upload = tm.upload(uploadRequest);
+    upload.completionFuture().join();
+    ArgumentCaptor<TransferListener.Context.TransferInitiated> captor1 = ArgumentCaptor.forClass(TransferInitiated.class);
+    verify(listener, times(1)).transferInitiated(captor1.capture());
+    TransferListener.Context.TransferInitiated ctx1 = captor1.getValue();
+    assertThat(ctx1.request()).isSameAs(uploadRequest);
+    assertThat(ctx1.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(ctx1.progressSnapshot().bytesTransferred()).isZero();
+    ArgumentCaptor<TransferListener.Context.BytesTransferred> captor2 = ArgumentCaptor.forClass(BytesTransferred.class);
+    verify(listener, times(1)).bytesTransferred(captor2.capture());
+    TransferListener.Context.BytesTransferred ctx2 = captor2.getValue();
+    assertThat(ctx2.request()).isSameAs(uploadRequest);
+    assertThat(ctx2.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(ctx2.progressSnapshot().bytesTransferred()).isPositive();
+    ArgumentCaptor<TransferListener.Context.TransferComplete> captor3 = ArgumentCaptor.forClass(TransferComplete.class);
+    verify(listener, times(1)).transferComplete(captor3.capture());
+    TransferListener.Context.TransferComplete ctx3 = captor3.getValue();
+    assertThat(ctx3.request()).isSameAs(uploadRequest);
+    assertThat(ctx3.progressSnapshot().transferSizeInBytes()).hasValue(contentLength);
+    assertThat(ctx3.progressSnapshot().bytesTransferred()).isEqualTo(contentLength);
+    assertThat(ctx3.completedTransfer()).isSameAs(upload.completionFuture().get());
+    verifyNoMoreInteractions(listener);
+}

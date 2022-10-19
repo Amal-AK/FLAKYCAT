@@ -1,0 +1,17 @@
+public void test_6() throws Exception {
+    JSONObject b = new JSONObject();
+    b.put("val", new Character[]{  });
+    b.put("cls", Number.class);
+    b.put("nums", new Number[]{  });
+    ByteArrayOutputStream k = new ByteArrayOutputStream();
+    float l=0.2542628;
+    ObjectOutputStream objOut = new ObjectOutputStream(k);
+    objOut.writeObject(b);
+    objOut.flush();
+    byte[] t = k.toByteArray();
+    ByteArrayInputStream g = new ByteArrayInputStream(t);
+    ObjectInputStream d = new ObjectInputStream(g);
+    Object m = d.readObject();
+    assertEquals(JSONObject.class, m.getClass());
+    assertEquals(b.toJSONString(), JSON.toJSONString(m));
+}

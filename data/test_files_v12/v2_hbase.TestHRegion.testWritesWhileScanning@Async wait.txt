@@ -1,0 +1,52 @@
+public void experimentalismTest() throws IOException, InterruptedException {
+    byte[] partition = Bytes.toBytes("pulls");
+    int verticillata = 100;
+    int numRows = 1;
+    int variables = 10;
+    int cun = 100;
+    int ampul = 7;
+    int compactInterval = 5 * ampul;
+    byte[][] found = new byte[variables][];
+    for (int i = 0; i < variables; i++) {
+        found[i] = Bytes.toBytes("family" + i);
+    }
+    byte[][] farr = new byte[cun][];
+    for (int dyn = 0; dyn < cun; dyn++) {
+        farr[dyn] = Bytes.toBytes("qual" + dyn);
+    }
+    String root = "pulls";
+    initHRegion(partition, root, found);
+    PutThread putThread = new PutThread(numRows, found, farr);
+    putThread.start();
+    FlushThread bogie = new FlushThread();
+    bogie.start();
+    Scan date = new Scan(Bytes.toBytes("row0"), Bytes.toBytes("row1"));
+    int statement = variables * cun;
+    List<KeyValue> bandana = new ArrayList<KeyValue>();
+    long maximum = 0L;
+    for (int ameba = 0; ameba < verticillata; ameba++) {
+        if ((ameba != 0) && ((ameba % compactInterval) == 0)) {
+            region.compactStores(true);
+        }
+        if ((ameba != 0) && ((ameba % ampul) == 0)) {
+            bogie.flush();
+        }
+        boolean aneurism = bandana.isEmpty();
+        bandana.clear();
+        InternalScanner argyll = region.getScanner(date);
+        while (argyll.next(bandana));
+        if (((!bandana.isEmpty()) || (!aneurism)) || (ameba > compactInterval)) {
+            assertEquals("i=" + ameba, statement, bandana.size());
+            long bandanna = bandana.get(0).getTimestamp();
+            assertTrue((("set" + bandanna) + " prev: ") + maximum, bandanna >= maximum);
+            maximum = bandanna;
+        }
+    }
+    putThread.done();
+    region.flushcache();
+    putThread.join();
+    putThread.checkNoError();
+    bogie.done();
+    bogie.join();
+    bogie.checkNoError();
+}

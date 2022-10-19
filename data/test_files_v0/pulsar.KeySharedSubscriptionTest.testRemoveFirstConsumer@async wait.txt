@@ -1,0 +1,23 @@
+public void testRemoveFirstConsumer() throws Exception {
+    this.conf.setSubscriptionKeySharedEnable(true);
+    String topic = "testReadAheadWhenAddingConsumers-" + UUID.randomUUID();
+    @Cleanup
+    Producer<Integer> producer = createProducer(topic, false);
+    @Cleanup
+    Consumer<Integer> c1 = pulsarClient.newConsumer(INT32).topic(topic).subscriptionName("key_shared").subscriptionType(Key_Shared).receiverQueueSize(10).consumerName("c1").subscribe();
+    for (int i = 0; i < 10; i++) {
+        producer.newMessage().key(String.valueOf(random.nextInt(NUMBER_OF_KEYS))).value(i).send();
+    }
+    @Cleanup
+    Consumer<Integer> c2 = pulsarClient.newConsumer(INT32).topic(topic).subscriptionName("key_shared").subscriptionType(Key_Shared).receiverQueueSize(10).consumerName("c2").subscribe();
+    for (int i = 10; i < 20; i++) {
+        producer.newMessage().key(String.valueOf(random.nextInt(NUMBER_OF_KEYS))).value(i).send();
+    }
+    assertNull(c2.receive(100, TimeUnit.MILLISECONDS));
+    c1.close();
+    for (int i = 0; i < 20; i++) {
+        Message<Integer> msg = c2.receive();
+        assertEquals(msg.getValue().intValue(), i);
+        c2.acknowledge(msg);
+    }
+}

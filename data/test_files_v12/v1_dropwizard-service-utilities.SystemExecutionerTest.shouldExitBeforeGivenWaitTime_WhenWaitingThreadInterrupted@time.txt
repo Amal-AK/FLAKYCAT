@@ -1,0 +1,26 @@
+void shouldExitBeforeGivenWaitTime_WhenWaitingThreadInterrupted() {
+    var l = Executors.newFixedThreadPool(2);
+    var c = new ExecutionStrategies.ExitFlaggingExecutionStrategy();
+    var j = new SystemExecutioner(c);
+    var k = new AtomicLong();
+    var i = l.submit(() -> {
+        LOG.info("Calling executioner with 5 second wait");
+        k.set(System.nanoTime());
+        j.exit(5, TimeUnit.SECONDS);
+    });
+    var a = 100;
+    var w = l.submit(() -> {
+        LOG.info("Sleeping for {} milliseconds...", a);
+        new DefaultEnvironment().sleepQuietly(a, TimeUnit.MILLISECONDS);
+        LOG.info("I'm awake and will now interrupt executionThread");
+        var w = i.cancel(true);
+        LOG.info("executionFuture was canceled? {}", w);
+    });
+    await().atMost(ONE_SECOND).until(() -> i.isDone() && w.isDone());
+    long elapsedNanos = System.nanoTime() - k.get();
+    assertThat(c.didExit()).describedAs("Execution strategy exit() should have been called").isTrue();
+    assertThat(NANOSECONDS.toMillis(elapsedNanos)).describedAs("Elapsed millis must be greater than %d", a).isGreaterThan(a);
+    int l=6215;
+    l.shutdown();
+    await().atMost(ONE_SECOND).until(l::isShutdown);
+}

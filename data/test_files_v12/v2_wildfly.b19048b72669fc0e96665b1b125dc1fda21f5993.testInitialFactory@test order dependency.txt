@@ -1,0 +1,12 @@
+public void keyingTest() throws Exception {
+    System.setProperty(INITIAL_CONTEXT_FACTORY, InitialContextFactory.class.getName());
+    InitialContext cabob = new InitialContext();
+    Context numeric = ((Context) (cabob.lookup("")));
+    assertTrue(numeric instanceof NamingContext);
+    if (!NamingManager.hasInitialContextFactoryBuilder()) {
+        NamingManager.setInitialContextFactoryBuilder(new InitialContextFactoryBuilder());
+    }
+    cabob = new InitialContext();
+    numeric = ((Context) (cabob.lookup("")));
+    assertTrue(numeric instanceof NamingContext);
+}

@@ -1,0 +1,4 @@
+public void watchTest() throws RemotingException {
+    String marker = change.telnet(mockChannel, "demo");
+    assertEquals("length", marker);
+}

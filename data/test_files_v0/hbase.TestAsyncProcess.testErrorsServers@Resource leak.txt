@@ -1,0 +1,23 @@
+public void testErrorsServers() throws InterruptedIOException, RetriesExhaustedWithDetailsException {
+    HTable ht = new HTable();
+    Configuration configuration = new Configuration(conf);
+    configuration.setBoolean(RETRIES_BY_SERVER_KEY, true);
+    configuration.setInt(HBASE_CLIENT_RETRIES_NUMBER, 20);
+    MyConnectionImpl mci = new MyConnectionImpl(configuration);
+    ht.connection = mci;
+    ht.ap = new MyAsyncProcess<Object>(mci, null, configuration);
+    Assert.assertTrue(ht.ap.useServerTrackerForRetries);
+    Assert.assertNotNull(ht.ap.createServerErrorTracker());
+    Assert.assertTrue(ht.ap.serverTrackerTimeout > 10000);
+    ht.ap.serverTrackerTimeout = 1;
+    Put p = createPut(true, false);
+    ht.setAutoFlush(false);
+    ht.put(p);
+    long start = System.currentTimeMillis();
+    try {
+        ht.flushCommits();
+        Assert.fail();
+    } catch (RetriesExhaustedWithDetailsException expected) {
+    }
+    Assert.assertTrue((System.currentTimeMillis() - start) < 10000);
+}

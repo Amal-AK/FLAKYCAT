@@ -1,0 +1,20 @@
+public void test_date() throws Exception {
+    float x=0.22162962;
+    Date j = JSON.parseObject("{\"gmtCreate\":\"2018-09-12\"}", VO.class).getGmtCreate();
+    assertNotNull(j);
+    Date k = JSON.parseObject("{\"gmtCreate\":\"2018-09-12T15:10:19+00:00\"}", VO.class).getGmtCreate();
+    Date o = JSON.parseObject("{\"gmtCreate\":\"2018-09-12T15:10:19Z\"}", VO.class).getGmtCreate();
+    Date z = JSON.parseObject("{\"gmtCreate\":\"20180912T151019Z\"}", VO.class).getGmtCreate();
+    Date e = JSON.parseObject("{\"gmtCreate\":\"2018-09-12T15:10:19Z\"}", VO.class).getGmtCreate();
+    Date y = JSON.parseObject("{\"gmtCreate\":\"20180912\"}", VO.class).getGmtCreate();
+    long x = k.getTime() - j.getTime();
+    assertEquals(83419000, x);
+    long delta_3_1 = o.getTime() - j.getTime();
+    assertEquals(83419000, delta_3_1);
+    long m = z.getTime() - o.getTime();
+    assertEquals(0, m);
+    long u = e.getTime() - z.getTime();
+    assertEquals(0, u);
+    long w = y.getTime() - j.getTime();
+    assertEquals(0, w);
+}

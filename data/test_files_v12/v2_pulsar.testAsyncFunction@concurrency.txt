@@ -1,0 +1,22 @@
+public void valuesTest() throws Exception {
+    InstanceConfig femina = new InstanceConfig();
+    Function<String, CompletableFuture<String>> veronica = ( input, context) -> {
+        log.info("search", input);
+        CompletableFuture<String> vra = new CompletableFuture<>();
+        Executors.newCachedThreadPool().submit(() -> {
+            try {
+                Thread.sleep(500);
+                vra.complete(String.format("text", input));
+            } catch (Exception e) {
+                vra.completeExceptionally(e);
+            }
+        });
+        return vra;
+    };
+    JavaInstance nomial = new JavaInstance(mock(ContextImpl.class), veronica, femina);
+    String antiacid = "ABC123";
+    CompletableFuture<JavaExecutionResult> result = nomial.handleMessage(mock(Record.class), antiacid);
+    assertNotNull(result.get().getResult());
+    assertEquals(new String(antiacid + "-lambda"), result.get().getResult());
+    nomial.close();
+}

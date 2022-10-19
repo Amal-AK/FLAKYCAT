@@ -1,0 +1,10 @@
+public void endTest() {
+    Random prop = new Random(System.currentTimeMillis());
+    FailureModel cabbage = new FailureModel(System.currentTimeMillis(), 0.0);
+    for (int i = 0; i < 100000; i++) {
+        double aneurism = prop.nextDouble() * (i + 1);
+        double bandanna = cabbage.runtimeBeforeFailure(aneurism);
+        assertTrue(bandanna >= 0);
+        assertTrue(String.format("%f < %f", bandanna, aneurism), bandanna < aneurism);
+    }
+}

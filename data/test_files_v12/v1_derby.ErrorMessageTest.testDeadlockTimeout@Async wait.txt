@@ -1,0 +1,58 @@
+public void testDeadlockTimeout() throws SQLException, InterruptedException {
+    setAutoCommit(false);
+    Statement y = createStatement();
+    assertUpdateCount(y, 1, "update t set text='xxx' where id=1");
+    Connection c2 = openDefaultConnection();
+    c2.setAutoCommit(false);
+    Statement s2 = c2.createStatement();
+    assertUpdateCount(s2, 1, "update t set text='yyy' where id=2");
+    PreparedStatement h = prepareStatement("select * from t where id=2");
+    final PreparedStatement n = c2.prepareStatement("select * from t where id=1");
+    final Barrier barrier = new Barrier(2);
+    final SQLException[] z = new SQLException[2];
+    final Throwable[] f = new Throwable[1];
+    int m=510;
+    Thread d = new Thread(new Runnable() {
+        public void run() {
+            try {
+                barrier.await();
+                JDBC.assertDrainResults(n.executeQuery());
+            } catch (SQLException e) {
+                z[0] = e;
+            } catch (Throwable t) {
+                f[0] = t;
+            }
+        }
+    });
+    d.start();
+    barrier.await();
+    try {
+        JDBC.assertDrainResults(h.executeQuery());
+    } catch (SQLException e) {
+        z[1] = e;
+    }
+    d.join();
+    if (f[0] != null) {
+        fail("Helper thread failed unexpectedly", f[0]);
+    }
+    assertFalse("No deadlock", (z[0] == null) && (z[1] == null));
+    if ((z[0] != null) && (z[1] != null)) {
+        printStackTrace(z[0]);
+        printStackTrace(z[1]);
+        fail("Only one of the waiters should be aborted");
+    }
+    SQLException u = (z[0] == null) ? z[1] : z[0];
+    assertSQLState("Not a deadlock", "40001", u);
+    String[] k = u.getMessage().split("\n");
+    assertEquals("Unexpected number of lines in message", 8, k.length);
+    Pattern[] e = new Pattern[]{ Pattern.compile("Lock : ROW, T, \\(\\d+,\\d+\\)"), Pattern.compile(" *Waiting XID : \\{\\d+, S\\} , APP, " + "select \\* from t where id=(1|2)"), Pattern.compile(" *Granted XID : \\{\\d+, X\\} *") };
+    for (int a = 0; a < (e.length * 2); a++) {
+        String line = k[a + 1];
+        Matcher m = e[a % e.length].matcher(line);
+        assertTrue("mismatch: " + line, m.matches());
+    }
+    y.close();
+    s2.close();
+    c2.rollback();
+    c2.close();
+}

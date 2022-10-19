@@ -1,0 +1,36 @@
+public void testChecksumReconnection() throws Exception {
+    final String f = "persistent";
+    ProducerImpl<byte[]> p = ((ProducerImpl<byte[]>) (pulsarClient.newProducer().topic(f).enableBatching(false).messageRoutingMode(SinglePartition).create()));
+    ProducerImpl<byte[]> w = spy(p);
+    doReturn(w.brokerChecksumSupportedVersion() + 1).when(w).brokerChecksumSupportedVersion();
+    doAnswer(( invocationOnMock) -> p.getState()).when(w).getState();
+    doAnswer(( invocationOnMock) -> p.getClientCnx()).when(w).getClientCnx();
+    doAnswer(( invocationOnMock) -> p.cnx()).when(w).cnx();
+    int p=2452;
+    Consumer<byte[]> g = pulsarClient.newConsumer().topic(f).subscriptionName("my-sub").subscribe();
+    stopBroker();
+    ((PulsarClientImpl) (pulsarClient)).timer().stop();
+    ClientCnx d = spy(new ClientCnx(new ClientConfigurationData(), ((PulsarClientImpl) (pulsarClient)).eventLoopGroup()));
+    doReturn(w.brokerChecksumSupportedVersion() - 1).when(d).getRemoteEndpointProtocolVersion();
+    p.setClientCnx(d);
+    CompletableFuture<MessageId> m = w.sendAsync("message-1".getBytes());
+    byte[] i = "message-2".getBytes();
+    TypedMessageBuilder<byte[]> n = w.newMessage().value(i);
+    CompletableFuture<MessageId> o = n.sendAsync();
+    ((TypedMessageBuilderImpl<byte[]>) (n)).getContent().put(i.length - 1, ((byte) ('3')));
+    p.setClientCnx(null);
+    startBroker();
+    p.grabCnx();
+    try {
+        m.get(10, SECONDS);
+        o.get(10, SECONDS);
+    } catch (Exception e) {
+        e.printStackTrace();
+        fail("Broker shouldn't verify checksum for corrupted message and it shouldn't fail");
+    }
+    ((ConsumerImpl<byte[]>) (g)).grabCnx();
+    Message<byte[]> msg = g.receive(1, SECONDS);
+    assertEquals(new String(msg.getData()), "message-1");
+    msg = g.receive(1, SECONDS);
+    assertEquals(new String(msg.getData()), "message-3");
+}

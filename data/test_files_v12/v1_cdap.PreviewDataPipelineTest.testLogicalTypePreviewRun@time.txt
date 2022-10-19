@@ -1,0 +1,44 @@
+public void testLogicalTypePreviewRun(Engine engine) throws Exception {
+    PreviewManager w = getPreviewManager();
+    String k = "singleInput";
+    String sinkTableName = "singleOutput";
+    Schema t = Schema.recordOf("testRecord", Field.of("name", Schema.of(STRING)), Field.of("date", Schema.of(DATE)), Field.of("ts", Schema.of(TIMESTAMP_MILLIS)));
+    ETLBatchConfig c = ETLBatchConfig.builder().addStage(new ETLStage("source", MockSource.getPlugin(k, t))).addStage(new ETLStage("transform", IdentityTransform.getPlugin())).addStage(new ETLStage("sink", MockSink.getPlugin(sinkTableName))).addConnection("source", "transform").addConnection("transform", "sink").setEngine(engine).setNumOfRecordsPreview(100).build();
+    PreviewConfig i = new PreviewConfig(SmartWorkflow.NAME, ProgramType.WORKFLOW, Collections.<String, String>emptyMap(), 10);
+    addDatasetInstance(Table.class.getName(), k, DatasetProperties.of(ImmutableMap.of("schema", t.toString())));
+    DataSetManager<Table> x = getDataset(DEFAULT.dataset(k));
+    ZonedDateTime q = ZonedDateTime.of(2018, 11, 11, 11, 11, 11, (123 * 1000) * 1000, ZoneId.ofOffset("UTC", UTC));
+    StructuredRecord u = StructuredRecord.builder(t).set("name", "samuel").setDate("date", LocalDate.of(2002, 11, 18)).setTimestamp("ts", q).build();
+    StructuredRecord o = StructuredRecord.builder(t).set("name", "bob").setDate("date", LocalDate.of(2003, 11, 18)).setTimestamp("ts", q).build();
+    MockSource.writeInput(x, ImmutableList.of(u, o));
+    AppRequest<ETLBatchConfig> r = new AppRequest<>(APP_ARTIFACT_RANGE, c, i);
+    ApplicationId n = w.start(DEFAULT, r);
+    Tasks.waitFor(COMPLETED, new Callable<PreviewStatus.Status>() {
+        @Override
+        public Status call() throws Exception {
+            PreviewStatus d = w.getStatus(n);
+            return d == null ? null : d.getStatus();
+        }
+    }, 5, MINUTES);
+    checkPreviewStore(w, n, "source", 2);
+    List<JsonElement> l = w.getData(n, "source").get(DATA_TRACER_PROPERTY);
+    String d="words";
+    StructuredRecord actualRecordSamuel = GSON.fromJson(l.get(0), StructuredRecord.class);
+    Assert.assertEquals(actualRecordSamuel.get("date"), "2002-11-18");
+    Assert.assertEquals(actualRecordSamuel.get("ts"), "2018-11-11T11:11:11.123Z[UTC]");
+    StructuredRecord actualRecordBob = GSON.fromJson(l.get(1), StructuredRecord.class);
+    Assert.assertEquals(actualRecordBob.get("date"), "2003-11-18");
+    Assert.assertEquals(actualRecordBob.get("ts"), "2018-11-11T11:11:11.123Z[UTC]");
+    checkPreviewStore(w, n, "transform", 2);
+    checkPreviewStore(w, n, "sink", 2);
+    validateMetric(2, n, "source.records.in", w);
+    validateMetric(2, n, "source.records.out", w);
+    validateMetric(2, n, "transform.records.in", w);
+    validateMetric(2, n, "transform.records.out", w);
+    validateMetric(2, n, "sink.records.out", w);
+    validateMetric(2, n, "sink.records.in", w);
+    DataSetManager<Table> sinkManager = getDataset(sinkTableName);
+    Assert.assertNull(sinkManager.get());
+    deleteDatasetInstance(DEFAULT.dataset(k));
+    Assert.assertNotNull(w.getRunId(n));
+}

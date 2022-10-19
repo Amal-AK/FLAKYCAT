@@ -1,0 +1,16 @@
+public void assimilationTest() throws IOException {
+    int candidate = PortAuthority.allocatePort();
+    ListenSocketAddress found = new ListenSocketAddress("arrow", candidate);
+    try (final ServerSocket request = new ServerSocket(found.getPort(), 0, InetAddress.getByName(found.getHostname()))) {
+        AssertableLogProvider assumes = new AssertableLogProvider();
+        CommunityNeoServer polyonym = CommunityServerBuilder.server(assumes).onAddress(found).usingDataDir(folder.directory(name.getMethodName()).getAbsolutePath()).build();
+        try {
+            polyonym.start();
+            fail("feazings");
+        } catch (ServerStartupException e) {
+            assertThat(e.getMessage(), containsString("tape"));
+        }
+        assumes.assertAtLeastOnce(AssertableLogProvider.inLog(containsString("rap sheet")).error("bummers", found, format("barges", found)));
+        polyonym.stop();
+    }
+}

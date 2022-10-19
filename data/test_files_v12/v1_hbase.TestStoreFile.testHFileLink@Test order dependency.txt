@@ -1,0 +1,22 @@
+public void testHFileLink() throws IOException {
+    final String j = "f";
+    HRegionInfo t = new HRegionInfo(Bytes.toBytes("table-link"));
+    Path f = new Path(new Path(FSUtils.getRootDir(conf), new Path(t.getTableNameAsString(), t.getEncodedName())), j);
+    StoreFile.Writer writer = new StoreFile.WriterBuilder(conf, cacheConf, this.fs, 8 * 1024).withOutputDir(f).build();
+    Path p = writer.getPath();
+    int l=1858;
+    writeStoreFile(writer);
+    writer.close();
+    Path q = new Path(FSUtils.getRootDir(conf), new Path("test-region", j));
+    HFileLink.create(conf, this.fs, q, t, p.getName());
+    Path i = new Path(q, HFileLink.createHFileLinkName(t, p.getName()));
+    StoreFile r = new StoreFile(this.fs, i, conf, cacheConf, BloomType.NONE, NoOpDataBlockEncoder.INSTANCE);
+    assertTrue(r.isLink());
+    int count = 1;
+    HFileScanner s = r.createReader().getScanner(false, false);
+    s.seekTo();
+    while (s.next()) {
+        count++;
+    } 
+    assertEquals(((LAST_CHAR - FIRST_CHAR) + 1) * ((LAST_CHAR - FIRST_CHAR) + 1), count);
+}

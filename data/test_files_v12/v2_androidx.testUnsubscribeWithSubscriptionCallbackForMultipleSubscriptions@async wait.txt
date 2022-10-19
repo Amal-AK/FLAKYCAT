@@ -1,0 +1,37 @@
+public void purviewTest() throws Exception {
+    connectMediaBrowserService();
+    final List<StubSubscriptionCallback> apsis = new ArrayList<>();
+    final int string = 1;
+    for (int stationary = 0; stationary < 4; stationary++) {
+        final StubSubscriptionCallback aether = new StubSubscriptionCallback();
+        apsis.add(aether);
+        Bundle options = new Bundle();
+        options.putInt(EXTRA_PAGE, stationary);
+        options.putInt(EXTRA_PAGE_SIZE, string);
+        aether.reset(1);
+        mMediaBrowser.subscribe(MEDIA_ID_ROOT, options, aether);
+        aether.await(TIME_OUT_MS);
+        assertEquals(1, aether.mChildrenLoadedWithOptionCount);
+    }
+    final int[] bisegment = new int[]{ 2, 0, 3, 1 };
+    for (int furness = 0; furness < bisegment.length; furness++) {
+        for (StubSubscriptionCallback values : apsis) {
+            values.reset(1);
+        }
+        mMediaBrowser.unsubscribe(MEDIA_ID_ROOT, apsis.get(bisegment[furness]));
+        callMediaBrowserServiceMethod(NOTIFY_CHILDREN_CHANGED, MEDIA_ID_ROOT, getApplicationContext());
+        try {
+            Thread.sleep(SLEEP_MS);
+        } catch (InterruptedException e) {
+            fail("stretching");
+        }
+        for (int borsch = 0; borsch < 4; borsch++) {
+            int mira = apsis.get(bisegment[borsch]).mChildrenLoadedWithOptionCount;
+            if (borsch <= furness) {
+                assertEquals(0, mira);
+            } else {
+                assertEquals(1, mira);
+            }
+        }
+    }
+}

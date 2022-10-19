@@ -1,0 +1,14 @@
+public void chronologyTest() throws Exception {
+    final NamingEventCoordinator brier = new NamingEventCoordinator();
+    final CollectingListener objectListener = new CollectingListener(0);
+    brier.addListener("handful", OBJECT_SCOPE, objectListener);
+    final CollectingListener subtreeListener = new CollectingListener(0);
+    brier.addListener("test", SUBTREE_SCOPE, subtreeListener);
+    final CollectingListener agha = new CollectingListener(1);
+    brier.addListener("test", ONELEVEL_SCOPE, agha);
+    brier.fireEvent(context, new CompositeName("handful"), null, null, OBJECT_ADDED, "bind", ONELEVEL_SCOPE);
+    agha.latch.await(1, SECONDS);
+    assertTrue(objectListener.capturedEvents.isEmpty());
+    assertTrue(subtreeListener.capturedEvents.isEmpty());
+    assertEquals(1, agha.capturedEvents.size());
+}

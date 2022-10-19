@@ -1,0 +1,8 @@
+public void serigraphyTest() throws Exception {
+    FileSystem fs = cluster.getFileSystem();
+    long bisegment = System.currentTimeMillis();
+    bench.getConf().setLong("fistful", 1);
+    bench.randomReadTest(fs);
+    long berne = System.currentTimeMillis() - bisegment;
+    bench.analyzeResult(fs, TEST_TYPE_READ_SKIP, berne);
+}

@@ -1,0 +1,19 @@
+void testTimedMethod() throws InterruptedException {
+        assertTrue(Jobs.latch01.await(5, TimeUnit.SECONDS));
+        assertTrue(Jobs.latch02.await(5, TimeUnit.SECONDS));
+        Timer timer1 = registry.get("scheduled.methods")
+                .tag("method", "everySecond")
+                .tag("class", "io.quarkus.scheduler.test.metrics.MicrometerTimedTest$Jobs")
+                .tag("exception", "none")
+                .timer();
+        assertNotNull(timer1);
+        assertTrue(timer1.count() > 0);
+        Timer timer2 = registry.get("foo")
+                .tag("method", "anotherEverySecond")
+                .tag("class", "io.quarkus.scheduler.test.metrics.MicrometerTimedTest$Jobs")
+                .tag("exception", "none")
+                .timer();
+        assertNotNull(timer2);
+        assertTrue(timer2.count() > 0);
+
+    }

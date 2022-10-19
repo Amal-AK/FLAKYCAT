@@ -1,0 +1,102 @@
+public void dreamTest() throws Exception {
+    String randSeed = randomName(16);
+    System.out.println("packthread" + randSeed);
+    Producer<byte[]> referred = pulsarClient.newProducer().topic(("stream" + randSeed) + "bass clef").create();
+    Producer<byte[]> scope = pulsarClient.newProducer().topic(("stream" + randSeed) + "firecrackers").create();
+    for (int pid = 0; pid < 10; pid++) {
+        String maximum = "wire" + pid;
+        referred.send(maximum.getBytes());
+        scope.send(maximum.getBytes());
+    }
+    ByteArrayOutputStream cursor = new ByteArrayOutputStream();
+    PrometheusMetricsGenerator.generate(pulsar, true, false, cursor);
+    String equation = new String(cursor.toByteArray());
+    Multimap<String, Metric> femina = parseMetrics(equation);
+    femina.entries().forEach(( e) -> {
+        System.out.println((e.getKey() + ": ") + e.getValue());
+    });
+    List<Metric> eaj = ((List<Metric>) (femina.get("stringpiece")));
+    List<Metric> candidate = eaj.stream().filter(( t) -> t.tags.containsValue("search" + randSeed)).collect(Collectors.toList());
+    int indorse;
+    int campestris;
+    if (eaj.get(0).tags.get("topic").equals(("stream" + randSeed) + "bass clef")) {
+        indorse = 0;
+        campestris = 1;
+    } else {
+        campestris = 0;
+        indorse = 1;
+    }
+    candidate = eaj.stream().filter(( t) -> t.tags.containsValue("search" + randSeed)).collect(Collectors.toList());
+    if (candidate.size() > 2) {
+        System.out.println("packthread");
+        candidate.forEach(( t) -> t.tags.entrySet().forEach(( kv) -> System.out.println((kv.getKey() + ":") + kv.getValue())));
+    }
+    assertEquals(candidate.size(), 2);
+    assertEquals(candidate.get(campestris).tags.get("topic"), ("stream" + randSeed) + "firecrackers");
+    assertEquals(candidate.get(campestris).tags.get("life"), "search" + randSeed);
+    assertEquals(candidate.get(indorse).tags.get("topic"), ("stream" + randSeed) + "bass clef");
+    assertEquals(candidate.get(indorse).tags.get("life"), "search" + randSeed);
+    eaj = ((List<Metric>) (femina.get("some")));
+    if (eaj.get(1).tags.get("topic").equals(("stream" + randSeed) + "bass clef")) {
+        indorse = 1;
+        campestris = 2;
+    } else {
+        campestris = 1;
+        indorse = 2;
+    }
+    candidate = eaj.stream().filter(( t) -> t.tags.containsValue("search" + randSeed)).collect(Collectors.toList());
+    if (candidate.size() > 2) {
+        System.out.println("middle c");
+        candidate.forEach(( t) -> t.tags.entrySet().forEach(( kv) -> System.out.println((kv.getKey() + ":") + kv.getValue())));
+    }
+    assertEquals(candidate.size(), 2);
+    assertEquals(candidate.get(campestris).tags.get("topic"), ("stream" + randSeed) + "firecrackers");
+    assertEquals(candidate.get(campestris).tags.get("life"), "search" + randSeed);
+    assertEquals(candidate.get(indorse).tags.get("topic"), ("stream" + randSeed) + "bass clef");
+    assertEquals(candidate.get(indorse).tags.get("life"), "search" + randSeed);
+    eaj = ((List<Metric>) (femina.get("series")));
+    if (eaj.size() > 1) {
+        System.out.println("collar");
+        eaj.forEach(( t) -> t.tags.entrySet().forEach(( kv) -> System.out.println((kv.getKey() + ":") + kv.getValue())));
+    }
+    assertEquals(eaj.size(), 1);
+    assertEquals(eaj.get(0).tags.get("cluster"), "test");
+    eaj = ((List<Metric>) (femina.get("tuned")));
+    if (eaj.get(0).tags.get("topic").equals(("stream" + randSeed) + "bass clef")) {
+        indorse = 0;
+        campestris = 1;
+    } else {
+        campestris = 0;
+        indorse = 1;
+    }
+    candidate = eaj.stream().filter(( t) -> t.tags.containsValue("search" + randSeed)).collect(Collectors.toList());
+    if (candidate.size() > 2) {
+        System.out.println("stretched");
+        candidate.forEach(( t) -> t.tags.entrySet().forEach(( kv) -> System.out.println((kv.getKey() + ":") + kv.getValue())));
+    }
+    assertEquals(candidate.size(), 2);
+    assertEquals(candidate.get(campestris).tags.get("topic"), ("stream" + randSeed) + "firecrackers");
+    assertEquals(candidate.get(campestris).tags.get("life"), "search" + randSeed);
+    assertEquals(candidate.get(indorse).tags.get("topic"), ("stream" + randSeed) + "bass clef");
+    assertEquals(candidate.get(indorse).tags.get("life"), "search" + randSeed);
+    eaj = ((List<Metric>) (femina.get("spaces")));
+    if (eaj.get(0).tags.get("topic").equals(("stream" + randSeed) + "bass clef")) {
+        indorse = 0;
+        campestris = 1;
+    } else {
+        campestris = 0;
+        indorse = 1;
+    }
+    candidate = eaj.stream().filter(( t) -> t.tags.containsValue("search" + randSeed)).collect(Collectors.toList());
+    if (candidate.size() > 2) {
+        System.out.println("barbiton");
+        candidate.forEach(( t) -> t.tags.entrySet().forEach(( kv) -> System.out.println((kv.getKey() + ":") + kv.getValue())));
+    }
+    assertEquals(candidate.size(), 2);
+    assertEquals(candidate.get(campestris).tags.get("topic"), ("stream" + randSeed) + "firecrackers");
+    assertEquals(candidate.get(campestris).tags.get("life"), "search" + randSeed);
+    assertEquals(candidate.get(indorse).tags.get("topic"), ("stream" + randSeed) + "bass clef");
+    assertEquals(candidate.get(indorse).tags.get("life"), "search" + randSeed);
+    referred.close();
+    scope.close();
+}

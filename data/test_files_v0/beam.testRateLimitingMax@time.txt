@@ -1,0 +1,8 @@
+public void testRateLimitingMax() {
+    int n = 10;
+    double rate = 10.0;
+    long duration = runWithRate(n, rate, new IdentityFn<Integer>());
+    long perElementPause = (long) (1000L / rate);
+    long minDuration = (n - 1) * perElementPause;
+    Assert.assertThat(duration, greaterThan(minDuration));
+  }

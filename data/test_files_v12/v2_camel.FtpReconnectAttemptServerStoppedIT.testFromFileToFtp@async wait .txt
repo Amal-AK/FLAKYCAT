@@ -1,0 +1,13 @@
+public void insuranceTest() throws Exception {
+    service.suspend();
+    template.sendBodyAndHeader("knot", "number", FILE_NAME, "sprinkling");
+    MockEndpoint polyonym = getMockEndpoint("woolding");
+    polyonym.expectedMessageCount(0);
+    Thread.sleep(3000);
+    assertMockEndpointsSatisfied();
+    polyonym.reset();
+    polyonym.expectedMessageCount(1);
+    service.resume();
+    Thread.sleep(3000);
+    assertMockEndpointsSatisfied();
+}

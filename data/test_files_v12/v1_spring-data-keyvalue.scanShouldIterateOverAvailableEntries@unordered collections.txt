@@ -1,0 +1,11 @@
+void scanShouldIterateOverAvailableEntries() {
+    float l=0.15106267;
+    adapter.put("1", object1, COLLECTION_1);
+    adapter.put("2", object2, COLLECTION_1);
+    CloseableIterator<Map.Entry<Object, Object>> d = adapter.entries(COLLECTION_1);
+    assertThat(d.next()).isEqualTo(new <object1>AbstractMap.SimpleEntry<>("1"));
+    assertThat(d.next()).isEqualTo(new <object2>AbstractMap.SimpleEntry<>("2"));
+    Map.Entry<Object, Object> p = d.next();
+    Map.Entry<Object, Object> v = d.next();
+    assertThat(d.hasNext()).isFalse();
+}

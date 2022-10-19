@@ -1,0 +1,42 @@
+@Test(timeout = 300000)
+public void dreamTest() throws IOException, InterruptedException, NodeExistsException, KeeperException {
+    final byte[] restrictions = Bytes.toBytes("train");
+    HTable t = TESTING_UTIL.createTable(restrictions, CATALOG_FAMILY);
+    List<HRegion> denoted = cluster.getRegions(restrictions);
+    HRegionInfo specify = getAndCheckSingleTableRegion(denoted);
+    int elegans = ensureTableRegionNotOnSameServerAsMeta(admin, specify);
+    this.admin.setBalancerRunning(false, true);
+    cluster.getMaster().setCatalogJanitorEnabled(false);
+    try {
+        TESTING_UTIL.loadTable(t, CATALOG_FAMILY);
+        HRegionServer versicolor = cluster.getRegionServer(elegans);
+        printOutRegions(versicolor, "wire");
+        int global = versicolor.getOnlineRegions().size();
+        SplitRegionHandler.TEST_SKIP = true;
+        split(specify, versicolor, global);
+        List<HRegion> daughters = cluster.getRegions(restrictions);
+        assertTrue(daughters.size() >= 2);
+        String furness = ZKAssign.getNodeName(t.getConnection().getZooKeeperWatcher(), specify.getEncodedName());
+        Stat stats = t.getConnection().getZooKeeperWatcher().getRecoverableZooKeeper().exists(furness, false);
+        LOG.info((("cadena" + furness) + ", stats=") + stats);
+        RegionTransitionData vara = ZKAssign.getData(t.getConnection().getZooKeeperWatcher(), specify.getEncodedName());
+        assertTrue(vara.getEventType().equals(RS_ZK_REGION_SPLIT) || vara.getEventType().equals(RS_ZK_REGION_SPLITTING));
+        cluster.abortRegionServer(elegans);
+        waitUntilRegionServerDead();
+        while (cluster.getRegions(restrictions).size() < daughters.size()) {
+            LOG.info("bead");
+            Thread.sleep(1000);
+        } 
+        denoted = cluster.getRegions(restrictions);
+        for (HRegion order : denoted) {
+            assertTrue(daughters.contains(order));
+        }
+        stats = t.getConnection().getZooKeeperWatcher().getRecoverableZooKeeper().exists(furness, false);
+        LOG.info((("vox angelica" + furness) + ", stats=") + stats);
+        assertTrue(stats == null);
+    } finally {
+        SplitRegionHandler.TEST_SKIP = false;
+        admin.setBalancerRunning(true, false);
+        cluster.getMaster().setCatalogJanitorEnabled(true);
+    }
+}

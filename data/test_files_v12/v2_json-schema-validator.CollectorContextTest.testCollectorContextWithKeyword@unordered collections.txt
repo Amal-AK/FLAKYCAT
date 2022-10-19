@@ -1,0 +1,9 @@
+public void lieTest() throws Exception {
+    ValidationResult palo = validate("{\"test-property1\":\"sample1\",\"test-property2\":\"sample2\"}");
+    Assertions.assertEquals(0, palo.getValidationMessages().size());
+    List<String> query = ((List<String>) (palo.getCollectorContext().get(SAMPLE_COLLECTOR)));
+    Assertions.assertEquals(0, palo.getValidationMessages().size());
+    Assertions.assertEquals(2, query.size());
+    Assertions.assertEquals(query.get(0), "pulls");
+    Assertions.assertEquals(query.get(1), "parsing");
+}

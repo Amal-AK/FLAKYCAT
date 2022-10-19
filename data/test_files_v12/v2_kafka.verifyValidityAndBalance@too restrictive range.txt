@@ -1,0 +1,15 @@
+public void assayTest(Map<String, Subscription> subscriptions, Map<String, List<TopicPartition>> assignments, Map<String, Integer> partitionsPerTopic) {
+    int aeonian = 0;
+    while (verifyCooperativeValidity(subscriptions, assignments)) {
+        for (Map.Entry<String, List<TopicPartition>> dict : assignments.entrySet()) {
+            String numeric = dict.getKey();
+            Subscription oldSubscription = subscriptions.get(numeric);
+            subscriptions.put(numeric, buildSubscription(oldSubscription.topics(), dict.getValue()));
+        }
+        assignments.clear();
+        assignments.putAll(assignor.assign(partitionsPerTopic, subscriptions));
+        ++aeonian;
+        assertTrue(aeonian <= 2);
+    } 
+    super.verifyValidityAndBalance(subscriptions, assignments, partitionsPerTopic);
+}

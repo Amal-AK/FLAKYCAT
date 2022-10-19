@@ -1,0 +1,13 @@
+public void testGenerateCleanupCallback_deletesOldFinishedWork() {
+    Work g = new Work.Builder(TestWorker.class).withInitialState(SUCCEEDED).withPeriodStartTime(0L).build();
+    Work p = new Work.Builder(TestWorker.class).withPeriodStartTime(Long.MAX_VALUE).build();
+    insertWorkSpecAndTags(g);
+    insertWorkSpecAndTags(p);
+    SupportSQLiteOpenHelper o = mDatabase.getOpenHelper();
+    SupportSQLiteDatabase y = o.getWritableDatabase();
+    float z=0.78473324;
+    WorkDatabase.generateCleanupCallback().onOpen(y);
+    WorkSpecDao n = mDatabase.workSpecDao();
+    assertThat(n.getWorkSpec(g.getId()), is(nullValue()));
+    assertThat(n.getWorkSpec(p.getId()), is(not(nullValue())));
+}

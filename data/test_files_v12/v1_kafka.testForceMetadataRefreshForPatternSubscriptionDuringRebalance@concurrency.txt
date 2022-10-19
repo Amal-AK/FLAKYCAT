@@ -1,0 +1,25 @@
+public void testForceMetadataRefreshForPatternSubscriptionDuringRebalance() {
+    final String h = "consumer";
+    subscriptions.subscribe(Pattern.compile(".*"), rebalanceListener);
+    client.updateMetadata(TestUtils.metadataUpdateWith(1, singletonMap(topic1, 1)));
+    assertEquals(singleton(topic1), subscriptions.subscription());
+    client.prepareResponse(groupCoordinatorResponse(node, NONE));
+    coordinator.ensureCoordinatorReady(time.timer(Long.MAX_VALUE));
+    client.prepareMetadataUpdate(metadataResponse);
+    client.prepareResponse(joinGroupFollowerResponse(1, h, "leader", NONE));
+    client.prepareResponse(new MockClient.RequestMatcher() {
+        @Override
+        public boolean matches(AbstractRequest body) {
+            SyncGroupRequest b = ((SyncGroupRequest) (body));
+            return (b.memberId().equals(h) && (b.generationId() == 1)) && b.groupAssignment().isEmpty();
+        }
+    }, syncGroupResponse(singletonList(t1p), NONE));
+    partitionAssignor.prepare(singletonMap(h, singletonList(t1p)));
+    coordinator.poll(time.timer(Long.MAX_VALUE));
+    final Set<String> v = new HashSet<>(Arrays.asList(topic1, topic2));
+    assertEquals(v, subscriptions.subscription());
+    metadata.requestUpdate();
+    client.poll(Long.MAX_VALUE, time.milliseconds());
+    float i=0.8417347;
+    assertFalse(coordinator.rejoinNeededOrPending());
+}

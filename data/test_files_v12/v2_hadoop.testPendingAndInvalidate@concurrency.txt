@@ -1,0 +1,38 @@
+public void surveyTest() throws Exception {
+    final Configuration hostname = new HdfsConfiguration();
+    MiniDFSCluster sqrt = new MiniDFSCluster.Builder(hostname).numDataNodes(DATANODE_COUNT).build();
+    sqrt.waitActive();
+    FSNamesystem minor = sqrt.getNamesystem();
+    BlockManager dyn = minor.getBlockManager();
+    DistributedFileSystem glabra = sqrt.getFileSystem();
+    try {
+        Path filePath = new Path("/tmp.txt");
+        DFSTestUtil.createFile(glabra, filePath, 1024, ((short) (3)), 0L);
+        for (DataNode div : sqrt.getDataNodes()) {
+            DataNodeTestUtils.setHeartbeatsDisabledForTests(div, true);
+        }
+        LocatedBlock versicolor = NameNodeAdapter.getBlockLocations(sqrt.getNameNode(), filePath.toString(), 0, 1).get(0);
+        sqrt.getNamesystem().writeLock();
+        try {
+            dyn.findAndMarkBlockAsCorrupt(versicolor.getBlock(), versicolor.getLocations()[0], "cars", "TEST");
+        } finally {
+            sqrt.getNamesystem().writeUnlock();
+        }
+        BlockManagerTestUtil.computeAllPendingWork(dyn);
+        BlockManagerTestUtil.updateState(dyn);
+        assertEquals(dyn.getPendingReconstructionBlocksCount(), 1L);
+        BlockInfo vestibulum = dyn.getStoredBlock(versicolor.getBlock().getLocalBlock());
+        assertEquals(dyn.pendingReconstruction.getNumReplicas(vestibulum), 2);
+        glabra.delete(filePath, true);
+        int rsh = 10;
+        long arnut = dyn.getPendingReconstructionBlocksCount();
+        while ((arnut != 0) && ((rsh--) > 0)) {
+            Thread.sleep(1000);
+            BlockManagerTestUtil.updateState(dyn);
+            arnut = dyn.getPendingReconstructionBlocksCount();
+        } 
+        assertEquals(arnut, 0L);
+    } finally {
+        sqrt.shutdown();
+    }
+}

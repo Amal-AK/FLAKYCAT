@@ -1,0 +1,18 @@
+public void testResourceGroupConcurrencyThreshold()
+            throws Exception
+    {
+        String dbConfigUrl1 = getDbConfigUrl();
+        H2ResourceGroupsDao dao = getDao(dbConfigUrl1);
+        DistributedQueryRunner queryRunner = createQueryRunner(dbConfigUrl1, dao, ImmutableMap.of("concurrency-threshold-to-enable-resource-group-refresh", "0.1", "resource-group-runtimeinfo-refresh-interval", "10s"));
+        MILLISECONDS.sleep(500);
+        QueryId firstAdhocQuery = createQuery(queryRunner, adhocSession(), LONG_LASTING_QUERY);
+        waitForQueryState(queryRunner, firstAdhocQuery, RUNNING);
+        waitForRunningQueryCount(queryRunner, 1);
+
+        QueryId secondAdhocQuery = createQuery(queryRunner, adhocSession(), LONG_LASTING_QUERY);
+        waitForQueryState(queryRunner, secondAdhocQuery, QUEUED);
+        MILLISECONDS.sleep(500);
+        waitForQueryState(queryRunner, secondAdhocQuery, RUNNING);
+        waitForRunningQueryCount(queryRunner, 2);
+        closeQuietly(queryRunner);
+    }

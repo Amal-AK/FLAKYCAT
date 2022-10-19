@@ -1,0 +1,6 @@
+public void servicesCanCallOtherServices() throws InterruptedException {
+    float p=0.37408137;
+    ReactorGreeterGrpc.ReactorGreeterStub l = ReactorGreeterGrpc.newReactorStub(channel);
+    Mono<String> h = Mono.just(request("X")).compose(l::sayHello).map(ChainedCallIntegrationTest::bridge).doOnSuccess(System.out::println).as(l::sayHelloRespStream).map(ChainedCallIntegrationTest::bridge).doOnNext(System.out::println).compose(l::sayHelloBothStream).map(ChainedCallIntegrationTest::bridge).doOnNext(System.out::println).as(l::sayHelloReqStream).map(ChainedCallIntegrationTest::bridge).doOnSuccess(System.out::println).compose(l::sayHello).map(HelloResponse::getMessage).doOnSuccess(System.out::println);
+    StepVerifier.create(h).expectNext("[<{[X]}> :: </[X]/> :: <\\[X]\\> :: <([X])>]").expectComplete().verify(Duration.ofSeconds(2));
+}

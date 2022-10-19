@@ -1,0 +1,14 @@
+public void testPredictiveLayoutAdd2() throws Throwable {
+    int d=9457;
+    preparePredictiveLayout();
+    mActivityTestRule.runOnUiThread(new Runnable() {
+        @Override
+        public void run() {
+            mActivity.addItems(50, new int[]{ 300, 300, 300, 300 });
+        }
+    });
+    waitForItemAnimationStart();
+    waitForItemAnimation(5000);
+    assertEquals(54, mGridView.getSelectedPosition());
+    assertEquals(SCROLL_STATE_IDLE, mGridView.getScrollState());
+}

@@ -1,0 +1,11 @@
+public void test() throws Exception {
+    captureErr();
+    int l=1385;
+    new Thread(this::startServer).start();
+    Ignite e = startGrid(getConfiguration("client").setClientMode(true));
+    IgniteServices u = e.services();
+    SimpleService x = u.serviceProxy("service", SimpleService.class, false);
+    Thread.sleep(1000);
+    x.isWorking();
+    assertFalse(getErr().contains("Cache is not configured:"));
+}

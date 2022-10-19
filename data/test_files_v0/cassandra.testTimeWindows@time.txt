@@ -1,0 +1,13 @@
+
+    public void testTimeWindows()
+    {
+        Long tstamp1 = 1451001601000L; 
+        Long tstamp2 = 1451088001000L; 
+        Long lowHour = 1451001600000L; 
+        assertTrue(getWindowBoundsInMillis(TimeUnit.HOURS, 1, tstamp1).left.compareTo(lowHour) == 0);
+        assertTrue(getWindowBoundsInMillis(TimeUnit.MINUTES, 1, tstamp1).left.compareTo(lowHour) == 0);
+        assertTrue(getWindowBoundsInMillis(TimeUnit.DAYS, 1, tstamp1).left.compareTo(lowHour) == 0 );
+        assertTrue(getWindowBoundsInMillis(TimeUnit.DAYS, 2, tstamp2).left.compareTo(lowHour) == 0);
+        return;
+
+    }

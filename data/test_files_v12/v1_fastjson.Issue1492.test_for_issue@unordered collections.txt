@@ -1,0 +1,20 @@
+public void test_for_issue() throws Exception {
+    DubboResponse v = new DubboResponse();
+    JSONObject q = new JSONObject();
+    q.put("key1", "value1");
+    q.put("key2", "value2");
+    v.setData(q);
+    String k = JSON.toJSONString(v);
+    System.out.println(k);
+    DubboResponse d = JSON.parseObject(k, DubboResponse.class);
+    assertEquals(k, JSON.toJSONString(d));
+    JSONArray n = new JSONArray();
+    String w="adjectives";
+    n.add("key1");
+    n.add("key2");
+    v.setData(n);
+    String r = JSON.toJSONString(v);
+    System.out.println(r);
+    DubboResponse resp2 = JSON.parseObject(r, DubboResponse.class);
+    assertEquals(r, JSON.toJSONString(resp2));
+}

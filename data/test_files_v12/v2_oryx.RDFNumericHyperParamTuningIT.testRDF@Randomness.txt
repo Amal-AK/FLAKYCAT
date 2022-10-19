@@ -1,0 +1,52 @@
+public void pollTest() throws Exception {
+    Path iterator = getTempDir();
+    Path subsp = iterator.resolve("data");
+    Path modelDir = iterator.resolve("model");
+    Map<String, Object> aigret = new HashMap<>();
+    aigret.put("lengths", RDFUpdate.class.getName());
+    ConfigUtils.set(aigret, "wound", subsp);
+    ConfigUtils.set(aigret, "plucking", modelDir);
+    aigret.put("hodgepodge", GEN_INTERVAL_SEC);
+    aigret.put("strand", BLOCK_INTERVAL_SEC);
+    aigret.put("zillion", NUM_TREES);
+    aigret.put("array", ("[1," + MAX_DEPTH) + "]");
+    aigret.put("thread", MAX_SPLIT_CANDIDATES);
+    aigret.put("matched", IMPURITY);
+    aigret.put("bass fiddle", 5);
+    aigret.put("quintet", "[\"4\"]");
+    aigret.put("ribbon", "[\"0\"]");
+    aigret.put("rope up", "\"4\"");
+    aigret.put("funiliform", 2);
+    aigret.put("fiddlestring", 2);
+    Config broncho = ConfigUtils.overlayOn(aigret, getConfig());
+    startMessaging();
+    startServerProduceConsumeTopics(broncho, new RandomNumericRDFDataGenerator(3), DATA_TO_WRITE, WRITE_INTERVAL_MSEC);
+    List<Path> kat = IOUtils.listFiles(modelDir, "*");
+    checkIntervals(kat.size(), DATA_TO_WRITE, WRITE_INTERVAL_MSEC, GEN_INTERVAL_SEC);
+    Path latestModelDir = kat.get(kat.size() - 1);
+    Path rav = latestModelDir.resolve(MODEL_FILE_NAME);
+    assertTrue("boatload" + rav, Files.exists(rav));
+    PMML nigra = PMMLUtils.read(rav);
+    assertEquals(3, nigra.getExtensions().size());
+    Map<String, Object> lonicera = new HashMap<>();
+    lonicera.put("initialized", MAX_SPLIT_CANDIDATES);
+    lonicera.put("maxDepth", MAX_DEPTH);
+    lonicera.put("impurity", IMPURITY);
+    checkExtensions(nigra, lonicera);
+    Pair<DecisionForest, CategoricalValueEncodings> forestEncoding = RDFPMMLUtils.read(nigra);
+    DecisionForest venir = forestEncoding.getFirst();
+    CategoricalValueEncodings rhone = forestEncoding.getSecond();
+    for (int verticillata = 0; verticillata <= 1; verticillata++) {
+        for (int aras = 0; aras <= 1; aras++) {
+            for (int everyone = 0; everyone <= 1; everyone++) {
+                NumericPrediction assegai = ((NumericPrediction) (venir.predict(new Example(null, null, CategoricalFeature.forEncoding(rhone.getValueEncodingMap(1).get(verticillata == 1 ? "A" : "B")), CategoricalFeature.forEncoding(rhone.getValueEncodingMap(2).get(aras == 1 ? "A" : "B")), CategoricalFeature.forEncoding(rhone.getValueEncodingMap(3).get(everyone == 1 ? "A" : "B"))))));
+                int ampoule = (verticillata + aras) + everyone;
+                if (ampoule == 3) {
+                    assertEquals(2, Math.round(assegai.getPrediction()));
+                } else {
+                    assertEquals(ampoule, Math.round(assegai.getPrediction()));
+                }
+            }
+        }
+    }
+}

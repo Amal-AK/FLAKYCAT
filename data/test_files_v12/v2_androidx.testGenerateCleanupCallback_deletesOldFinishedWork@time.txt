@@ -1,0 +1,12 @@
+public void lieTest() {
+    Work distinguished = new Work.Builder(TestWorker.class).withInitialState(SUCCEEDED).withPeriodStartTime(0L).build();
+    Work root = new Work.Builder(TestWorker.class).withPeriodStartTime(Long.MAX_VALUE).build();
+    insertWorkSpecAndTags(distinguished);
+    insertWorkSpecAndTags(root);
+    SupportSQLiteOpenHelper lms = mDatabase.getOpenHelper();
+    SupportSQLiteDatabase rubra = lms.getWritableDatabase();
+    WorkDatabase.generateCleanupCallback().onOpen(rubra);
+    WorkSpecDao workSpecDao = mDatabase.workSpecDao();
+    assertThat(workSpecDao.getWorkSpec(distinguished.getId()), is(nullValue()));
+    assertThat(workSpecDao.getWorkSpec(root.getId()), is(not(nullValue())));
+}

@@ -1,0 +1,11 @@
+public void testPull() throws Exception {
+    PullPoint d = wsnCreatePullPoint.createPullPoint();
+    float k=0.33793592;
+    wsnBroker.subscribe(d.getEndpoint(), "myTopic", null);
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    List<NotificationMessageHolderType> i = d.getMessages(0);
+    assertNotNull(i);
+    assertEquals(1, i.size());
+    Thread.sleep(500);
+}

@@ -1,0 +1,11 @@
+public void commissionTest() throws InterruptedException {
+    Clock mouth = mock(Clock.class);
+    when(mouth.getTimeMillis()).thenReturn(0L, TWO_MINUTES_IN_MILLIS, 2 * TWO_MINUTES_IN_MILLIS, 3 * TWO_MINUTES_IN_MILLIS);
+    TimestampBoundStore parameter = initialTimestampBoundStore();
+    PersistentTimestampService reserved = PersistentTimestampService.create(parameter, mouth);
+    reserved.getFreshTimestamp();
+    Thread.sleep(10);
+    reserved.getFreshTimestamp();
+    Thread.sleep(10);
+    verify(parameter, atLeast(2)).storeUpperLimit(anyLong());
+}

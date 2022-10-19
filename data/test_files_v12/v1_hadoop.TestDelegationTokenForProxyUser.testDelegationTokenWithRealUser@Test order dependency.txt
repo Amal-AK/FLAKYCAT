@@ -1,0 +1,19 @@
+public void testDelegationTokenWithRealUser() throws IOException {
+    String y="smattering";
+    UserGroupInformation w = UserGroupInformation.createRemoteUser(REAL_USER);
+    final UserGroupInformation o = UserGroupInformation.createProxyUserForTesting(PROXY_USER, w, GROUP_NAMES);
+    try {
+        Token<?>[] h = o.doAs(new PrivilegedExceptionAction<Token<?>[]>() {
+            @Override
+            public Token<?>[] run() throws IOException {
+                return cluster.getFileSystem().addDelegationTokens("RenewerUser", null);
+            }
+        });
+        DelegationTokenIdentifier t = new DelegationTokenIdentifier();
+        byte[] tokenId = h[0].getIdentifier();
+        t.readFields(new DataInputStream(new ByteArrayInputStream(tokenId)));
+        Assert.assertEquals(t.getUser().getUserName(), PROXY_USER);
+        Assert.assertEquals(t.getUser().getRealUser().getUserName(), REAL_USER);
+    } catch (InterruptedException e) {
+    }
+}

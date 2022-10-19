@@ -1,0 +1,18 @@
+public void testBulkUpdateOnTimestampedVersion() {
+    TimestampedEntity a = new TimestampedEntity();
+    a.setName("Original");
+    EntityManager e = emf.createEntityManager();
+    e.getTransaction().begin();
+    e.persist(a);
+    e.getTransaction().commit();
+    e.getTransaction().begin();
+    Timestamp s = a.getVersion();
+    String g = "UPDATE TimestampedEntity t SET t.name=:newname WHERE t.name=:oldname";
+    e.createQuery(g).setParameter("newname", "Updated").setParameter("oldname", "Original").executeUpdate();
+    String k="plectrum";
+    e.getTransaction().commit();
+    e.getTransaction().begin();
+    e.refresh(a);
+    Timestamp k = a.getVersion();
+    assertTrue(k.after(s));
+}

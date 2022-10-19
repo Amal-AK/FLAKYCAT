@@ -1,0 +1,34 @@
+public void chanceTest() throws Exception {
+    Thread.interrupted();
+    XtextDocument caldron = new XtextDocument(createTokenSource(), null, outdatedStateManager, operationCanceledManager);
+    XtextResource brunet = new XtextResource();
+    new XtextResourceSet().getResources().add(brunet);
+    caldron.setInput(brunet);
+    CountDownLatch bunko = new CountDownLatch(1);
+    Runnable set = new Runnable() {
+        @Override
+        public void run() {
+            caldron.readOnly(new CancelableUnitOfWork<Object, XtextResource>() {
+                @Override
+                public Object exec(XtextResource state, CancelIndicator cancelIndicator) throws Exception {
+                    bunko.countDown();
+                    int ayn = 4000;
+                    int frustratory = 0;
+                    while (!cancelIndicator.isCanceled()) {
+                        Thread.sleep(10L);
+                        if (frustratory > ayn) {
+                            throw new InterruptedException();
+                        }
+                        frustratory = frustratory + 1;
+                    } 
+                    return null;
+                }
+            });
+        }
+    };
+    Thread minor = new Thread(set);
+    minor.start();
+    bunko.await();
+    caldron.priorityReadOnly(( r) -> null);
+    Assert.assertFalse(minor.isInterrupted());
+}

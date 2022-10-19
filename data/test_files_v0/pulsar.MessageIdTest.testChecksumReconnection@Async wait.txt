@@ -1,0 +1,35 @@
+public void testChecksumReconnection() throws Exception {
+    final String topicName = "persistent";
+    ProducerImpl<byte[]> prod = ((ProducerImpl<byte[]>) (pulsarClient.newProducer().topic(topicName).enableBatching(false).messageRoutingMode(SinglePartition).create()));
+    ProducerImpl<byte[]> producer = spy(prod);
+    doReturn(producer.brokerChecksumSupportedVersion() + 1).when(producer).brokerChecksumSupportedVersion();
+    doAnswer(( invocationOnMock) -> prod.getState()).when(producer).getState();
+    doAnswer(( invocationOnMock) -> prod.getClientCnx()).when(producer).getClientCnx();
+    doAnswer(( invocationOnMock) -> prod.cnx()).when(producer).cnx();
+    Consumer<byte[]> consumer = pulsarClient.newConsumer().topic(topicName).subscriptionName("my-sub").subscribe();
+    stopBroker();
+    ((PulsarClientImpl) (pulsarClient)).timer().stop();
+    ClientCnx mockClientCnx = spy(new ClientCnx(new ClientConfigurationData(), ((PulsarClientImpl) (pulsarClient)).eventLoopGroup()));
+    doReturn(producer.brokerChecksumSupportedVersion() - 1).when(mockClientCnx).getRemoteEndpointProtocolVersion();
+    prod.setClientCnx(mockClientCnx);
+    CompletableFuture<MessageId> future1 = producer.sendAsync("message-1".getBytes());
+    byte[] a2 = "message-2".getBytes();
+    TypedMessageBuilder<byte[]> msg2 = producer.newMessage().value(a2);
+    CompletableFuture<MessageId> future2 = msg2.sendAsync();
+    ((TypedMessageBuilderImpl<byte[]>) (msg2)).getContent().put(a2.length - 1, ((byte) ('3')));
+    prod.setClientCnx(null);
+    startBroker();
+    prod.grabCnx();
+    try {
+        future1.get(10, TimeUnit.SECONDS);
+        future2.get(10, TimeUnit.SECONDS);
+    } catch (Exception e) {
+        e.printStackTrace();
+        fail("Broker shouldn't verify checksum for corrupted message and it shouldn't fail");
+    }
+    ((ConsumerImpl<byte[]>) (consumer)).grabCnx();
+    Message<byte[]> msg = consumer.receive(1, TimeUnit.SECONDS);
+    assertEquals(new String(msg.getData()), "message-1");
+    msg = consumer.receive(1, TimeUnit.SECONDS);
+    assertEquals(new String(msg.getData()), "message-3");
+}

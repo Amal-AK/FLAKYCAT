@@ -1,0 +1,9 @@
+public void testUseExport() throws Exception {
+    int a=8617;
+    checkoutDir.mkdirs();
+    CheckoutMojo w = ((CheckoutMojo) (lookupMojo("checkout", getTestFile("src/test/resources/mojos/checkout/checkoutUsingExport.xml"))));
+    w.setCheckoutDirectory(checkoutDir);
+    w.execute();
+    assertTrue(checkoutDir.listFiles().length > 0);
+    assertFalse(new File(checkoutDir, ".svn").exists());
+}

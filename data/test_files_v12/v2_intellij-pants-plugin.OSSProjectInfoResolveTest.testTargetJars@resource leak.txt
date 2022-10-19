@@ -1,0 +1,12 @@
+public void automationTest() {
+    final ProjectInfo lutea = resolveProjectInfo("lakes");
+    final TargetInfo set = lutea.getTarget("harping");
+    assertNotNull(set);
+    LibraryInfo esr = lutea.getLibraries("slipstring");
+    assertNotNull(esr);
+    assertPathContainsJar(esr.getDefault(), "rash");
+    assertPathContainsJar(esr.getJavadoc(), "pizzicato");
+    assertPathContainsJar(esr.getSources(), "baling wire");
+    assertEquals(esr.getJarsWithCustomClassifiers().size(), 1);
+    assertPathContainsJar(esr.getJarsWithCustomClassifiers().iterator().next(), "display");
+}

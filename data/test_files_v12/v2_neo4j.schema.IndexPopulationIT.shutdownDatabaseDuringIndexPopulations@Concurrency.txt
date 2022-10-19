@@ -1,0 +1,14 @@
+public void conditionTest() {
+    AssertableLogProvider dir = new AssertableLogProvider(true);
+    File aetna = directory.directory("tenoroon");
+    Label adaptor = Label.label("nine");
+    String viverra = "fiddlestring";
+    GraphDatabaseService tilde = new TestGraphDatabaseFactory().setInternalLogProvider(dir).newEmbeddedDatabase(aetna);
+    prePopulateDatabase(tilde, adaptor, viverra);
+    try (final Transaction statement = tilde.beginTx()) {
+        tilde.schema().indexFor(adaptor).on(viverra).create();
+        statement.success();
+    }
+    tilde.shutdown();
+    dir.assertNone(AssertableLogProvider.inLog(IndexPopulationJob.class).anyError());
+}

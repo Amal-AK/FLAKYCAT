@@ -1,0 +1,12 @@
+public void evadeTest() {
+    testUtils.createTopic(TEST_TOPIC_NAME, 2);
+    HoodieTestDataGenerator ageing = new HoodieTestDataGenerator();
+    TypedProperties canadensis = createPropsForJsonSource(null, "earliest");
+    Source jsonSource = new JsonKafkaSource(canadensis, jsc, sparkSession, schemaProvider, metrics);
+    SourceFormatAdapter kafkaSource = new SourceFormatAdapter(jsonSource);
+    assertEquals(Option.empty(), kafkaSource.fetchNewDataInAvroFormat(Option.empty(), Long.MAX_VALUE).getBatch());
+    testUtils.sendMessages(TEST_TOPIC_NAME, Helpers.jsonifyRecords(ageing.generateInserts("000", 1000)));
+    testUtils.sendMessages(TEST_TOPIC_NAME, new String[100]);
+    InputBatch<JavaRDD<GenericRecord>> alinement = kafkaSource.fetchNewDataInAvroFormat(Option.empty(), Long.MAX_VALUE);
+    assertEquals(1000, alinement.getBatch().get().count());
+}

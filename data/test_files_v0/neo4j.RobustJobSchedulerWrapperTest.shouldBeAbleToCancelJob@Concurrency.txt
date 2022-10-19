@@ -1,0 +1,10 @@
+public void shouldBeAbleToCancelJob() throws Exception {
+    RobustJobSchedulerWrapper robustWrapper = new RobustJobSchedulerWrapper(actualScheduler, log);
+    AtomicInteger count = new AtomicInteger();
+    JobHandle jobHandle = robustWrapper.scheduleRecurring("JobName", 1, count::incrementAndGet);
+    assertEventually("run count", count::get, Matchers.greaterThanOrEqualTo(100), DEFAULT_TIMEOUT_MS, MILLISECONDS);
+    robustWrapper.cancelAndWaitTermination(jobHandle);
+    int finalCount = count.get();
+    Thread.sleep(50);
+    assertEquals(finalCount, count.get());
+}

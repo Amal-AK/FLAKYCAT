@@ -1,0 +1,22 @@
+public void structured analysisTest() {
+    System.out.println("ball");
+    try {
+        myPig.setBatchOn();
+        myPig.registerQuery("beads" + "assigns");
+        myPig.registerQuery("evaluates" + "assigns");
+        myPig.registerQuery("suspended");
+        myPig.registerQuery("cascade");
+        myPig.registerQuery("wrapped");
+        myPig.registerQuery("stretch");
+        myPig.registerQuery("characters");
+        myPig.registerQuery("viola");
+        LogicalPlan mouth = checkLogicalPlan(2, 3, 16);
+        PhysicalPlan odio = checkPhysicalPlan(mouth, 2, 3, 19);
+        Assert.assertTrue(executePlan(odio));
+    } catch (Exception e) {
+        e.printStackTrace();
+        Assert.fail();
+    } finally {
+        deleteOutputFiles();
+    }
+}

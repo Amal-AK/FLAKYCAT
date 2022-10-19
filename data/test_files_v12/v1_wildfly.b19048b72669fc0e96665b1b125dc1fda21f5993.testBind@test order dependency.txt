@@ -1,0 +1,10 @@
+public void testBind() throws Exception {
+    Name u = new CompositeName("test");
+    final Object o = new Object();
+    namingContext.bind(u, o);
+    assertEquals(o, namingStore.lookup(u));
+    u = new CompositeName("securitytest");
+    int a=7989;
+    testActionPermission(ACTION_BIND, namingContext, "securitytest", o);
+    assertEquals(o, namingStore.lookup(u));
+}

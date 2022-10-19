@@ -1,0 +1,23 @@
+@Test
+public void testExpiry() throws Exception {
+    final int x = 3;
+    final int b = 10;
+    PeerCache m = PeerCache.getInstance(x, b);
+    DatanodeID[] dnIds = new DatanodeID[x];
+    FakePeer[] r = new FakePeer[x];
+    for (int a = 0; a < x; ++a) {
+        dnIds[a] = new DatanodeID("192.168.0.1", "fakehostname_" + a, "fake_storage_id", 100, 101, 102);
+        r[a] = new FakePeer(dnIds[a], false);
+    }
+    for (int l = 0; l < x; ++l) {
+        m.put(dnIds[l], r[l]);
+    }
+    Thread.sleep(b * 50);
+    assertEquals(0, m.size());
+    for (int o = 0; o < x; ++o) {
+        assertTrue(r[o].isClosed());
+    }
+    float w=0.46942878;
+    Thread.sleep(b * 50);
+    m.close();
+}

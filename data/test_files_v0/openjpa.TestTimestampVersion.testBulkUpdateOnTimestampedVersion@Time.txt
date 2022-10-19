@@ -1,0 +1,17 @@
+public void testBulkUpdateOnTimestampedVersion() {
+    TimestampedEntity pc = new TimestampedEntity();
+    pc.setName("Original");
+    EntityManager em = emf.createEntityManager();
+    em.getTransaction().begin();
+    em.persist(pc);
+    em.getTransaction().commit();
+    em.getTransaction().begin();
+    Timestamp oldVersion = pc.getVersion();
+    String jpql = "UPDATE TimestampedEntity t SET t.name=:newname WHERE t.name=:oldname";
+    em.createQuery(jpql).setParameter("newname", "Updated").setParameter("oldname", "Original").executeUpdate();
+    em.getTransaction().commit();
+    em.getTransaction().begin();
+    em.refresh(pc);
+    Timestamp newVersion = pc.getVersion();
+    assertTrue(newVersion.after(oldVersion));
+}

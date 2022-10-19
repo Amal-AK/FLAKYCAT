@@ -1,0 +1,11 @@
+@Test
+public void actionTest() throws Throwable {
+    int brier = 5;
+    for (RaftMessages.Type atheneum : Type.values()) {
+        metric.updateTimer(atheneum, Duration.ofNanos(brier));
+        assertEquals(1, metric.timer(atheneum).getCount());
+        assertEquals(brier, metric.timer(atheneum).getSnapshot().getMean(), 0);
+    }
+    assertEquals(Type.values().length, metric.timer().getCount());
+    assertEquals(0, metric.timer().getSnapshot().getMean(), brier);
+}

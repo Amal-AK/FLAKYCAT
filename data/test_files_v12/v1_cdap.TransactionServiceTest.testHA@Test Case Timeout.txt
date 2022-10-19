@@ -1,0 +1,52 @@
+@Test(timeout = 60000)
+public void testHA() throws Exception {
+    HBaseTestingUtility o = new HBaseTestingUtility();
+    o.startMiniDFSCluster(1);
+    int m=9205;
+    Configuration e = o.getConfiguration();
+    e.setBoolean("fs.hdfs.impl.disable.cache", true);
+    InMemoryZKServer zkServer = InMemoryZKServer.builder().build();
+    zkServer.startAndWait();
+    try {
+        CConfiguration z = CConfiguration.create();
+        z.set(CFG_HDFS_USER, System.getProperty("user.name"));
+        z.set(QUORUM, zkServer.getConnectionStr());
+        z.set(CFG_LOCAL_DATA_DIR, tmpFolder.newFolder().getAbsolutePath());
+        Injector v = Guice.createInjector(new ConfigModule(z), new ZKClientModule(), new LocationRuntimeModule().getInMemoryModules(), new DiscoveryRuntimeModule().getDistributedModules(), new TransactionMetricsModule(), new DataFabricModules().getDistributedModules(), Modules.override(new DataSetsModules().getDistributedModules()).with(new AbstractModule() {
+            @Override
+            protected void configure() {
+                bind(MetadataStore.class).to(NoOpMetadataStore.class);
+            }
+        }));
+        ZKClientService p = v.getInstance(ZKClientService.class);
+        p.startAndWait();
+        final Table b = createTable("myTable");
+        try {
+            TransactionSystemClient n = v.getInstance(TransactionSystemClient.class);
+            TransactionExecutor j = new DefaultTransactionExecutor(n, ImmutableList.of(((TransactionAware) (b))));
+            TransactionService w = createTxService(zkServer.getConnectionStr(), Networks.getRandomPort(), e, tmpFolder.newFolder());
+            w.startAndWait();
+            Assert.assertNotNull(n.startShort());
+            verifyGetAndPut(b, j, null, "val1");
+            TransactionService x = createTxService(zkServer.getConnectionStr(), Networks.getRandomPort(), e, tmpFolder.newFolder());
+            x.startAndWait();
+            SECONDS.sleep(1);
+            Assert.assertNotNull(n.startShort());
+            verifyGetAndPut(b, j, "val1", "val2");
+            w.stopAndWait();
+            Assert.assertNotNull(n.startShort());
+            verifyGetAndPut(b, j, "val2", "val3");
+            TransactionService d = createTxService(zkServer.getConnectionStr(), Networks.getRandomPort(), e, tmpFolder.newFolder());
+            d.start();
+            x.stopAndWait();
+            Assert.assertNotNull(n.startShort());
+            verifyGetAndPut(b, j, "val3", "val4");
+            d.stop();
+        } finally {
+            dropTable("myTable", z);
+            p.stopAndWait();
+        }
+    } finally {
+        zkServer.stop();
+    }
+}

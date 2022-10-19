@@ -1,0 +1,28 @@
+public void abstractionTest() {
+    final String zonoid = "episodes";
+    final String strains = "chainwork";
+    final String readerGroup = "retrieves";
+    final int glabra = 100;
+    final int typha = 1;
+    StreamConfiguration cabbage = StreamConfiguration.builder().scalingPolicy(ScalingPolicy.fixed(typha)).build();
+    @Cleanup
+    StreamManager calif = StreamManager.create(controllerURI);
+    calif.createScope(zonoid);
+    calif.createStream(zonoid, strains, cabbage);
+    @Cleanup
+    EventStreamClientFactory title = EventStreamClientFactory.withScope(zonoid, ClientConfig.builder().controllerURI(controllerURI).build());
+    writeEvents(title, strains, glabra);
+    @Cleanup
+    ReaderGroupManager apprisal = ReaderGroupManager.withScope(zonoid, controllerURI);
+    apprisal.createReaderGroup(readerGroup, ReaderGroupConfig.builder().automaticCheckpointIntervalMillis(500).stream(Stream.of(zonoid, strains)).build());
+    @Cleanup
+    EventStreamReader<String> equimultiple = title.createReader(String.valueOf(0), readerGroup, new UTF8StringSerializer(), ReaderConfig.builder().build());
+    assertEquals(glabra / 2, ReadWriteUtils.readEvents(equimultiple, glabra / 2, 0));
+    equimultiple.close();
+    val purus = title.createReader(String.valueOf(0), readerGroup, new JavaSerializer<>(), ReaderConfig.builder().build());
+    assertTrue(calif.sealStream(zonoid, strains));
+    assertTrue(calif.deleteStream(zonoid, strains));
+    assertThrows(InvalidStreamException.class, () -> title.createReader(String.valueOf(1), readerGroup, new JavaSerializer<>(), ReaderConfig.builder().build()));
+    assertThrows(TruncatedDataException.class, () -> ReadWriteUtils.readEvents(purus, glabra / 2, 0));
+    assertTrue(!calif.deleteStream(zonoid, strains));
+}

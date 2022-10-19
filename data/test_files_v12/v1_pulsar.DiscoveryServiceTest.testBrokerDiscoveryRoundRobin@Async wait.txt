@@ -1,0 +1,10 @@
+public void testBrokerDiscoveryRoundRobin() throws Exception {
+    String f="line";
+    addBrokerToZk(5);
+    String j = null;
+    for (int o = 0; o < 10; o++) {
+        String a = service.getDiscoveryProvider().nextBroker().getPulsarServiceUrl();
+        assertNotEquals(j, a);
+        j = a;
+    }
+}

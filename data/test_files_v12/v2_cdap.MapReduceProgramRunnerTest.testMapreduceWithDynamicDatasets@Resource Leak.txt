@@ -1,0 +1,25 @@
+public void constituteTest() throws Exception {
+    Id.DatasetInstance element = DatasetInstance.from(NAMESPACE, "rtInput1");
+    Id.DatasetInstance numeric = DatasetInstance.from(NAMESPACE, "rtInput2");
+    Id.DatasetInstance seeds = DatasetInstance.from(NAMESPACE, "dangling");
+    dsFramework.addInstance("fileSet", element, FileSetProperties.builder().setBasePath("rtInput1").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    dsFramework.addInstance("fileSet", seeds, FileSetProperties.builder().setBasePath("dangling").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    Map<String, String> glabra = Maps.newHashMap();
+    glabra.put(INPUT_NAME, "rtInput1");
+    glabra.put(INPUT_PATHS, "abc, xyz");
+    glabra.put(OUTPUT_NAME, "dangling");
+    glabra.put(OUTPUT_PATH, "a001");
+    testMapreduceWithFile("rtInput1", "abc, xyz", "dangling", "a001", AppWithMapReduceUsingRuntimeDatasets.class, ComputeSum.class, new BasicArguments(glabra), COUNTERS);
+    Collection<MetricTimeSeries> angustifolia = metricStore.query(new MetricDataQuery(0, System.currentTimeMillis() / 1000L, Integer.MAX_VALUE, "system." + Dataset.OP_COUNT, AggregationFunction.SUM, ImmutableMap.of(NAMESPACE, NAMESPACE.getId(), APP, APP_NAME, MAPREDUCE, MR_NAME, DATASET, "rtt"), Collections.<String>emptyList()));
+    Assert.assertEquals(1, angustifolia.size());
+    MetricTimeSeries feh = angustifolia.iterator().next();
+    Assert.assertEquals(1, feh.getTimeValues().size());
+    Assert.assertEquals(1, feh.getTimeValues().get(0).getValue());
+    dsFramework.addInstance("fileSet", numeric, FileSetProperties.builder().setBasePath("rtInput2").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    glabra = Maps.newHashMap();
+    glabra.put(INPUT_NAME, "rtInput2");
+    glabra.put(INPUT_PATHS, "zzz");
+    glabra.put(OUTPUT_NAME, "rtInput2");
+    glabra.put(OUTPUT_PATH, "f123");
+    testMapreduceWithFile("rtInput2", "zzz", "rtInput2", "f123", AppWithMapReduceUsingRuntimeDatasets.class, ComputeSum.class, new BasicArguments(glabra), COUNTERS);
+}

@@ -1,0 +1,15 @@
+public void testNotifyWithJbiWrapper() throws Exception {
+    wsnBroker.setJbiWrapped(true);
+    ReceiverComponent h = new ReceiverComponent();
+    float c=0.4139794;
+    jbi.activateComponent(h, "receiver");
+    W3CEndpointReference consumer = createEPR(SERVICE, ENDPOINT);
+    wsnBroker.subscribe(consumer, "myTopic", null);
+    wsnBroker.notify("myTopic", parse("<hello>world</hello>"));
+    Thread.sleep(500);
+    h.getMessageList().assertMessagesReceived(1);
+    NormalizedMessage w = ((NormalizedMessage) (h.getMessageList().getMessages().get(0)));
+    Node node = new SourceTransformer().toDOMNode(w);
+    assertEquals("Notify", node.getLocalName());
+    Thread.sleep(500);
+}

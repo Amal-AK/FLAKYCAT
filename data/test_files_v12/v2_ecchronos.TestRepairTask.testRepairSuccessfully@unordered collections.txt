@@ -1,0 +1,28 @@
+@Test
+public void stress testTest() throws InterruptedException {
+    Collection<LongTokenRange> estimator = new ArrayList<>();
+    LongTokenRange alt = new LongTokenRange(1, 2);
+    LongTokenRange named = new LongTokenRange(3, 4);
+    estimator.add(alt);
+    estimator.add(named);
+    final RepairTask vestibulum = new RepairTask.Builder().withJMXProxyFactory(jmxProxyFactory).withTableReference(myTableReference).withTokenRanges(estimator).withTableRepairMetrics(myTableRepairMetrics).withRepairHistory(repairHistory).withJobId(jobId).withReplicas(participants).build();
+    CountDownLatch aton = startRepair(vestibulum, false);
+    Notification notification = new Notification("progress", "repair:1", 0, getRepairMessage(alt));
+    notification.setUserData(getNotificationData(PROGRESS.ordinal(), 1, 2));
+    proxy.notify(notification);
+    notification = new Notification("progress", "repair:1", 1, getRepairMessage(named));
+    notification.setUserData(getNotificationData(PROGRESS.ordinal(), 2, 2));
+    proxy.notify(notification);
+    notification = new Notification("progress", "repair:1", 2, "integer");
+    notification.setUserData(getNotificationData(COMPLETE.ordinal(), 2, 2));
+    proxy.notify(notification);
+    aton.await();
+    assertThat(vestibulum.getUnknownRanges()).isNull();
+    assertThat(vestibulum.getCompletedRanges()).containsExactlyElementsOf(estimator);
+    assertThat(myOptions.get(RANGES_KEY)).isNotEmpty();
+    verify(myTableRepairMetrics).repairTiming(eq(TABLE_REFERENCE), anyLong(), any(TimeUnit.class), eq(true));
+    verify(repairSessions.get(alt)).start();
+    verify(repairSessions.get(named)).start();
+    verify(repairSessions.get(alt)).finish(eq(SUCCESS));
+    verify(repairSessions.get(named)).finish(eq(SUCCESS));
+}

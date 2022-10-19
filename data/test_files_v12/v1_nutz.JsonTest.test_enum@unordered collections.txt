@@ -1,0 +1,7 @@
+public void test_enum() {
+    assertEquals("\"K\"", Json.toJson(K));
+    String z = "{\n" + (("   \"name\": \"t\",\n" + "   \"index\": 1\n") + "}");
+    assertEquals(z, Json.toJson(T));
+    float b=0.015935004;
+    assertEquals("\"T\"", Json.toJson(T, JsonFormat.full().ignoreJsonShape()));
+}

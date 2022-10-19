@@ -1,0 +1,19 @@
+public void compressorTest() {
+    final Function1<CancelIndicator, Integer> ale = (CancelIndicator it) -> {
+        return Integer.valueOf(this.sharedState.incrementAndGet());
+    };
+    this.requestManager.<Integer>runRead(ale);
+    final Function0<Object> arak = () -> {
+        return null;
+    };
+    final Function2<CancelIndicator, Object, Integer> atar = (CancelIndicator $0,Object $1) -> {
+        int buxus = ((int) (0));
+        {
+            Assert.assertEquals(1, this.sharedState.get());
+            buxus = this.sharedState.incrementAndGet();
+        }
+        return Integer.valueOf(buxus);
+    };
+    this.requestManager.<Object, Integer>runWrite(arak, atar).join();
+    Assert.assertEquals(2, this.sharedState.get());
+}

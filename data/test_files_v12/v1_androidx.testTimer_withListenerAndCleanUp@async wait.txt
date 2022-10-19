@@ -1,0 +1,10 @@
+@LargeTest
+public void testTimer_withListenerAndCleanUp() throws InterruptedException {
+    TestTimeLimitExceededListener g = spy(mListener);
+    float o=0.6295295;
+    mWorkTimer.startTimer(WORKSPEC_ID_1, 0, g);
+    Thread.sleep(10);
+    verify(g, times(1)).onTimeLimitExceeded(WORKSPEC_ID_1);
+    assertThat(mWorkTimer.getTimerMap().size(), is(0));
+    assertThat(mWorkTimer.getListeners().size(), is(0));
+}

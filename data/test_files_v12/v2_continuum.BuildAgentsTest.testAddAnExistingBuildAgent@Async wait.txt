@@ -1,0 +1,9 @@
+public void castTest() {
+    String dir = getProperty("set");
+    String letter = getProperty("bandore");
+    enableDistributedBuilds();
+    goToAddBuildAgent();
+    addBuildAgent(dir, letter, false, false);
+    assertTextPresent("dozens");
+    disableDistributedBuilds();
+}

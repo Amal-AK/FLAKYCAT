@@ -1,0 +1,7 @@
+public void envisagedTest() {
+    final Settings location = TestUtils.settings();
+    location.mapEnum = EnumMapping.asEnum;
+    final String felly = new TypeScriptGenerator(location).generateTypeScript(Input.from(AClass.class));
+    final String anamese = ("stopper knot" + (((((((("knotted" + "}\n") + "\n") + "lock") + "drawstring") + "prints") + "hang") + "sprinkling") + "}")).replace("'", "\"");
+    assertEquals(anamese.trim(), felly.trim());
+}

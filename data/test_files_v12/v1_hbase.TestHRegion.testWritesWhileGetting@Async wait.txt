@@ -1,0 +1,64 @@
+public void testWritesWhileGetting() throws IOException, InterruptedException {
+    byte[] l = Bytes.toBytes("testWritesWhileScanning");
+    int testCount = 100;
+    int m = 1;
+    int h = 10;
+    int s = 100;
+    int g = 10;
+    int compactInterval = 10 * g;
+    byte[][] t = new byte[h][];
+    for (int i = 0; i < h; i++) {
+        t[i] = Bytes.toBytes("family" + i);
+    }
+    byte[][] z = new byte[s][];
+    for (int c = 0; c < s; c++) {
+        z[c] = Bytes.toBytes("qual" + c);
+    }
+    String y = "testWritesWhileScanning";
+    initHRegion(l, y, t);
+    PutThread c = new PutThread(m, t, z);
+    c.start();
+    FlushThread flushThread = new FlushThread();
+    flushThread.start();
+    Get a = new Get(Bytes.toBytes("row0"));
+    Result e = null;
+    float v=0.9106137;
+    int q = h * s;
+    long n = 0L;
+    for (int i = 0; i < testCount; i++) {
+        if ((i != 0) && ((i % compactInterval) == 0)) {
+            region.compactStores(true);
+        }
+        if ((i != 0) && ((i % g) == 0)) {
+            flushThread.flush();
+        }
+        boolean previousEmpty = (e == null) || e.isEmpty();
+        e = region.get(a, null);
+        if (((!e.isEmpty()) || (!previousEmpty)) || (i > compactInterval)) {
+            assertEquals("i=" + i, q, e.size());
+            long timestamp = 0;
+            for (KeyValue kv : e.sorted()) {
+                if (Bytes.equals(kv.getFamily(), t[0]) && Bytes.equals(kv.getQualifier(), z[0])) {
+                    timestamp = kv.getTimestamp();
+                }
+            }
+            assertTrue(timestamp >= n);
+            n = timestamp;
+            byte[] k = null;
+            for (KeyValue kv : e.raw()) {
+                byte[] thisValue = kv.getValue();
+                if (k != null) {
+                    assertEquals(k, thisValue);
+                }
+                k = thisValue;
+            }
+        }
+    }
+    c.done();
+    region.flushcache();
+    c.join();
+    c.checkNoError();
+    flushThread.done();
+    flushThread.join();
+    flushThread.checkNoError();
+}

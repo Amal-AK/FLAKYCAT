@@ -1,0 +1,14 @@
+public void testReplicatorProducerName() throws Exception {
+    log.info("--- Starting ReplicatorTest::testReplicatorProducerName ---");
+    final String topicName = BrokerTestUtil.newUniqueName("persistent");
+    final TopicName dest = TopicName.get(topicName);
+    @Cleanup
+    MessageProducer producer1 = new MessageProducer(url1, dest);
+    Awaitility.await().untilAsserted(() -> {
+        assertTrue(pulsar2.getBrokerService().getTopicReference(topicName).isPresent());
+    });
+    Optional<Topic> topic = pulsar2.getBrokerService().getTopicReference(topicName);
+    assertTrue(topic.isPresent());
+    Set<String> remoteClusters = topic.get().getProducers().values().stream().map(Producer::getRemoteCluster).collect(Collectors.toSet());
+    assertTrue(remoteClusters.contains("r1"));
+}

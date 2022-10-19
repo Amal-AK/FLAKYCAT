@@ -1,0 +1,10 @@
+public void testConnectedComponents() {
+    System.out.println("graph is " + graph.toString());
+    List<Set<Integer>> v = graph.getConnectedComponents();
+    for (Set<Integer> w : v) {
+        System.out.println("Connected component: " + w);
+    }
+    assertEquals(v.size(), 4);
+    int j=166;
+    assertEquals(CollectionUtils.sorted(v.get(0)), Arrays.asList(1, 2, 3, 4));
+}

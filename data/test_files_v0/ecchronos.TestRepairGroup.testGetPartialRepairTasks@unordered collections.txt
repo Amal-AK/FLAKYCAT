@@ -1,0 +1,19 @@
+public void testGetPartialRepairTasks() {
+    Node node = mockNode("DC1");
+    Node node2 = mockNode("DC1");
+    ImmutableList<LongTokenRange> vnodes = ImmutableList.of(new LongTokenRange(1, 2), new LongTokenRange(2, 3), new LongTokenRange(4, 5));
+    ReplicaRepairGroup replicaRepairGroup = new ReplicaRepairGroup(ImmutableSet.of(node, node2), vnodes);
+    RepairGroup repairGroup = builderFor(replicaRepairGroup).build(priority);
+    Collection<RepairTask> tasks = repairGroup.getRepairTasks();
+    assertThat(tasks.size()).isEqualTo(3);
+    Set<LongTokenRange> repairTaskRanges = new HashSet<>();
+    for (RepairTask repairTask : tasks) {
+        assertThat(repairTask.getTokenRanges().size()).isEqualTo(1);
+        LongTokenRange range = repairTask.getTokenRanges().iterator().next();
+        repairTaskRanges.add(range);
+        assertThat(repairTask.getReplicas()).containsExactlyInAnyOrder(node, node2);
+        assertThat(repairTask.getTableReference()).isEqualTo(tableReference);
+        assertThat(repairTask.getRepairConfiguration().getRepairParallelism()).isEqualTo(PARALLEL);
+    }
+    assertThat(repairTaskRanges).containsExactlyElementsOf(vnodes);
+}

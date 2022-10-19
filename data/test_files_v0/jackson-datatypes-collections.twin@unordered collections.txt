@@ -1,0 +1,10 @@
+ public void twin() throws Exception {
+        final ObjectMapper mapper = mapperWithModule();
+        Object sampleOne = randomSample(Object.class);
+        Object sampleTwo = randomSample(Object.class);
+        String expectedJson = "{\"one\":" + mapper.writeValueAsString(sampleOne);
+        Twin<String> twin = Tuples.twin((String) sampleOne, (String) sampleTwo);
+        Assert.assertEquals(expectedJson, mapper.writeValueAsString(twin));
+        Assert.assertEquals(twin, mapper.readValue(expectedJson, new TypeReference<Twin<String>>() {}));
+   
+    }

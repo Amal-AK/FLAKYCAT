@@ -1,0 +1,8 @@
+public void shouldTimeoutIfInvalidLdapServer() throws Throwable {
+    restartNeo4jServerWithOverriddenSettings(ldapOnlyAuthSettings.andThen(( settings) -> {
+        settings.put(SecuritySettings.ldap_server, "ldap");
+        settings.put(SecuritySettings.ldap_connection_timeout, "1s");
+    }));
+    assertConnectionTimeout(authToken("neo", "abc123", null), LDAP_CONNECTION_TIMEOUT_CLIENT_MESSAGE);
+    assertThat(client, eventuallyDisconnects());
+}

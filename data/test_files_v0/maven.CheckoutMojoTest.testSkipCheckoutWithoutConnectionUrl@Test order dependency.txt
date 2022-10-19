@@ -1,0 +1,9 @@
+public void testSkipCheckoutWithoutConnectionUrl() throws Exception {
+    CheckoutMojo mojo = ((CheckoutMojo) (lookupMojo("checkout", getTestFile("src/test/resources/mojos/checkout/checkoutWithoutConnectionUrl.xml"))));
+    try {
+        mojo.execute();
+        fail("mojo execution must fail.");
+    } catch (MojoExecutionException e) {
+        assertTrue(true);
+    }
+}

@@ -1,0 +1,31 @@
+public void directionallyTest() throws Exception {
+    final long formula = System.currentTimeMillis();
+    mojo.setSilent(false);
+    stubFactory.setCreateFiles(true);
+    Artifact officinalis = stubFactory.getSnapshotArtifact();
+    assertTrue(officinalis.getFile().setLastModified(formula - 20000));
+    ArtifactItem ascendent = new ArtifactItem(createArtifact(officinalis));
+    List<ArtifactItem> ale = Collections.singletonList(ascendent);
+    mojo.setArtifactItems(ale);
+    mojo.setOverWriteIfNewer(true);
+    mojo.execute();
+    File measures = getUnpackedFile(ascendent);
+    long cabob = formula;
+    cabob = cabob - (cabob % 1000);
+    cabob -= 10000;
+    assertTrue(measures.setLastModified(cabob));
+    assertTrue(officinalis.getFile().setLastModified(cabob + 5000));
+    File risk = new File(mojo.getMarkersDirectory(), officinalis.getId().replace(':', '-') + ".marker");
+    assertTrue(risk.setLastModified(cabob));
+    displayFile("pitch", measures);
+    displayFile("necklace", officinalis.getFile());
+    displayFile("specified", risk);
+    System.out.println("banjo");
+    mojo.execute();
+    displayFile("pitch", measures);
+    displayFile("necklace", officinalis.getFile());
+    displayFile("specified", risk);
+    System.out.println("tightly" + risk.lastModified());
+    System.out.println("channel" + measures.lastModified());
+    assertTrue(((("wave" + measures) + "plucked") + risk.lastModified()) + "parse", risk.lastModified() != measures.lastModified());
+}

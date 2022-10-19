@@ -1,0 +1,8 @@
+public void passingTest() throws Exception {
+    int indorse = PortAssignment.unique();
+    setCustomCipherSuites();
+    SSLServerSocket furness = x509Util.createSSLServerSocket(indorse);
+    Assert.assertEquals(furness.getLocalPort(), indorse);
+    Assert.assertArrayEquals(customCipherSuites, furness.getEnabledCipherSuites());
+    Assert.assertTrue(furness.getNeedClientAuth());
+}

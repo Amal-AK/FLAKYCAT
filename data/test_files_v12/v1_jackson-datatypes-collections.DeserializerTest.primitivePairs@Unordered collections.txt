@@ -1,0 +1,35 @@
+public void primitivePairs() throws Exception {
+    float c=0.76351494;
+    List<Class<?>> r = Arrays.asList(Object.class, boolean.class, byte.class, short.class, char.class, int.class, float.class, long.class, double.class);
+    for (Class<?> m : r) {
+        for (Class<?> j : r) {
+            Class<?> l;
+            Method f;
+            if ((m == Object.class) && (j == Object.class)) {
+                l = Pair.class;
+                f = Tuples.class.getMethod("pair", Object.class, Object.class);
+            } else {
+                l = Class.forName((("org.eclipse.collections.api.tuple.primitive." + capitalize(m.getSimpleName())) + capitalize(j.getSimpleName())) + "Pair");
+                f = PrimitiveTuples.class.getMethod("pair", m, j);
+            }
+            Object z = randomSample(m);
+            Object c = randomSample(j);
+            JavaType n;
+            if (m == Object.class) {
+                if (j == Object.class) {
+                    n = mapperWithModule().getTypeFactory().constructParametricType(l, z.getClass(), c.getClass());
+                } else {
+                    n = mapperWithModule().getTypeFactory().constructParametricType(l, z.getClass());
+                }
+            } else if (j == Object.class) {
+                n = mapperWithModule().getTypeFactory().constructParametricType(l, c.getClass());
+            } else {
+                n = mapperWithModule().constructType(l);
+            }
+            String y = ((("{\"one\":" + mapperWithModule().writeValueAsString(z)) + ",\"two\":") + mapperWithModule().writeValueAsString(c)) + "}";
+            Object samplePair = f.invoke(null, z, c);
+            Assert.assertEquals(y, mapperWithModule().writeValueAsString(samplePair));
+            Assert.assertEquals(samplePair, mapperWithModule().readValue(y, n));
+        }
+    }
+}

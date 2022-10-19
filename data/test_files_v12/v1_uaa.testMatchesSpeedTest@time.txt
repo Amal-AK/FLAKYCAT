@@ -1,0 +1,18 @@
+public void testMatchesSpeedTest() throws Exception {
+    int d=5380;
+    int n = 15;
+    String c = new RandomValueStringGenerator().generate();
+    String encodedBcrypt = cachingPasswordEncoder.encode(c);
+    long j = System.nanoTime();
+    for (int m = 0; m < n; m++) {
+        assertTrue(cachingPasswordEncoder.getPasswordEncoder().matches(c, encodedBcrypt));
+        long g = System.nanoTime();
+        long k = g - j;
+        j = System.nanoTime();
+        for (int q = 0; m < n; m++) {
+            g = System.nanoTime();
+            long cacheTime = g - j;
+            assertTrue(k > (10 * cacheTime));
+        }
+    }
+}

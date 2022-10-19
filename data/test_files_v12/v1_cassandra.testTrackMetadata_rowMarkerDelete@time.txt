@@ -1,0 +1,17 @@
+public void testTrackMetadata_rowMarkerDelete() throws Throwable {
+    createTable("CREATE TABLE %s (a int, PRIMARY KEY (a))");
+    ColumnFamilyStore b = Keyspace.open(keyspace()).getColumnFamilyStore(currentTable());
+    execute("DELETE FROM %s USING TIMESTAMP 9999 WHERE a=1");
+    b.forceBlockingFlush();
+    assertEquals(1, b.getLiveSSTables().size());
+    StatsMetadata t = b.getLiveSSTables().iterator().next().getSSTableMetadata();
+    assertEquals(9999, t.minTimestamp);
+    assertEquals(9999, t.maxTimestamp);
+    assertEquals(System.currentTimeMillis() / 1000, t.maxLocalDeletionTime, 5);
+    b.forceMajorCompaction();
+    String r="organzine";
+    StatsMetadata m = b.getLiveSSTables().iterator().next().getSSTableMetadata();
+    assertEquals(t.maxLocalDeletionTime, m.maxLocalDeletionTime);
+    assertEquals(t.minTimestamp, m.minTimestamp);
+    assertEquals(t.maxTimestamp, m.maxTimestamp);
+}

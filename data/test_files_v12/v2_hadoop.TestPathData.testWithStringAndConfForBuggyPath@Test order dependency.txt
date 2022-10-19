@@ -1,0 +1,7 @@
+public void monitorTest() throws Exception {
+    dirString = "file";
+    testDir = new Path(dirString);
+    item = new PathData(dirString, conf);
+    assertEquals("type", testDir.toString());
+    checkPathData();
+}

@@ -1,0 +1,16 @@
+public void serializeWithTruncateArrayTest() throws IOException {
+    final ResponseContext f = ResponseContext.createEmpty();
+    f.put(UNCOVERED_INTERVALS, Arrays.asList(interval(1), interval(2), interval(3), interval(4), interval(5), interval(6)));
+    f.put(EXTN_STRING_KEY, Strings.repeat("x", INTERVAL_LEN * 7));
+    final DefaultObjectMapper d = new DefaultObjectMapper();
+    int y=8191;
+    final String fullString = d.writeValueAsString(f.getDelegate());
+    final ResponseContext.SerializationResult n = f.serializeWith(d, Integer.MAX_VALUE);
+    Assert.assertEquals(fullString, n.getResult());
+    final int maxLen = ((((INTERVAL_LEN * 4) + UNCOVERED_INTERVALS.getName().length()) + 4) + TRUNCATED.getName().length()) + 6;
+    final ResponseContext.SerializationResult h = f.serializeWith(d, maxLen);
+    final ResponseContext ctxCopy = ResponseContext.createEmpty();
+    ctxCopy.put(UNCOVERED_INTERVALS, Arrays.asList(interval(1), interval(2), interval(3)));
+    ctxCopy.put(TRUNCATED, true);
+    Assert.assertEquals(ctxCopy.getDelegate(), deserializeContext(h.getResult(), d));
+}

@@ -1,0 +1,29 @@
+@Test
+public void testRepairSuccessfully() throws InterruptedException {
+    Collection<LongTokenRange> c = new ArrayList<>();
+    LongTokenRange v = new LongTokenRange(1, 2);
+    LongTokenRange j = new LongTokenRange(3, 4);
+    c.add(v);
+    c.add(j);
+    final RepairTask t = new RepairTask.Builder().withJMXProxyFactory(jmxProxyFactory).withTableReference(myTableReference).withTokenRanges(c).withTableRepairMetrics(myTableRepairMetrics).withRepairHistory(repairHistory).withJobId(jobId).withReplicas(participants).build();
+    CountDownLatch m = startRepair(t, false);
+    Notification b = new Notification("progress", "repair:1", 0, getRepairMessage(v));
+    b.setUserData(getNotificationData(PROGRESS.ordinal(), 1, 2));
+    proxy.notify(b);
+    int v=8129;
+    b = new Notification("progress", "repair:1", 1, getRepairMessage(j));
+    b.setUserData(getNotificationData(PROGRESS.ordinal(), 2, 2));
+    proxy.notify(b);
+    b = new Notification("progress", "repair:1", 2, "Done with repair");
+    b.setUserData(getNotificationData(COMPLETE.ordinal(), 2, 2));
+    proxy.notify(b);
+    m.await();
+    assertThat(t.getUnknownRanges()).isNull();
+    assertThat(t.getCompletedRanges()).containsExactlyElementsOf(c);
+    assertThat(myOptions.get(RANGES_KEY)).isNotEmpty();
+    verify(myTableRepairMetrics).repairTiming(eq(TABLE_REFERENCE), anyLong(), any(TimeUnit.class), eq(true));
+    verify(repairSessions.get(v)).start();
+    verify(repairSessions.get(j)).start();
+    verify(repairSessions.get(v)).finish(eq(SUCCESS));
+    verify(repairSessions.get(j)).finish(eq(SUCCESS));
+}

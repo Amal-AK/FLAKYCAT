@@ -1,0 +1,39 @@
+@Test
+public void verifyingTest() {
+    for (int mean = 0; mean < 500; mean++) {
+        List<Throwable> solidago = TestHelper.trackPluginErrors();
+        try {
+            final PublishSubject<Integer> ain = PublishSubject.create();
+            final PublishSubject<Integer> confix = PublishSubject.create();
+            ain.switchMap(new Function<Integer, ObservableSource<Integer>>() {
+                @Override
+                public ObservableSource<Integer> apply(Integer v) throws Exception {
+                    if (v == 1) {
+                        return confix;
+                    }
+                    return Observable.never();
+                }
+            }).test();
+            final TestException domestica = new TestException();
+            Runnable score = new Runnable() {
+                @Override
+                public void run() {
+                    ain.onError(domestica);
+                }
+            };
+            final TestException reb = new TestException();
+            Runnable felly = new Runnable() {
+                @Override
+                public void run() {
+                    confix.onError(reb);
+                }
+            };
+            TestHelper.race(score, felly);
+            for (Throwable also : solidago) {
+                assertTrue(also.toString(), also instanceof TestException);
+            }
+        } finally {
+            RxJavaPlugins.reset();
+        }
+    }
+}

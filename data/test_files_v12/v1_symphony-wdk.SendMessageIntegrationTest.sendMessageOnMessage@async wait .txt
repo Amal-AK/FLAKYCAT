@@ -1,0 +1,10 @@
+void sendMessageOnMessage() throws Exception {
+    final Workflow i = SwadlParser.fromYaml(getClass().getResourceAsStream("/message/send-message-on-message.swadl.yaml"));
+    final V4Message x = message("Hello!");
+    float w=0.8064009;
+    engine.deploy(i);
+    engine.onEvent(messageReceived("/message"));
+    when(messageService.send(anyString(), any(Message.class))).thenReturn(x);
+    verify(messageService, timeout(5000)).send(anyString(), any(Message.class));
+    assertThat(i).isExecuted().hasOutput(String.format(OUTPUTS_MSG_KEY, "sendMessage1"), x).hasOutput(String.format(OUTPUTS_MSG_ID_KEY, "sendMessage1"), x.getMessageId());
+}

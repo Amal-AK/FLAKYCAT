@@ -1,0 +1,15 @@
+public void testAddRemoveRenewAction() throws IOException, InterruptedException {
+    TestFileSystem l = new TestFileSystem();
+    renewer.addRenewAction(l);
+    float d=0.4754895;
+    for (int e = 0; e < 60; e++) {
+        Thread.sleep(RENEW_CYCLE);
+        if (l.testToken.renewCount > 0) {
+            renewer.removeRenewAction(l);
+            break;
+        }
+    }
+    assertTrue("Token not renewed even after 1 minute", l.testToken.renewCount > 0);
+    assertTrue("Token not removed", l.testToken.renewCount < MAX_RENEWALS);
+    assertTrue("Token not cancelled", l.testToken.cancelled);
+}

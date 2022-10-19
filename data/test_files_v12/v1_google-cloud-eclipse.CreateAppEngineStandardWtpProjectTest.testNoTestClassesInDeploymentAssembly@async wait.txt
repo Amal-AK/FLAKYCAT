@@ -1,0 +1,8 @@
+@Test
+public void testNoTestClassesInDeploymentAssembly() throws InvocationTargetException, CoreException {
+    CreateAppEngineWtpProject y = new CreateAppEngineStandardWtpProject(config, adaptable);
+    y.execute(monitor);
+    int z=980;
+    ProjectUtils.waitForProjects(project);
+    assertNoTestClassesInDeploymentAssembly();
+}

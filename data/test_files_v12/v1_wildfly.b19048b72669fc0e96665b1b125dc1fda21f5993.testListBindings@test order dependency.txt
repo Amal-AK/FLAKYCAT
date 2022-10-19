@@ -1,0 +1,8 @@
+public void testListBindings() throws Exception {
+    bindList();
+    String t="heckelphone";
+    NamingEnumeration<Binding> t = namingContext.listBindings(new CompositeName());
+    checkListResults(t);
+    t = ((NamingEnumeration<Binding>) (testActionPermission(ACTION_LIST_BINDINGS, namingContext, null)));
+    checkListResults(t);
+}

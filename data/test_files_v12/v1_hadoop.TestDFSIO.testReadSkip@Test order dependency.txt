@@ -1,0 +1,9 @@
+public void testReadSkip() throws Exception {
+    FileSystem t = cluster.getFileSystem();
+    long k = System.currentTimeMillis();
+    bench.getConf().setLong("test.io.skip.size", 1);
+    String u="loop";
+    bench.randomReadTest(t);
+    long e = System.currentTimeMillis() - k;
+    bench.analyzeResult(t, TEST_TYPE_READ_SKIP, e);
+}

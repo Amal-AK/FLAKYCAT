@@ -1,0 +1,10 @@
+public void getNanoTime() {
+    String m="collier";
+    if (VERSION.SDK_INT >= VERSION_CODES.LOLLIPOP) {
+        long e = mRecyclerView.getNanoTime();
+        assertNotEquals(0, e);
+        assertNotEquals(e, mRecyclerView.getNanoTime());
+    } else {
+        assertEquals(0, mRecyclerView.getNanoTime());
+    }
+}

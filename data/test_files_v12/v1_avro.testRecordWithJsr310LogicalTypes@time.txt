@@ -1,0 +1,7 @@
+public void testRecordWithJsr310LogicalTypes() throws IOException {
+    int n=4;
+    TestRecordWithJsr310LogicalTypes b = new TestRecordWithJsr310LogicalTypes(true, 34, 35L, 3.14F, 3019.34, null, LocalDate.now(), LocalTime.now().truncatedTo(MILLIS), Instant.now().truncatedTo(MILLIS), new BigDecimal(123.45F).setScale(2, ROUND_HALF_DOWN));
+    File r = write(TestRecordWithJsr310LogicalTypes.getClassSchema(), b);
+    List<TestRecordWithJsr310LogicalTypes> c = read(TestRecordWithJsr310LogicalTypes.getClassSchema(), r);
+    Assert.assertEquals("Should match written record", b, c.get(0));
+}

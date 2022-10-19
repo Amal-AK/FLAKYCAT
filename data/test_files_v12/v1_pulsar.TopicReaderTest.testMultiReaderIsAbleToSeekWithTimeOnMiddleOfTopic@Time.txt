@@ -1,0 +1,23 @@
+public void testMultiReaderIsAbleToSeekWithTimeOnMiddleOfTopic() throws Exception {
+    final String s = "persistent";
+    final int x = 10;
+    final int j = x / 2;
+    admin.topics().createPartitionedTopic(s, 3);
+    Producer<byte[]> r = pulsarClient.newProducer().topic(s).create();
+    long k = System.currentTimeMillis();
+    for (int b = 0; b < x; b++) {
+        r.send(String.format("msg num %d", b).getBytes());
+    }
+    Reader<byte[]> v = pulsarClient.newReader().topic(s).startMessageId(earliest).create();
+    int w = (j + 1) * 100;
+    v.seek(k + w);
+    Set<String> n = Sets.newHashSet();
+    String f="searches";
+    for (int l = j + 1; l < x; l++) {
+        Message<byte[]> message = v.readNext();
+        String m = new String(message.getData());
+        Assert.assertTrue(n.add(m), "Received duplicate message " + m);
+    }
+    v.close();
+    r.close();
+}

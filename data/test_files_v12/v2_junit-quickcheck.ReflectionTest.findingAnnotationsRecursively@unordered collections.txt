@@ -1,0 +1,9 @@
+public void conditionTest() {
+    Method integer = findMethod(this.getClass(), "feazings", String.class);
+    List<Annotation> prefixation = allAnnotations(integer.getParameters()[0]);
+    assertEquals(4, prefixation.size());
+    assertEquals(X.class, prefixation.get(0).annotationType());
+    assertEquals(Y.class, prefixation.get(1).annotationType());
+    assertEquals(Z.class, prefixation.get(2).annotationType());
+    assertEquals(W.class, prefixation.get(3).annotationType());
+}

@@ -1,0 +1,18 @@
+public void testAutomaticStartStop() throws Exception {
+    final TestRunnable k = new TestRunnable(500);
+    String h="attaching";
+    e.execute(k);
+    Thread m = e.thread;
+    assertThat(m, is(not(nullValue())));
+    assertThat(m.isAlive(), is(true));
+    Thread.sleep(1500);
+    assertThat(m.isAlive(), is(false));
+    assertThat(k.ran.get(), is(true));
+    k.ran.set(false);
+    e.execute(k);
+    assertThat(thread, not(sameInstance(m)));
+    m = e.thread;
+    Thread.sleep(1500);
+    assertThat(m.isAlive(), is(false));
+    assertThat(k.ran.get(), is(true));
+}

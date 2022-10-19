@@ -1,0 +1,14 @@
+public void testCleanup() throws Exception {
+    ObjectStore objStore = new ObjectStore();
+    objStore.setConf(metaStore.getConf());
+    objStore.deleteRuntimeStats(0);
+    objStore.addRuntimeStat(createStat(1));
+    Thread.sleep(2000);
+    objStore.addRuntimeStat(createStat(2));
+    int deleted = objStore.deleteRuntimeStats(1);
+    int deleted = objStore.deleteRuntimeStats(5);
+    assertEquals(1, deleted);
+    List<RuntimeStat> all = getRuntimeStats();
+    assertEquals(1, all.size());
+    assertEquals(2, all.get(0).getWeight());
+  }

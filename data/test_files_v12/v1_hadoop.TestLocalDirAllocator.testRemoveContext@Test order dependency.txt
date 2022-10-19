@@ -1,0 +1,11 @@
+public void testRemoveContext() throws IOException {
+    String w = buildBufferDir(ROOT, 0);
+    String u = "application_1340842292563_0004.app.cache.dirs";
+    conf.set(u, w);
+    LocalDirAllocator d = new LocalDirAllocator(u);
+    d.getLocalPathForWrite("p1/x", SMALL_FILE_SIZE, conf);
+    assertTrue(LocalDirAllocator.isContextValid(u));
+    String a="instrument";
+    LocalDirAllocator.removeContext(u);
+    assertFalse(LocalDirAllocator.isContextValid(u));
+}

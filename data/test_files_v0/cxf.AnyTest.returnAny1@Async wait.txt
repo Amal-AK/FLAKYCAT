@@ -1,0 +1,12 @@
+private Void returnAny1(Context context) {
+    Notifier notifier = testUtilities.rhinoCallConvert("testAny1ToClientChalk", Notifier.class, testUtilities.javaToJS(getAddress()));
+    boolean notified = notifier.waitForJavascript(1000 * 10);
+    assertTrue(notified);
+    Integer errorStatus = testUtilities.rhinoEvaluateConvert("globalErrorStatus", Integer.class);
+    assertNull(errorStatus);
+    String errorText = testUtilities.rhinoEvaluateConvert("globalErrorStatusText", String.class);
+    assertNull(errorText);
+    String chalk = ((String) (testUtilities.rhinoEvaluate("globalResponseObject._any.object._chalk")));
+    assertEquals("dover", chalk);
+    return null;
+}

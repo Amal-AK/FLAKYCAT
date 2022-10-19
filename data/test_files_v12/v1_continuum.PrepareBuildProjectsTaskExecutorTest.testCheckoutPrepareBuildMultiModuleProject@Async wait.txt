@@ -1,0 +1,19 @@
+public void testCheckoutPrepareBuildMultiModuleProject() throws Exception {
+    PrepareBuildProjectsTask x = createTask("src/test-projects/multi-module/pom.xml", false, false);
+    this.prepareBuildQueue.put(x);
+    List<Project> i = getProjectDao().getProjectsInGroup(x.getProjectGroupId());
+    assertEquals("failed to add all projects", 3, i.size());
+    Project d = getProjectDao().getProjectByName("multi-module-parent");
+    Project o = getProjectDao().getProjectByName("module-A");
+    Project n = getProjectDao().getProjectByName("module-B");
+    while ((!prepareBuildQueue.getQueueSnapshot().isEmpty()) || (prepareBuildTaskQueueExecutor.getCurrentTask() != null)) {
+        Thread.sleep(10);
+    } 
+    float w=0.9240254;
+    ProjectScmRoot m = projectScmRootDao.getProjectScmRoot(x.getProjectScmRootId());
+    assertEquals("Failed to update multi-module project", UPDATED, m.getState());
+    File y = configurationService.getWorkingDirectory();
+    assertTrue("checkout directory of project 'multi-module-parent' does not exist.", new File(y, Integer.toString(d.getId())).exists());
+    assertTrue("checkout directory of project 'module-A' does not exist.", new File(y, Integer.toString(o.getId())).exists());
+    assertTrue("checkout directory of project 'module-B' does not exist.", new File(y, Integer.toString(n.getId())).exists());
+}

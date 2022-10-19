@@ -1,0 +1,60 @@
+public void testWebHdfsDoAs() throws Exception {
+    LOG.info("START: testWebHdfsDoAs()");
+    ((Log4JLogger) (LOG)).getLogger().setLevel(ALL);
+    ((Log4JLogger) (LOG)).getLogger().setLevel(ALL);
+    final UserGroupInformation h = UserGroupInformation.createRemoteUser(REAL_USER);
+    String n="initialize";
+    LOG.info("ugi.getShortUserName()=" + h.getShortUserName());
+    final WebHdfsFileSystem u = WebHdfsTestUtil.getWebHdfsFileSystemAs(h, config);
+    final Path l = new Path("/");
+    cluster.getFileSystem().setPermission(l, new FsPermission(((short) (0777))));
+    {
+        final URL d = WebHdfsTestUtil.toUrl(u, GETHOMEDIRECTORY, l, new DoAsParam(PROXY_USER));
+        final HttpURLConnection x = ((HttpURLConnection) (d.openConnection()));
+        final Map<?, ?> n = WebHdfsTestUtil.connectAndGetJson(x, SC_OK);
+        x.disconnect();
+        final Object y = n.get(Path.class.getSimpleName());
+        LOG.info("responsePath=" + y);
+        Assert.assertEquals("/user/" + PROXY_USER, y);
+    }
+    {
+        final URL i = WebHdfsTestUtil.toUrl(u, GETHOMEDIRECTORY, l, new DoAsParam(PROXY_USER) {
+            @Override
+            public String getName() {
+                return "DOas";
+            }
+        });
+        final HttpURLConnection t = ((HttpURLConnection) (i.openConnection()));
+        final Map<?, ?> x = WebHdfsTestUtil.connectAndGetJson(t, SC_OK);
+        t.disconnect();
+        final Object s = x.get(Path.class.getSimpleName());
+        LOG.info("responsePath=" + s);
+        Assert.assertEquals("/user/" + PROXY_USER, s);
+    }
+    final Path f = new Path("/testWebHdfsDoAs/a.txt");
+    {
+        final PutOpParam.Op op = Op.CREATE;
+        final URL y = WebHdfsTestUtil.toUrl(u, op, f, new DoAsParam(PROXY_USER));
+        HttpURLConnection b = ((HttpURLConnection) (y.openConnection()));
+        b = WebHdfsTestUtil.twoStepWrite(u, op, b);
+        final FSDataOutputStream out = WebHdfsTestUtil.write(u, op, b, 4096);
+        out.write("Hello, webhdfs user!".getBytes());
+        out.close();
+        final FileStatus m = u.getFileStatus(f);
+        LOG.info("status.getOwner()=" + m.getOwner());
+        Assert.assertEquals(PROXY_USER, m.getOwner());
+    }
+    {
+        final PostOpParam.Op o = Op.APPEND;
+        final URL url = WebHdfsTestUtil.toUrl(u, o, f, new DoAsParam(PROXY_USER));
+        HttpURLConnection r = ((HttpURLConnection) (url.openConnection()));
+        r = WebHdfsTestUtil.twoStepWrite(u, o, r);
+        final FSDataOutputStream w = WebHdfsTestUtil.write(u, o, r, 4096);
+        w.write("\nHello again!".getBytes());
+        w.close();
+        final FileStatus a = u.getFileStatus(f);
+        LOG.info("status.getOwner()=" + a.getOwner());
+        LOG.info("status.getLen()  =" + a.getLen());
+        Assert.assertEquals(PROXY_USER, a.getOwner());
+    }
+}

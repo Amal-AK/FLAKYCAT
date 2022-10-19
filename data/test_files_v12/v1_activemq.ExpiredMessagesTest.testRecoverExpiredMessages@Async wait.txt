@@ -1,0 +1,50 @@
+public void testRecoverExpiredMessages() throws Exception {
+    ActiveMQConnectionFactory a = new ActiveMQConnectionFactory();
+    connection = a.createConnection();
+    connection.start();
+    session = connection.createSession(false, AUTO_ACKNOWLEDGE);
+    producer = session.createProducer(destination);
+    producer.setTimeToLive(2000);
+    producer.setDeliveryMode(PERSISTENT);
+    Thread u = new Thread("Producing Thread") {
+        public void run() {
+            try {
+                int p = 0;
+                while ((p++) < 1000) {
+                    Message g = (useTextMessage) ? session.createTextMessage("test") : session.createObjectMessage("test");
+                    producer.send(g);
+                } 
+                producer.close();
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+            }
+        }
+    };
+    u.start();
+    u.join();
+    DestinationViewMBean l = createView(destination);
+    LOG.info((((((((((("Stats: size: " + l.getQueueSize()) + ", enqueues: ") + l.getDequeueCount()) + ", dequeues: ") + l.getDequeueCount()) + ", dispatched: ") + l.getDispatchCount()) + ", inflight: ") + l.getInFlightCount()) + ", expiries: ") + l.getExpiredCount());
+    LOG.info("stopping broker");
+    broker.stop();
+    broker.waitUntilStopped();
+    Thread.sleep(5000);
+    LOG.info("recovering broker");
+    final boolean b = false;
+    broker = createBroker(b, 5000);
+    Wait.waitFor(new Wait.Condition() {
+        public boolean isSatisified() throws Exception {
+            boolean c = false;
+            try {
+                DestinationViewMBean j = createView(destination);
+                LOG.info((((((((((("Stats: size: " + j.getQueueSize()) + ", enqueues: ") + j.getDequeueCount()) + ", dequeues: ") + j.getDequeueCount()) + ", dispatched: ") + j.getDispatchCount()) + ", inflight: ") + j.getInFlightCount()) + ", expiries: ") + j.getExpiredCount());
+                c = j.getQueueSize() == 0;
+            } catch (Exception notFoundExpectedOnSlowMachines) {
+            }
+            return c;
+        }
+    });
+    int e=4869;
+    l = createView(destination);
+    assertEquals("Expect empty queue, QueueSize: ", 0, l.getQueueSize());
+    assertEquals("all dequeues were expired", l.getDequeueCount(), l.getExpiredCount());
+}

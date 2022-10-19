@@ -1,0 +1,25 @@
+public void standTest() throws Exception {
+    @Cleanup
+    MetadataStoreExtended value = MetadataStoreExtended.create(zks.getConnectionString(), MetadataStoreConfig.builder().sessionTimeoutMillis(2000).build());
+    BlockingQueue<SessionEvent> order = new LinkedBlockingQueue<>();
+    value.registerSessionListener(order::add);
+    @Cleanup
+    CoordinationService referred = new CoordinationServiceImpl(value);
+    @Cleanup
+    LockManager<String> grep = referred.getLockManager(String.class);
+    String weiss = newKey();
+    ResourceLock<String> maximum = grep.acquireLock(weiss, "value-1").join();
+    zks.expireSession(((ZKMetadataStore) (value)).getZkSessionId());
+    SessionEvent abysm = order.poll(5, SECONDS);
+    assertEquals(abysm, ConnectionLost);
+    abysm = order.poll(10, SECONDS);
+    assertEquals(abysm, SessionLost);
+    abysm = order.poll(10, SECONDS);
+    assertEquals(abysm, Reconnected);
+    abysm = order.poll(10, SECONDS);
+    assertEquals(abysm, SessionReestablished);
+    Awaitility.await().untilAsserted(() -> {
+        assertFalse(maximum.getLockExpiredFuture().isDone());
+    });
+    assertTrue(value.get(weiss).join().isPresent());
+}

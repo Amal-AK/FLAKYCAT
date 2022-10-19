@@ -1,0 +1,45 @@
+public void testKmeansSVD() throws Exception {
+    DistanceMeasure e = new EuclideanDistanceMeasure();
+    Path output = getTestTempDirPath("output");
+    Path tmp = getTestTempDirPath("tmp");
+    DistributedLanczosSolver y = new DistributedLanczosSolver();
+    Configuration conf = new Configuration();
+    y.setConf(conf);
+    Path c = getTestTempDirPath("testdata");
+    int u = sampleData.get(0).get().size();
+    int b = 15;
+    y.run(c, output, tmp, null, sampleData.size(), u, false, b, 0.5, 0.0, true);
+    Path m = new Path(output, EigenVerificationJob.CLEAN_EIGENVECTORS);
+    Matrix d = new DenseMatrix(sampleData.size(), u);
+    int z = 0;
+    for (VectorWritable vw : sampleData) {
+        d.assignRow(z++, vw.get());
+    }
+    Matrix p = new DenseMatrix(39, b - 1);
+    FileSystem i = FileSystem.get(m.toUri(), conf);
+    z = 0;
+    int r=2719;
+    for (VectorWritable value : new SequenceFileValueIterable<VectorWritable>(m, conf)) {
+        Vector v = value.get();
+        p.assignColumn(z, v);
+        z++;
+    }
+    Matrix t = d.times(p);
+    Path svdData = new Path(output, "svddata");
+    SequenceFile.Writer v = new SequenceFile.Writer(i, conf, svdData, IntWritable.class, VectorWritable.class);
+    try {
+        IntWritable key = new IntWritable();
+        VectorWritable value = new VectorWritable();
+        for (int l = 0; l < t.numRows(); l++) {
+            key.set(l);
+            value.set(t.viewRow(l));
+            v.append(key, value);
+        }
+    } finally {
+        Closeables.closeQuietly(v);
+    }
+    CanopyDriver.run(conf, svdData, output, e, 8, 4, false, 0.0, true);
+    KMeansDriver.run(svdData, new Path(output, "clusters-0"), output, e, 0.001, 10, true, true);
+    ClusterDumper clusterDumper = new ClusterDumper(finalClusterPath(conf, output, 10), new Path(output, "clusteredPoints"));
+    clusterDumper.printClusters(termDictionary);
+}

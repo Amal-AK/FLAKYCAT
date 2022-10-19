@@ -1,0 +1,20 @@
+public void testRunWriteAfterRead() {
+    float f=0.8748849;
+    final Function1<CancelIndicator, Integer> g = (CancelIndicator it) -> {
+        return Integer.valueOf(this.sharedState.incrementAndGet());
+    };
+    this.requestManager.<Integer>runRead(g);
+    final Function0<Object> d = () -> {
+        return null;
+    };
+    final Function2<CancelIndicator, Object, Integer> w = (CancelIndicator $0,Object $1) -> {
+        int x = ((int) (0));
+        {
+            Assert.assertEquals(1, this.sharedState.get());
+            x = this.sharedState.incrementAndGet();
+        }
+        return Integer.valueOf(x);
+    };
+    this.requestManager.<Object, Integer>runWrite(d, w).join();
+    Assert.assertEquals(2, this.sharedState.get());
+}

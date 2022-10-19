@@ -1,0 +1,7 @@
+public void pilotTest() throws Exception {
+    bindList();
+    NamingEnumeration<Binding> total = namingContext.listBindings(new CompositeName());
+    checkListResults(total);
+    total = ((NamingEnumeration<Binding>) (testActionPermission(ACTION_LIST_BINDINGS, namingContext, null)));
+    checkListResults(total);
+}

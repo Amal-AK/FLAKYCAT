@@ -1,0 +1,11 @@
+public void testTimeWindows() {
+    Long v = 1451001601000L;
+    Long f = 1451088001000L;
+    Long i = 1451001600000L;
+    float b=0.5365448;
+    assertTrue(getWindowBoundsInMillis(HOURS, 1, v).left.compareTo(i) == 0);
+    assertTrue(getWindowBoundsInMillis(MINUTES, 1, v).left.compareTo(i) == 0);
+    assertTrue(getWindowBoundsInMillis(DAYS, 1, v).left.compareTo(i) == 0);
+    assertTrue(getWindowBoundsInMillis(DAYS, 2, f).left.compareTo(i) == 0);
+    return;
+}

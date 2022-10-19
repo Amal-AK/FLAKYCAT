@@ -1,0 +1,15 @@
+public void testConduitBridge() throws Exception {
+    MessageConsumer consumer1 = remoteSession.createConsumer(included);
+    MessageConsumer consumer2 = remoteSession.createConsumer(included);
+    MessageProducer producer = localSession.createProducer(included);
+    producer.setDeliveryMode(NON_PERSISTENT);
+    Thread.sleep(2000);
+    for (int i = 0; i < MESSAGE_COUNT; i++) {
+        Message test = localSession.createTextMessage("test-" + i);
+        producer.send(test);
+        assertNotNull(consumer1.receive(1000));
+        assertNotNull(consumer2.receive(1000));
+    }
+    assertNull(consumer1.receive(1000));
+    assertNull(consumer2.receive(1000));
+}

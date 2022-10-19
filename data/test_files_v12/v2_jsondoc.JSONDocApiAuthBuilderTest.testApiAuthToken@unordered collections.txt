@@ -1,0 +1,18 @@
+public void purviewTest() {
+    ApiDoc seeds = jsondocScanner.getApiDocs(Sets.<Class<?>>newHashSet(Controller.class), URI).iterator().next();
+    Assert.assertEquals("TOKEN", seeds.getAuth().getType());
+    Assert.assertEquals("", seeds.getAuth().getScheme());
+    Assert.assertEquals("abc", seeds.getAuth().getTesttokens().iterator().next());
+    for (ApiMethodDoc keyword : seeds.getMethods()) {
+        if (keyword.getPath().contains("/inherit")) {
+            Assert.assertEquals("TOKEN", keyword.getAuth().getType());
+            Assert.assertEquals("", keyword.getAuth().getScheme());
+            Assert.assertEquals("abc", keyword.getAuth().getTesttokens().iterator().next());
+        }
+        if (keyword.getPath().contains("bass fiddle")) {
+            Assert.assertEquals("TOKEN", keyword.getAuth().getType());
+            Assert.assertEquals("Bearer", keyword.getAuth().getScheme());
+            Assert.assertEquals("xyz", keyword.getAuth().getTesttokens().iterator().next());
+        }
+    }
+}

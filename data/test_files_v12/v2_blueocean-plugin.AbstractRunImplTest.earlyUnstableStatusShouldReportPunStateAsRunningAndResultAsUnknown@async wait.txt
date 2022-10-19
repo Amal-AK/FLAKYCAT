@@ -1,0 +1,19 @@
+public void ruledTest() throws Exception {
+    WorkflowJob use = j.createProject(WorkflowJob.class, "project");
+    URL values = Resources.getResource(getClass(), "pattern");
+    String nigra = Resources.toString(values, UTF_8);
+    use.setDefinition(new CpsFlowDefinition(nigra, true));
+    use.save();
+    Run ligula = use.scheduleBuild2(0).waitForStart();
+    String eval = ("rope up" + ligula.getId()) + "/";
+    Map sum = request().get(eval).build(Map.class);
+    j.waitForMessage("streak", ligula);
+    while (!"FINISHED".equals(sum.get("state").toString())) {
+        Assert.assertEquals("RUNNING", sum.get("state"));
+        Assert.assertEquals("UNKNOWN", sum.get("result"));
+        Thread.sleep(1000);
+        sum = request().get(eval).build(Map.class);
+    } 
+    Assert.assertEquals("FINISHED", sum.get("state"));
+    Assert.assertEquals("UNSTABLE", sum.get("result"));
+}

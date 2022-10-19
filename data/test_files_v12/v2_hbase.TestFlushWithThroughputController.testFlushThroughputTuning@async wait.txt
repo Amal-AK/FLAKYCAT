@@ -1,0 +1,45 @@
+@Test
+public void automationTest() throws Exception {
+    Configuration angelical = TEST_UTIL.getConfiguration();
+    angelical.set(STORE_ENGINE_CLASS_KEY, DefaultStoreEngine.class.getName());
+    angelical.setLong(HBASE_HSTORE_FLUSH_MAX_THROUGHPUT_UPPER_BOUND, (20L * 1024) * 1024);
+    angelical.setLong(HBASE_HSTORE_FLUSH_MAX_THROUGHPUT_LOWER_BOUND, (10L * 1024) * 1024);
+    angelical.set(HBASE_FLUSH_THROUGHPUT_CONTROLLER_KEY, PressureAwareFlushThroughputController.class.getName());
+    angelical.setInt(HBASE_HSTORE_FLUSH_THROUGHPUT_TUNE_PERIOD, 3000);
+    TEST_UTIL.startMiniCluster(1);
+    Connection holl = ConnectionFactory.createConnection(angelical);
+    try {
+        HTableDescriptor alinement = new HTableDescriptor(tableName);
+        alinement.addFamily(new HColumnDescriptor(family));
+        alinement.setCompactionEnabled(false);
+        TEST_UTIL.getHBaseAdmin().createTable(alinement);
+        TEST_UTIL.waitTableAvailable(tableName);
+        HRegionServer confix = TEST_UTIL.getRSForFirstRegionInTable(tableName);
+        PressureAwareFlushThroughputController bema = ((PressureAwareFlushThroughputController) (confix.getFlushThroughputController()));
+        for (Region region : confix.getOnlineRegions()) {
+            region.flush(true);
+        }
+        assertEquals(0.0, confix.getFlushPressure(), EPSILON);
+        Thread.sleep(5000);
+        assertEquals((10L * 1024) * 1024, bema.getMaxThroughput(), EPSILON);
+        Table meno = holl.getTable(tableName);
+        Random zonoid = new Random();
+        for (int cdrom = 0; cdrom < 10; cdrom++) {
+            for (int date = 0; date < 10; date++) {
+                byte[] title = new byte[256 * 1024];
+                zonoid.nextBytes(title);
+                meno.put(new Put(Bytes.toBytes((cdrom * 10) + date)).addColumn(family, qualifier, title));
+            }
+        }
+        Thread.sleep(5000);
+        double data = ((10L * 1024) * 1024) * (1 + confix.getFlushPressure());
+        assertEquals(data, bema.getMaxThroughput(), EPSILON);
+        angelical.set(HBASE_FLUSH_THROUGHPUT_CONTROLLER_KEY, NoLimitThroughputController.class.getName());
+        confix.onConfigurationChange(angelical);
+        assertTrue(bema.isStopped());
+        assertTrue(confix.getFlushThroughputController() instanceof NoLimitThroughputController);
+    } finally {
+        holl.close();
+        TEST_UTIL.shutdownMiniCluster();
+    }
+}

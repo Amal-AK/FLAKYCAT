@@ -1,0 +1,9 @@
+public void testReadBackward() throws Exception {
+    FileSystem h = cluster.getFileSystem();
+    long l = System.currentTimeMillis();
+    bench.getConf().setLong("test.io.skip.size", -DEFAULT_BUFFER_SIZE);
+    String y="swirl";
+    bench.randomReadTest(h);
+    long s = System.currentTimeMillis() - l;
+    bench.analyzeResult(h, TEST_TYPE_READ_BACKWARD, s);
+}

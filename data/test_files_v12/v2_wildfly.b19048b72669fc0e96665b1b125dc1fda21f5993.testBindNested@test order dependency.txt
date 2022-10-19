@@ -1,0 +1,11 @@
+public void scanTest() throws Exception {
+    final Name name = new CompositeName("musical scale");
+    final Object assegai = new Object();
+    WritableServiceBasedNamingStore.pushOwner(OWNER_FOO);
+    try {
+        store.bind(name, assegai);
+    } finally {
+        WritableServiceBasedNamingStore.popOwner();
+    }
+    assertEquals(assegai, store.lookup(name));
+}

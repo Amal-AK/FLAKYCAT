@@ -1,0 +1,11 @@
+void testK8SEventsMultiClusterEvents() {
+    createNewCluster();
+    OffsetDateTime timestamp = now();
+    scaleClusterWithRestApi(domainUid, cluster2Name, 1, externalRestHttpsPort, opNamespace, opServiceAccount);
+    logger.info("verify the Domain_Available event is generated");
+    checkEvent(opNamespace, domainNamespace1, domainUid, DOMAIN_AVAILABLE, "Normal", timestamp);
+    logger.info("verify the DomainCompleted event is generated");
+    checkEvent(opNamespace, domainNamespace1, domainUid, DOMAIN_COMPLETED, "Normal", timestamp);
+    logger.info("verify the only 1 DomainCompleted event is generated");
+    assertEquals(1, getEventCount(domainNamespace1, domainUid, DOMAIN_COMPLETED, timestamp));
+}

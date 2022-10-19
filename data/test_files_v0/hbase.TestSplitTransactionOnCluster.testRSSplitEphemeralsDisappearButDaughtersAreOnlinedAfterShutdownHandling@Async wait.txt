@@ -1,0 +1,45 @@
+public class Test { 
+@Test(timeout = 300000)
+public void testRSSplitEphemeralsDisappearButDaughtersAreOnlinedAfterShutdownHandling() throws IOException, InterruptedException, NodeExistsException, KeeperException {
+    final byte[] tableName = Bytes.toBytes("ephemeral");
+    HTable t = TESTING_UTIL.createTable(tableName, CATALOG_FAMILY);
+    List<HRegion> regions = cluster.getRegions(tableName);
+    HRegionInfo hri = getAndCheckSingleTableRegion(regions);
+    int tableRegionIndex = ensureTableRegionNotOnSameServerAsMeta(admin, hri);
+    this.admin.setBalancerRunning(false, true);
+    cluster.getMaster().setCatalogJanitorEnabled(false);
+    try {
+        TESTING_UTIL.loadTable(t, CATALOG_FAMILY);
+        HRegionServer server = cluster.getRegionServer(tableRegionIndex);
+        printOutRegions(server, "Initial regions: ");
+        int regionCount = server.getOnlineRegions().size();
+        SplitRegionHandler.TEST_SKIP = true;
+        split(hri, server, regionCount);
+        List<HRegion> daughters = cluster.getRegions(tableName);
+        assertTrue(daughters.size() >= 2);
+        String path = ZKAssign.getNodeName(t.getConnection().getZooKeeperWatcher(), hri.getEncodedName());
+        Stat stats = t.getConnection().getZooKeeperWatcher().getRecoverableZooKeeper().exists(path, false);
+        LOG.info((("EPHEMERAL NODE BEFORE SERVER ABORT, path=" + path) + ", stats=") + stats);
+        RegionTransitionData rtd = ZKAssign.getData(t.getConnection().getZooKeeperWatcher(), hri.getEncodedName());
+        assertTrue(rtd.getEventType().equals(RS_ZK_REGION_SPLIT) || rtd.getEventType().equals(RS_ZK_REGION_SPLITTING));
+        cluster.abortRegionServer(tableRegionIndex);
+        waitUntilRegionServerDead();
+        while (cluster.getRegions(tableName).size() < daughters.size()) {
+            LOG.info("Waiting for repair to happen");
+            Thread.sleep(1000);
+        } 
+        regions = cluster.getRegions(tableName);
+        for (HRegion r : regions) {
+            assertTrue(daughters.contains(r));
+        }
+        stats = t.getConnection().getZooKeeperWatcher().getRecoverableZooKeeper().exists(path, false);
+        LOG.info((("EPHEMERAL NODE AFTER SERVER ABORT, path=" + path) + ", stats=") + stats);
+        assertTrue(stats == null);
+    } finally {
+        SplitRegionHandler.TEST_SKIP = false;
+        admin.setBalancerRunning(true, false);
+        cluster.getMaster().setCatalogJanitorEnabled(true);
+    }
+}
+
+}

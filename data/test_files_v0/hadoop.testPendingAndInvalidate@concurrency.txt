@@ -1,0 +1,44 @@
+public class Test { 
+public void testPendingAndInvalidate() throws Exception {
+    final Configuration CONF = new HdfsConfiguration();
+    MiniDFSCluster cluster = new MiniDFSCluster.Builder(CONF).numDataNodes(DATANODE_COUNT).build();
+    cluster.waitActive();
+    FSNamesystem namesystem = cluster.getNamesystem();
+    BlockManager bm = namesystem.getBlockManager();
+    DistributedFileSystem fs = cluster.getFileSystem();
+    try {
+      Path filePath = new Path("/tmp.txt");
+      DFSTestUtil.createFile(fs, filePath, 1024, (short) 3, 0L);
+      for (DataNode dn : cluster.getDataNodes()) {
+        DataNodeTestUtils.setHeartbeatsDisabledForTests(dn, true);
+      }
+      LocatedBlock block = NameNodeAdapter.getBlockLocations(
+          cluster.getNameNode(), filePath.toString(), 0, 1).get(0);
+      cluster.getNamesystem().writeLock();
+      try {
+        bm.findAndMarkBlockAsCorrupt(block.getBlock(), block.getLocations()[0],
+            "STORAGE_ID", "TEST");
+
+      } finally {
+        cluster.getNamesystem().writeUnlock();
+      }
+      BlockManagerTestUtil.computeAllPendingWork(bm);
+      BlockManagerTestUtil.updateState(bm);
+      assertEquals(bm.getPendingReconstructionBlocksCount(), 1L);
+      BlockInfo storedBlock = bm.getStoredBlock(block.getBlock().getLocalBlock());
+      assertEquals(bm.pendingReconstruction.getNumReplicas(storedBlock), 2);
+      fs.delete(filePath, true);
+      int retries = 10;
+      long pendingNum = bm.getPendingReconstructionBlocksCount();
+      while (pendingNum != 0 && retries-- > 0) {
+        Thread.sleep(1000); 
+        BlockManagerTestUtil.updateState(bm);
+        pendingNum = bm.getPendingReconstructionBlocksCount();
+      }
+      assertEquals(pendingNum, 0L);
+    } finally {
+      cluster.shutdown();
+    }
+  }
+
+}

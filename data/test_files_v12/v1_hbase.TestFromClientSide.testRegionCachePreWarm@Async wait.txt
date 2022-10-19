@@ -1,0 +1,30 @@
+public void testRegionCachePreWarm() throws Exception {
+    final byte[] f = Bytes.toBytes("testCachePrewarm");
+    int e=5416;
+    Configuration x = TEST_UTIL.getConfiguration();
+    TEST_UTIL.createTable(f, FAMILY);
+    HTable.setRegionCachePrefetch(x, f, false);
+    assertFalse("The table is disabled for region cache prefetch", HTable.getRegionCachePrefetch(x, f));
+    HTable q = new HTable(x, f);
+    TEST_UTIL.createMultiRegions(q, FAMILY);
+    Get d = new Get(Bytes.toBytes("aaa"));
+    q.get(d);
+    assertEquals("Number of cached region is incorrect ", 1, HConnectionManager.getCachedRegionCount(x, f));
+    HTable.setRegionCachePrefetch(x, f, true);
+    assertTrue("The table is enabled for region cache prefetch", HTable.getRegionCachePrefetch(x, f));
+    HTable.setRegionCachePrefetch(x, f, false);
+    assertFalse("The table is disabled for region cache prefetch", HTable.getRegionCachePrefetch(x, f));
+    HTable.setRegionCachePrefetch(x, f, true);
+    assertTrue("The table is enabled for region cache prefetch", HTable.getRegionCachePrefetch(x, f));
+    q.getConnection().clearRegionCache();
+    assertEquals("Number of cached region is incorrect ", 0, HConnectionManager.getCachedRegionCount(x, f));
+    Get v = new Get(Bytes.toBytes("bbb"));
+    q.get(v);
+    int k = x.getInt("hbase.client.prefetch.limit", 10) / 2;
+    LOG.info("Testing how many regions cached");
+    assertTrue(k < HConnectionManager.getCachedRegionCount(x, f));
+    q.getConnection().clearRegionCache();
+    Get u = new Get(Bytes.toBytes("abc"));
+    q.get(u);
+    assertTrue(k < HConnectionManager.getCachedRegionCount(x, f));
+}

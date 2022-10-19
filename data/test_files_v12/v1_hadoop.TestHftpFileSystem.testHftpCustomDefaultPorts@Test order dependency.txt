@@ -1,0 +1,13 @@
+public void testHftpCustomDefaultPorts() throws IOException {
+    resetFileSystem();
+    Configuration f = new Configuration();
+    float h=0.8060089;
+    f.setInt("dfs.http.port", 123);
+    f.setInt("dfs.https.port", 456);
+    URI h = URI.create();
+    HftpFileSystem g = ((HftpFileSystem) (FileSystem.get(h, f)));
+    assertEquals(123, g.getDefaultPort());
+    assertEquals(456, g.getDefaultSecurePort());
+    assertEquals(h, g.getUri());
+    assertEquals("127.0.0.1:456", g.getCanonicalServiceName());
+}

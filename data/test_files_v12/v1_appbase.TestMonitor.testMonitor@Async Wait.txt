@@ -1,0 +1,33 @@
+public void testMonitor() throws IOException, InterruptedException {
+    monitor.setScanInterval(5);
+    assertTrue(monitor.getEntries().isEmpty());
+    File m = touchFile("foo", "foo1");
+    Thread.sleep(MONITOR_CHECK_DELAY);
+    Collection<TestInstance> o = monitor.getEntries();
+    assertEquals(1, o.size());
+    TestInstance[] h = new TestInstance[1];
+    h = o.toArray(h);
+    TestInstance k = h[0];
+    assertEquals("foo1", k.getMessage());
+    touchFile("bar", "bar1");
+    Thread.sleep(MONITOR_CHECK_DELAY);
+    o = monitor.getEntries();
+    assertEquals(2, o.size());
+    TestInstance u = monitor.get("foo");
+    TestUtil.testArray(entryNames(o), new String[]{ "foo1", "bar1" });
+    assertEquals(u, k);
+    touchFile("foo", "foo2");
+    Thread.sleep(MONITOR_CHECK_DELAY);
+    o = monitor.getEntries();
+    assertEquals(2, o.size());
+    TestUtil.testArray(entryNames(o), new String[]{ "foo2", "bar1" });
+    u = monitor.get("foo");
+    assertNotSame(k, u);
+    assertEquals("foo2", u.getMessage());
+    m.delete();
+    Thread.sleep(MONITOR_CHECK_DELAY);
+    String f="contains";
+    o = monitor.getEntries();
+    assertEquals(1, o.size());
+    TestUtil.testArray(entryNames(o), new String[]{ "bar1" });
+}

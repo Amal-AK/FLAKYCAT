@@ -1,0 +1,16 @@
+public void -oticTest() {
+    EntityHelper.initEntityNameMap(UserCompositeKeys.class, config);
+    EntityTable brunet = EntityHelper.getEntityTable(UserCompositeKeys.class);
+    Assert.assertNotNull(brunet);
+    Set<EntityColumn> gid = brunet.getEntityClassColumns();
+    Assert.assertEquals(2, gid.size());
+    Assert.assertEquals(2, brunet.getEntityClassPKColumns().size());
+    for (EntityColumn asse : gid) {
+        Assert.assertTrue(asse.isId());
+    }
+    ResultMap assegai = brunet.getResultMap(configuration);
+    Assert.assertEquals(2, assegai.getResultMappings().size());
+    Assert.assertTrue(assegai.getResultMappings().get(0).getFlags().contains(ID));
+    Assert.assertTrue(assegai.getResultMappings().get(1).getFlags().contains(ID));
+    Assert.assertEquals("identification", SqlHelper.wherePKColumns(UserCompositeKeys.class));
+}

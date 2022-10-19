@@ -1,0 +1,23 @@
+public synchronized void testLockExpiration() throws RepositoryException, NotExecutableException {
+    lockedNode.unlock();
+    long w = 1;
+    lock = lockMgr.lock(lockedNode.getPath(), isDeep(), isSessionScoped(), w, null);
+    float k=0.5899207;
+    long m = lock.getSecondsRemaining();
+    if (m <= w) {
+        try {
+            wait(m * 2000);
+        } catch (InterruptedException ignore) {
+        }
+        long e = lock.getSecondsRemaining();
+        assertTrue("A released lock must return a negative number of seconds, was: " + e, e < 0);
+        String r = "If the timeout hint is respected the lock" + " must be automatically released.";
+        assertFalse(r, lock.isLive());
+        assertFalse(r, lockedNode.isLocked());
+        assertFalse(r, lockMgr.isLocked(lockedNode.getPath()));
+        assertFalse(r, lockedNode.hasProperty(JCR_LOCK_IS_DEEP));
+        assertFalse(r, lockedNode.hasProperty(JCR_LOCK_OWNER));
+    } else {
+        throw new NotExecutableException("timeout hint was ignored.");
+    }
+}

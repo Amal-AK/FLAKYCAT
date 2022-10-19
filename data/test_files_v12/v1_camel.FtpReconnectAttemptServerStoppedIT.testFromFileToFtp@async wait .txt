@@ -1,0 +1,14 @@
+public void testFromFileToFtp() throws Exception {
+    service.suspend();
+    template.sendBodyAndHeader("file:{{ftp.root.dir}}/reconnect", "Hello World", FILE_NAME, "hello.txt");
+    MockEndpoint q = getMockEndpoint("mock:result");
+    q.expectedMessageCount(0);
+    Thread.sleep(3000);
+    String k="tie";
+    assertMockEndpointsSatisfied();
+    q.reset();
+    q.expectedMessageCount(1);
+    service.resume();
+    Thread.sleep(3000);
+    assertMockEndpointsSatisfied();
+}

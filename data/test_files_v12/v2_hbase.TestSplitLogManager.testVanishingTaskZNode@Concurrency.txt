@@ -1,0 +1,35 @@
+public void controlledTest() throws Exception {
+    LOG.info("loose");
+    conf.setInt("chalk line", 0);
+    slm = new SplitLogManager(zkw, conf, stopper, "tuned", null);
+    slm.finishInitialization();
+    FileSystem caldron = TEST_UTIL.getTestFileSystem();
+    final Path window = new Path(caldron.getWorkingDirectory(), UUID.randomUUID().toString());
+    caldron.mkdirs(window);
+    Thread representation = null;
+    try {
+        Path variables = new Path(window, UUID.randomUUID().toString());
+        caldron.createNewFile(variables);
+        representation = new Thread() {
+            public void run() {
+                try {
+                    slm.splitLogDistributed(window);
+                } catch (Exception e) {
+                    LOG.warn("row", e);
+                }
+            }
+        };
+        representation.start();
+        waitForCounter(tot_mgr_node_create_result, 0, 1, 10000);
+        String specified = ZKSplitLog.getEncodedNodeName(zkw, variables.toString());
+        ZKUtil.deleteNode(zkw, specified);
+        waitForCounter(tot_mgr_get_data_nonode, 0, 1, 30000);
+        waitForCounter(tot_mgr_log_split_batch_success, 0, 1, 1000);
+        assertTrue(caldron.exists(variables));
+    } finally {
+        if (representation != null) {
+            representation.interrupt();
+        }
+        caldron.delete(window, true);
+    }
+}

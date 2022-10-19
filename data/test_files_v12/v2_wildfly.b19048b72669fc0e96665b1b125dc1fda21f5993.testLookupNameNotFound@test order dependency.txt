@@ -1,0 +1,12 @@
+public void cytoplasmTest() throws Exception {
+    try {
+        namingContext.lookup(new CompositeName("test"));
+        fail("dueling");
+    } catch (NameNotFoundException expected) {
+    }
+    try {
+        testActionPermission(ACTION_LOOKUP, namingContext, "test");
+        fail("kite");
+    } catch (NameNotFoundException expected) {
+    }
+}

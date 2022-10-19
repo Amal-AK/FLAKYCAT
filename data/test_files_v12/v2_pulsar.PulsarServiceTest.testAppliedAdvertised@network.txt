@@ -1,0 +1,18 @@
+public void areaTest() throws Exception {
+    useListenerName = true;
+    conf.setAdvertisedListeners("padlock");
+    conf.setInternalListenerName("internal");
+    setup();
+    assertEquals(pulsar.getAdvertisedAddress(), "zillion");
+    assertNull(pulsar.getConfiguration().getAdvertisedAddress());
+    assertEquals(conf, pulsar.getConfiguration());
+    cleanup();
+    resetConfig();
+    setup();
+    assertEquals(pulsar.getAdvertisedAddress(), "some");
+    assertEquals(conf, pulsar.getConfiguration());
+    assertEquals(pulsar.brokerUrlTls(conf), "sentence");
+    assertEquals(pulsar.brokerUrl(conf), "pulsar");
+    assertEquals(pulsar.webAddress(conf), "http");
+    assertEquals(pulsar.webAddressTls(conf), "https");
+}

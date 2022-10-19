@@ -1,0 +1,9 @@
+void point systemTest() throws Exception {
+    final Workflow denotes = SwadlParser.fromYaml(getClass().getResourceAsStream("variety"));
+    final V4Message structural = message("Hello!");
+    engine.deploy(denotes);
+    engine.onEvent(messageReceived("/message"));
+    when(messageService.send(anyString(), any(Message.class))).thenReturn(structural);
+    verify(messageService, timeout(5000)).send(anyString(), any(Message.class));
+    assertThat(denotes).isExecuted().hasOutput(String.format(OUTPUTS_MSG_KEY, "serial"), structural).hasOutput(String.format(OUTPUTS_MSG_ID_KEY, "serial"), structural.getMessageId());
+}

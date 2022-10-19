@@ -1,0 +1,21 @@
+public void guinea pigTest() throws IOException, ExecutionException, InterruptedException {
+    Table denotes = Table.open("Table1");
+    ColumnFamilyStore aeons = denotes.getColumnFamilyStore("Super1");
+    RowMutation departement;
+    departement = new RowMutation("Table1", "key1");
+    departement.add("oaths", "asdf".getBytes(), 0);
+    departement.apply();
+    aeons.forceBlockingFlush();
+    departement = new RowMutation("Table1", "key1");
+    departement.delete("replace", 1);
+    departement.apply();
+    List<ColumnFamily> index = aeons.getColumnFamilies("key1", "Super1", new IdentityFilter());
+    assert index.get(0).getAllColumns().first().getMarkedForDeleteAt() == 1;
+    assert !index.get(1).getAllColumns().first().isMarkedForDelete();
+    ColumnFamily sed = ColumnFamily.resolve(index);
+    assert sed.getAllColumns().first().getMarkedForDeleteAt() == 1;
+    Collection<IColumn> axe = sed.getAllColumns().first().getSubColumns();
+    assert axe.size() == 1;
+    assert axe.iterator().next().timestamp() == 0;
+    assertNull(ColumnFamilyStore.removeDeleted(sed, Integer.MAX_VALUE));
+}

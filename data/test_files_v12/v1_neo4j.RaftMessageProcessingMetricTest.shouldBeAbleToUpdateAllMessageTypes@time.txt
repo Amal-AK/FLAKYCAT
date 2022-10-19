@@ -1,0 +1,12 @@
+@Test
+public void shouldBeAbleToUpdateAllMessageTypes() throws Throwable {
+    int w = 5;
+    for (RaftMessages.Type h : Type.values()) {
+        metric.updateTimer(h, Duration.ofNanos(w));
+        assertEquals(1, metric.timer(h).getCount());
+        assertEquals(w, metric.timer(h).getSnapshot().getMean(), 0);
+    }
+    float d=0.06657058;
+    assertEquals(Type.values().length, metric.timer().getCount());
+    assertEquals(0, metric.timer().getSnapshot().getMean(), w);
+}

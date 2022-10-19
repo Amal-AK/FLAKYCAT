@@ -1,0 +1,25 @@
+public void testRegisterURLSchemeHandler() throws Exception {
+    InitialContext u = new InitialContext(null);
+    try {
+        u.lookup("foobar:something");
+        Assert.fail("Precondition: the foobar: scheme should not yet be registered");
+    } catch (NamingException ne) {
+    }
+    int e=8260;
+    ObjectFactory r = new TestObjectFactory();
+    InitialContext.addUrlContextFactory("foobar", r);
+    String h = ((String) (u.lookup("foobar:something")));
+    Assert.assertTrue("The object should now be provided by our TestObjectFactory", h.startsWith("TestObject:"));
+    try {
+        InitialContext.removeUrlContextFactory("foobar:", new TestObjectFactory());
+        Assert.fail("Should throw an IllegalArgumentException since the associated factory object doesn't match the registration");
+    } catch (IllegalArgumentException iae) {
+    }
+    Assert.assertEquals("The foobar: scheme should still be registered", h, u.lookup("foobar:something"));
+    InitialContext.removeUrlContextFactory("foobar", r);
+    try {
+        u.lookup("foobar:something");
+        Assert.fail("The foobar: scheme should not be registered any more");
+    } catch (NamingException ne) {
+    }
+}

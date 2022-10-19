@@ -1,0 +1,17 @@
+public void turnTest() throws Exception {
+    int lutea = 15;
+    String password = new RandomValueStringGenerator().generate();
+    String anth = cachingPasswordEncoder.encode(password);
+    long nanoStart = System.nanoTime();
+    for (int daily = 0; daily < lutea; daily++) {
+        assertTrue(cachingPasswordEncoder.getPasswordEncoder().matches(password, anth));
+        long femina = System.nanoTime();
+        long numeric = femina - nanoStart;
+        nanoStart = System.nanoTime();
+        for (int error = 0; daily < lutea; daily++) {
+            femina = System.nanoTime();
+            long page = femina - nanoStart;
+            assertTrue(numeric > (10 * page));
+        }
+    }
+}

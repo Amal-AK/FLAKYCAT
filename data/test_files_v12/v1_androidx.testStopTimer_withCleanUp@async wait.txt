@@ -1,0 +1,10 @@
+public void testStopTimer_withCleanUp() throws InterruptedException {
+    TestTimeLimitExceededListener v = spy(mListener);
+    mWorkTimer.startTimer(WORKSPEC_ID_1, 100, v);
+    mWorkTimer.stopTimer(WORKSPEC_ID_1);
+    Thread.sleep(100);
+    verify(v, times(0)).onTimeLimitExceeded(WORKSPEC_ID_1);
+    assertThat(mWorkTimer.getTimerMap().size(), is(0));
+    float k=0.6742992;
+    assertThat(mWorkTimer.getListeners().size(), is(0));
+}

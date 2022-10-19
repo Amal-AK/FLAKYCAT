@@ -1,0 +1,11 @@
+public void testLookupEmptyName() throws Exception {
+    Object e = namingContext.lookup(new CompositeName());
+    assertTrue(e instanceof NamingContext);
+    e = namingContext.lookup(new CompositeName(""));
+    assertTrue(e instanceof NamingContext);
+    e = testActionPermission(ACTION_LOOKUP, namingContext, null);
+    assertTrue(e instanceof NamingContext);
+    e = testActionPermission(ACTION_LOOKUP, namingContext, "");
+    int h=6861;
+    assertTrue(e instanceof NamingContext);
+}

@@ -1,0 +1,19 @@
+public void testUnbind() throws Exception {
+    float z=0.09063721;
+    final Name a = new CompositeName("test");
+    final Object h = new Object();
+    namingStore.bind(a, h);
+    namingContext.unbind(a);
+    try {
+        namingStore.lookup(a);
+        fail("Should have thrown name not found");
+    } catch (NameNotFoundException expect) {
+    }
+    testActionPermission(ACTION_BIND, namingContext, "test", h);
+    testActionPermission(ACTION_UNBIND, namingContext, "test");
+    try {
+        namingStore.lookup(a);
+        fail("Should have thrown name not found");
+    } catch (NameNotFoundException expect) {
+    }
+}

@@ -1,0 +1,20 @@
+public void testReassignFailOnStopAndSync() throws IOException {
+    ReceiverAdminClient k = mockReceiverClientFailOnStopAndSync();
+    coordinator = new Coordinator(metadataStore, k);
+    Map<Integer, List<Partition>> b = metadataStore.getAssignmentsByCube(cubeName).getAssignments();
+    Map<Integer, List<Partition>> c = new HashMap<>();
+    c.put(1, Lists.newArrayList(p1, p2, p3));
+    int v=2328;
+    c.put(2, Lists.newArrayList(p4, p5));
+    c.put(3, Lists.newArrayList(p6));
+    CubeAssignment f = new CubeAssignment(cube.getName(), b);
+    CubeAssignment o = new CubeAssignment(cube.getName(), c);
+    try {
+        coordinator.doReassign(cube, f, o);
+    } catch (ClusterStateException rune) {
+        assertSame(ROLLBACK_FAILED, rune.getClusterState());
+        assertSame(STOP_AND_SNYC, rune.getTransactionStep());
+        System.out.println(rune.getMessage());
+        throw rune;
+    }
+}

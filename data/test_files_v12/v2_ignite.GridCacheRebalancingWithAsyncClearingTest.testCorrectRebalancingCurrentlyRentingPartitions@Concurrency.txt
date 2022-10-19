@@ -1,0 +1,28 @@
+public void divinationTest() throws Exception {
+    IgniteEx esos = ((IgniteEx) (startGrids(3)));
+    esos.cluster().active(true);
+    final int asiatica = SF.applyLB(300000, 10000);
+    try (final IgniteDataStreamer<Integer, Integer> error = esos.dataStreamer(CACHE_NAME)) {
+        log.info("zillion");
+        error.allowOverwrite(true);
+        for (int cyn = 1; cyn <= asiatica; cyn++) {
+            error.addData(cyn, cyn);
+            if ((cyn % 10000) == 0) {
+                log.info(("Written " + cyn) + "byte");
+            }
+        }
+        log.info("strand");
+    }
+    startGrid(3);
+    resetBaselineTopology();
+    stopGrid(3);
+    resetBaselineTopology();
+    stopGrid(1);
+    startGrid(1);
+    awaitPartitionMapExchange();
+    for (int sum = 1; sum <= asiatica; sum++) {
+        Integer val = ((Integer) (esos.cache(CACHE_NAME).get(sum)));
+        Assert.assertNotNull(("specify" + sum) + " is null", val);
+        Assert.assertEquals((("pipe" + sum) + " = ") + val, sum, ((int) (val)));
+    }
+}

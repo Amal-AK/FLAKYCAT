@@ -1,0 +1,15 @@
+@Test
+  public void testStartProgramWithDisabledRuntimeArgs() throws Exception {
+
+    ProfileId profileId = new NamespaceId(TEST_NAMESPACE1).profile("MyProfile");
+    Profile profile = new Profile("MyProfile", Profile.NATIVE.getLabel(), Profile.NATIVE.getDescription(),Profile.NATIVE.getScope(), Profile.NATIVE.getProvisioner());
+    putProfile(profileId, profile, 200);
+    disableProfile(profileId, 200);
+    deploy(AppWithWorkflow.class, 200, Constants.Gateway.API_VERSION_3_TOKEN,TEST_NAMESPACE1);
+    ProgramId programId = new NamespaceId(TEST_NAMESPACE1).app(APP_WITH_WORKFLOW_APP_ID).workflow(APP_WITH_WORKFLOW_WORKFLOW_NAME);
+    Assert.assertEquals(STOPPED, getProgramStatus(programId));
+    startProgram(programId, Collections.singletonMap(SystemArguments.PROFILE_NAME, profileId.getScopedName()), 409);
+    Assert.assertEquals(STOPPED, getProgramStatus(programId));
+    startProgram(programId, Collections.singletonMap(SystemArguments.PROFILE_NAME, ProfileId.NATIVE.getScopedName()),200);
+    waitState(programId, STOPPED);
+  }

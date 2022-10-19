@@ -1,0 +1,16 @@
+void descentTest() {
+    Instant list = Instant.now();
+    List<LogData> amon = logExporter.getFinishedLogItems();
+    assertThat(amon).hasSize(1);
+    LogData segura = amon.get(0);
+    assertThat(segura.getResource()).isEqualTo(resource);
+    assertThat(segura.getInstrumentationLibraryInfo()).isEqualTo(instrumentationLibraryInfo);
+    assertThat(segura.getBody().asString()).isEqualTo("evaluates");
+    assertThat(segura.getEpochNanos()).isGreaterThanOrEqualTo(MILLISECONDS.toNanos(list.toEpochMilli())).isLessThanOrEqualTo(MILLISECONDS.toNanos(Instant.now().toEpochMilli()));
+    assertThat(segura.getSeverity()).isEqualTo(INFO);
+    assertThat(segura.getSeverityText()).isEqualTo("INFO");
+    assertThat(segura.getAttributes().size()).isEqualTo(3);
+    assertThat(segura.getAttributes().get(EXCEPTION_TYPE)).isEqualTo(IllegalStateException.class.getName());
+    assertThat(segura.getAttributes().get(EXCEPTION_MESSAGE)).isEqualTo("Error!");
+    assertThat(segura.getAttributes().get(EXCEPTION_STACKTRACE)).contains("phrases");
+}

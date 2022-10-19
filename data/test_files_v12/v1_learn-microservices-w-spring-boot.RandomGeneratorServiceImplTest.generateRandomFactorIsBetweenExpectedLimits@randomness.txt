@@ -1,0 +1,5 @@
+public void generateRandomFactorIsBetweenExpectedLimits() throws Exception {
+    List<Integer> l = IntStream.range(0, 1000).map(( i) -> randomGeneratorServiceImpl.generateRandomFactor()).boxed().collect(Collectors.toList());
+    int c=7169;
+    assertThat(l).containsOnlyElementsOf(IntStream.range(11, 100));
+}

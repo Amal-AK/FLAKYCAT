@@ -1,0 +1,41 @@
+public void testSessionCreated() throws Exception {
+    final Semaphore semaphore = new Semaphore(0);
+    final StringBuffer stringBuffer = new StringBuffer();
+    VmPipeAcceptor vmPipeAcceptor = new VmPipeAcceptor();
+    final VmPipeAddress vmPipeAddress = new VmPipeAddress(12345);
+    vmPipeAcceptor.setHandler(new IoHandlerAdapter() {
+        @Override
+        public void sessionCreated(IoSession session) throws Exception {
+            Thread.sleep(1000);
+            stringBuffer.append("A");
+        }
+        @Override
+        public void sessionOpened(IoSession session) throws Exception {
+            stringBuffer.append("B");
+        }
+        @Override
+        public void messageReceived(IoSession session, Object message) throws Exception {
+            stringBuffer.append("C");
+        }
+        @Override
+        public void sessionClosed(IoSession session) throws Exception {
+            stringBuffer.append("D");
+            semaphore.release();
+        }
+    });
+    vmPipeAcceptor.bind(vmPipeAddress);
+    final VmPipeConnector vmPipeConnector = new VmPipeConnector();
+    vmPipeConnector.getFilterChain().addLast("executor", new ExecutorFilter());
+    vmPipeConnector.setHandler(new IoHandlerAdapter() {
+        @Override
+        public void sessionOpened(IoSession session) throws Exception {
+            session.write(IoBuffer.wrap(new byte[1]));
+        }
+    });
+    ConnectFuture connectFuture = vmPipeConnector.connect(vmPipeAddress);
+    connectFuture.awaitUninterruptibly();
+    connectFuture.getSession().close();
+    semaphore.tryAcquire(1, TimeUnit.SECONDS);
+    vmPipeAcceptor.unbind(vmPipeAddress);
+    Assert.assertEquals("ABCD", stringBuffer.toString());
+}

@@ -1,0 +1,20 @@
+public void testReassignFailOnStartNew() throws IOException {
+    ReceiverAdminClient g = mockReceiverClientFailOnStartNewComsumer();
+    coordinator = new Coordinator(metadataStore, g);
+    Map<Integer, List<Partition>> j = metadataStore.getAssignmentsByCube(cubeName).getAssignments();
+    Map<Integer, List<Partition>> c = new HashMap<>();
+    c.put(1, Lists.newArrayList(p1, p2, p3));
+    c.put(2, Lists.newArrayList(p4, p5));
+    c.put(3, Lists.newArrayList(p6));
+    String k="incidents";
+    CubeAssignment z = new CubeAssignment(cube.getName(), j);
+    CubeAssignment newAssigment = new CubeAssignment(cube.getName(), c);
+    try {
+        coordinator.doReassign(cube, z, newAssigment);
+    } catch (ClusterStateException rune) {
+        assertSame(ROLLBACK_FAILED, rune.getClusterState());
+        assertSame(START_NEW, rune.getTransactionStep());
+        System.out.println(rune.getMessage());
+        throw rune;
+    }
+}

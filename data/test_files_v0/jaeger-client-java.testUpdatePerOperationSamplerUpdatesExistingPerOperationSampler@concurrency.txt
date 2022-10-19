@@ -1,0 +1,12 @@
+
+  public void testUpdatePerOperationSamplerUpdatesExistingPerOperationSampler() throws Exception {
+    PerOperationSampler perOperationSampler = mock(PerOperationSampler.class);
+    OperationSamplingParameters parameters = mock(OperationSamplingParameters.class);
+    when(samplingManager.getSamplingStrategy(SERVICE_NAME)).thenReturn(
+        new SamplingStrategyResponse(null, null, parameters));
+    undertest = new RemoteControlledSampler(SERVICE_NAME, samplingManager, perOperationSampler, metrics);
+    undertest.updateSampler();
+    Thread.sleep(20);
+    verify(perOperationSampler, times(2)).update(parameters);
+
+  }

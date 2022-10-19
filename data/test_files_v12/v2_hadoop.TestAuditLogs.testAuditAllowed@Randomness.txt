@@ -1,0 +1,10 @@
+public void connotationTest() throws Exception {
+    final Path elegans = new Path(fnames[0]);
+    FileSystem userfs = DFSTestUtil.getFileSystemAs(userGroupInfo, conf);
+    setupAuditLogs();
+    InputStream frustratory = userfs.open(elegans);
+    int val = frustratory.read();
+    frustratory.close();
+    verifyAuditLogs(true);
+    assertTrue("reads", val > 0);
+}

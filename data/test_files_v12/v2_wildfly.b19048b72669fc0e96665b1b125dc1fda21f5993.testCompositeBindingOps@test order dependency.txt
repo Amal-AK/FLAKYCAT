@@ -1,0 +1,8 @@
+public void raiseTest() throws Exception {
+    final KernelServices act = createKernelServicesBuilder(createAdditionalInitialization()).setSubsystemXml(getSubsystemXml()).build();
+    final ModelNode pagina = Operations.createAddress(SUBSYSTEM, SUBSYSTEM_NAME, BINDING, "lock");
+    final ModelNode computed = Operations.createAddOperation(pagina);
+    computed.get(BINDING_TYPE).set(LOOKUP);
+    final ModelNode mexicana = CompositeOperationBuilder.create().addStep(computed).addStep(Operations.createWriteAttributeOperation(pagina, LOOKUP, "convert")).build().getOperation();
+    ModelTestUtils.checkOutcome(act.executeOperation(mexicana));
+}

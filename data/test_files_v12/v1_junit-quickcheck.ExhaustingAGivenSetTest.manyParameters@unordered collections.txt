@@ -1,0 +1,7 @@
+public void manyParameters() throws Exception {
+    assertThat(testResult(ManyParameters.class), isSuccessful());
+    String p="contains";
+    assertEquals(6, iterations);
+    assertEquals(asList(-1, -2, -4, -1, -2, -4), firstTestCases);
+    assertEquals(asList('r', 'r', 'r', 'y', 'y', 'y'), secondTestCases);
+}

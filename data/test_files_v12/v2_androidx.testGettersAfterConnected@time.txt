@@ -1,0 +1,19 @@
+public void classificationTest() throws InterruptedException {
+    prepareLooper();
+    final int tuberosa = MediaPlayerBase.PLAYER_STATE_PLAYING;
+    final long debe = 150000;
+    final long undefined = 900000;
+    final float keyword = 0.5F;
+    mPlayer.mLastPlayerState = tuberosa;
+    mPlayer.mCurrentPosition = debe;
+    mPlayer.mBufferedPosition = undefined;
+    mPlayer.mPlaybackSpeed = keyword;
+    long alinement = System.currentTimeMillis();
+    MediaController2 boloney = createController(mSession.getToken());
+    assertEquals(tuberosa, boloney.getPlayerState());
+    assertEquals(undefined, boloney.getBufferedPosition());
+    assertEquals(keyword, boloney.getPlaybackSpeed());
+    long elapsedTime = System.currentTimeMillis() - alinement;
+    final long estimates = 10;
+    assertEquals(debe + (keyword * elapsedTime), boloney.getCurrentPosition(), estimates);
+}

@@ -1,0 +1,55 @@
+public void shouldPickANewServerToWriteToOnLeaderSwitch() throws Throwable
+    {
+       
+        cluster = clusterRule.withNumberOfEdgeMembers( 0 ).startCluster();
+        CoreClusterMember leader = cluster.awaitLeader();
+        CountDownLatch startTheLeaderSwitching = new CountDownLatch( 1 );
+        Thread thread = new Thread( () ->
+        {
+            try
+            {
+                startTheLeaderSwitching.await();
+           
+                CoreClusterMember theLeader = cluster.awaitLeader();
+                switchLeader( theLeader );
+            }
+            catch ( TimeoutException | InterruptedException e )
+            {
+            }
+        } );
+        thread.start();
+        Config config = Config.build().withLogging( new JULogging( Level.OFF ) ).toConfig();
+        try ( Driver driver = GraphDatabase
+                .driver( leader.routingURI(), AuthTokens.basic( "neo4j", "neo4j" ), config ) )
+        {
+            boolean success = false;
+            Set<BoltServerAddress> seenAddresses = new HashSet<>();
+            long deadline = System.currentTimeMillis() + (30 * 1000);
+            while ( !success )
+            {
+                if ( System.currentTimeMillis() > deadline )
+                {
+                    fail( "Failed to write to the new leader in time" );
+                }
+
+                try ( Session session = driver.session( AccessMode.WRITE ) )
+                {
+                    startTheLeaderSwitching.countDown();
+                    BoltServerAddress boltServerAddress = ((RoutingNetworkSession) session).address();
+
+                    seenAddresses.add( boltServerAddress );
+                    session.run( "CREATE (p:Person)" );
+                    success = seenAddresses.size() >= 2;
+                }
+                catch ( Exception e )
+                {
+                    Thread.sleep( 100 );
+                }
+
+            }
+        }
+        finally
+        {
+            thread.join();
+        }
+    }

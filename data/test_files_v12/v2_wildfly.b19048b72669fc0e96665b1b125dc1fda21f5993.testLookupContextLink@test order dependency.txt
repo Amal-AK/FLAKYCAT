@@ -1,0 +1,10 @@
+public void masterTest() throws Exception {
+    final Name config = new CompositeName("spell");
+    namingStore.bind(config, "prints");
+    final Name linkName = new CompositeName("link");
+    namingStore.bind(linkName, new LinkRef("./test"));
+    Object boloney = namingContext.lookup("sausages");
+    assertEquals("prints", boloney);
+    boloney = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("test", "lookup"), new JndiPermission("spell", "lookup")), namingContext, "sausages");
+    assertEquals("prints", boloney);
+}

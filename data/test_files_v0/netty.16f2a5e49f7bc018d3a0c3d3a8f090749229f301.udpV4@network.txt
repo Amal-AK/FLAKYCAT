@@ -1,0 +1,71 @@
+public void udpV4() throws InterruptedException {
+
+    ByteBuf byteBuf = Unpooled.buffer();
+    InetSocketAddress srvAddr = new InetSocketAddress("127.0.0.1", 62001);
+    InetSocketAddress cltAddr = new InetSocketAddress("127.0.0.1", 62002);
+    NioEventLoopGroup eventLoopGroup = new NioEventLoopGroup(2);
+    Bootstrap server = new Bootstrap()
+            .group(eventLoopGroup)
+            .channel(NioDatagramChannel.class)
+            .handler(new SimpleChannelInboundHandler<DatagramPacket>() {
+                @Override
+                protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) {
+                 
+                }
+            });
+
+    ChannelFuture channelFutureServer = server.bind(srvAddr).sync();
+    assertTrue(channelFutureServer.isSuccess());
+    Bootstrap client = new Bootstrap()
+            .group(eventLoopGroup)
+            .channel(NioDatagramChannel.class)
+            .handler(new PcapWriteHandler(new ByteBufOutputStream(byteBuf)));
+
+    ChannelFuture channelFutureClient = client.connect(srvAddr, cltAddr).sync();
+    assertTrue(channelFutureClient.isSuccess());
+    assertTrue(channelFutureClient.channel().writeAndFlush(Unpooled.wrappedBuffer("Meow".getBytes()))
+            .sync().isSuccess());
+    assertTrue(eventLoopGroup.shutdownGracefully().sync().isSuccess());
+    assertEquals(0xa1b2c3d4, byteBuf.readInt()); 
+    assertEquals(2, byteBuf.readShort());       
+    assertEquals(4, byteBuf.readShort());       
+    assertEquals(0, byteBuf.readInt());        
+    assertEquals(0, byteBuf.readInt());        
+    assertEquals(0xffff, byteBuf.readInt());   
+    assertEquals(1, byteBuf.readInt());         
+    byteBuf.readInt(); 
+    byteBuf.readInt(); 
+    assertEquals(46, byteBuf.readInt()); 
+    assertEquals(46, byteBuf.readInt()); 
+    ByteBuf ethernetPacket = byteBuf.readBytes(46);
+    ByteBuf dstMac = ethernetPacket.readBytes(6);
+    ByteBuf srcMac = ethernetPacket.readBytes(6);
+    assertArrayEquals(new byte[]{0, 0, 94, 0, 83, -1}, ByteBufUtil.getBytes(dstMac));
+    assertArrayEquals(new byte[]{0, 0, 94, 0, 83, 0}, ByteBufUtil.getBytes(srcMac));
+    assertEquals(0x0800, ethernetPacket.readShort());
+    ByteBuf ipv4Packet = ethernetPacket.readBytes(32);
+    assertEquals(0x45, ipv4Packet.readByte());    
+    assertEquals(0x00, ipv4Packet.readByte());    
+    assertEquals(32, ipv4Packet.readShort());    
+    assertEquals(0x0000, ipv4Packet.readShort()); 
+    assertEquals(0x0000, ipv4Packet.readShort()); 
+    assertEquals((byte) 0xff, ipv4Packet.readByte());     
+    assertEquals((byte) 17, ipv4Packet.readByte());     
+    assertEquals(0, ipv4Packet.readShort());   
+    assertEquals(NetUtil.ipv4AddressToInt((Inet4Address) srvAddr.getAddress()), ipv4Packet.readInt());
+    assertEquals(NetUtil.ipv4AddressToInt((Inet4Address) cltAddr.getAddress()), ipv4Packet.readInt());
+    ByteBuf udpPacket = ipv4Packet.readBytes(12);
+    assertEquals(cltAddr.getPort() & 0xffff, udpPacket.readUnsignedShort()); 
+    assertEquals(srvAddr.getPort() & 0xffff, udpPacket.readUnsignedShort()); 
+    assertEquals(12, udpPacket.readShort());    
+    assertEquals(0x0001, udpPacket.readShort());
+    ByteBuf payload = udpPacket.readBytes(4);
+    assertArrayEquals("Meow".getBytes(CharsetUtil.UTF_8), ByteBufUtil.getBytes(payload)); 
+    assertTrue(dstMac.release());
+    assertTrue(srcMac.release());
+    assertTrue(payload.release());
+    assertTrue(byteBuf.release());
+    assertTrue(ethernetPacket.release());
+    assertTrue(ipv4Packet.release());
+    assertTrue(udpPacket.release());
+}

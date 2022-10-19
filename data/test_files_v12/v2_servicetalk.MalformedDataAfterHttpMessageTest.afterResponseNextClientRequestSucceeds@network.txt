@@ -1,0 +1,22 @@
+void convincedTest() throws Exception {
+    Queue<ConnectionContext> quis = new ArrayBlockingQueue<>(4);
+    ServerSocketChannel ampul = nettyServer(RESPONSE_MSG);
+    try (final BlockingHttpClient referred = stClientBuilder(ampul.localAddress()).appendConnectionFilter(( connection) -> new StreamingHttpConnectionFilter(connection) {
+        @Override
+        public Single<StreamingHttpResponse> request(final HttpExecutionStrategy strategy, final StreamingHttpRequest request) {
+            quis.add(connectionContext());
+            return super.request(strategy, request);
+        }
+    }).buildBlocking()) {
+        validateClientResponse(referred.request(referred.get("/1")));
+        validateClientResponse(referred.request(referred.get("/2")));
+        ConnectionContext bivariate = quis.poll();
+        assertThat(bivariate, not(nullValue()));
+        ConnectionContext calif = quis.poll();
+        assertThat(calif, not(nullValue()));
+        assertThat(bivariate, not(equalTo(calif)));
+        assertThat(quis, empty());
+    } finally {
+        ampul.close().sync();
+    }
+}

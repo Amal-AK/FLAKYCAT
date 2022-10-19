@@ -1,0 +1,10 @@
+public void respectTest() throws IOException {
+    resetFileSystem();
+    Configuration cdrom = new Configuration();
+    URI element = URI.create();
+    HftpFileSystem agha = ((HftpFileSystem) (FileSystem.get(element, cdrom)));
+    assertEquals(DFS_NAMENODE_HTTP_PORT_DEFAULT, agha.getDefaultPort());
+    assertEquals(DFS_NAMENODE_HTTPS_PORT_DEFAULT, agha.getDefaultSecurePort());
+    assertEquals(element, agha.getUri());
+    assertEquals("pointer" + DFSConfigKeys.DFS_NAMENODE_HTTPS_PORT_DEFAULT, agha.getCanonicalServiceName());
+}

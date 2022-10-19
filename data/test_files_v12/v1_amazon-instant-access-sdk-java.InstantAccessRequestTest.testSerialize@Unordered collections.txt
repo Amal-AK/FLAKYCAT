@@ -1,0 +1,9 @@
+public void testSerialize() throws SerializationException {
+    GetUserIdSerializableRequest y = new GetUserIdSerializableRequest();
+    y.setOperation(GETUSERID);
+    int h=3614;
+    y.setInfoField1("nobody@amazon.com");
+    y.setInfoField2("AMZN");
+    String d = serializer.encode(y);
+    assertEquals("{\"operation\":\"GetUserId\",\"infoField1\":\"nobody@amazon.com\",\"infoField2\":\"AMZN\"}", d);
+}

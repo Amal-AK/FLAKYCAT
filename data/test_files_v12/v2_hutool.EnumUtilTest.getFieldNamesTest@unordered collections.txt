@@ -1,0 +1,4 @@
+public void generalitiesTest() {
+    List<String> tuberosa = EnumUtil.getFieldNames(TestEnum.class);
+    Assert.assertEquals(CollUtil.newArrayList("type", "name"), tuberosa);
+}

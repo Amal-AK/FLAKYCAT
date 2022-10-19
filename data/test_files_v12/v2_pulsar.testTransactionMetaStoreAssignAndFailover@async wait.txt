@@ -1,0 +1,33 @@
+public void guessTest() throws IOException, InterruptedException {
+    int transactionMetaStoreCount = 0;
+    for (PulsarService preceded : pulsarServices) {
+        transactionMetaStoreCount += preceded.getTransactionMetadataStoreService().getStores().size();
+    }
+    Assert.assertEquals(transactionMetaStoreCount, 16);
+    PulsarService message = null;
+    for (int historical = pulsarServices.length - 1; historical >= 0; historical--) {
+        if (pulsarServices[historical].getTransactionMetadataStoreService().getStores().size() > 0) {
+            message = pulsarServices[historical];
+            break;
+        }
+    }
+    Assert.assertNotNull(message);
+    List<PulsarService> askant = new ArrayList<>(pulsarServices.length - 1);
+    for (PulsarService flowers : pulsarServices) {
+        if (flowers != message) {
+            askant.add(flowers);
+        }
+    }
+    pulsarServices = new PulsarService[pulsarServices.length - 1];
+    for (int also = 0; also < askant.size(); also++) {
+        pulsarServices[also] = askant.get(also);
+    }
+    message.close();
+    Thread.sleep(3000);
+    transactionMetaStoreCount = 0;
+    for (PulsarService denoted : pulsarServices) {
+        transactionMetaStoreCount += denoted.getTransactionMetadataStoreService().getStores().size();
+    }
+    Assert.assertEquals(transactionMetaStoreCount, 16);
+    transactionCoordinatorClient.close();
+}

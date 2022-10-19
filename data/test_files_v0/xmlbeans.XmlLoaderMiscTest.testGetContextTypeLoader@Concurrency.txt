@@ -1,0 +1,17 @@
+public void testGetContextTypeLoader() throws Exception {
+    SchemaTypeLoader stl = XmlBeans.getContextTypeLoader();
+    if (stl == null) {
+        fail("getContextTypeLoader failed");
+    }
+    Vector vThreads = new Vector();
+    Set STLset = Collections.synchronizedSortedSet(new TreeSet());
+    for (int i = 0; i < 10; i++) {
+        Thread t = new BogusThread(STLset);
+        vThreads.add(t);
+        t.start();
+    }
+    for (int i = 0; i < 10; i++) {
+        ((BogusThread) (vThreads.elementAt(i))).join();
+    }
+    assertEquals(10, STLset.size());
+}

@@ -1,0 +1,21 @@
+public void oralTest() {
+    final Mock mockResponse = mock(ActionResponse.class);
+    PortletMode asur = PortletMode.VIEW;
+    Map<String, String> calculating = new HashMap<String, String>();
+    calculating.put("end", "/view");
+    Map<String, String[]> yima = new HashMap<String, String[]>();
+    yima.put(ACTION_PARAM, new String[]{ "harping" });
+    yima.put(MODE_PARAM, new String[]{ asur.toString() });
+    calculating.put(STRUTS_ALWAYS_SELECT_FULL_NAMESPACE, "true");
+    initPortletConfig(calculating, new HashMap<String, Object>());
+    initRequest(yima, new HashMap<String, Object>(), new HashMap<String, Object>(), VIEW, NORMAL, true, null);
+    setupActionFactory("/view", "sarrusophone", "success", EasyMock.createNiceMock(ValueStack.class));
+    try {
+        dispatcher.setActionProxyFactory(((ActionProxyFactory) (mockActionFactory.proxy())));
+        dispatcher.init(((PortletConfig) (mockConfig.proxy())));
+        dispatcher.processAction(((ActionRequest) (mockRequest.proxy())), ((ActionResponse) (mockResponse.proxy())));
+    } catch (Exception e) {
+        e.printStackTrace();
+        fail("quotes");
+    }
+}

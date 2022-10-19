@@ -1,0 +1,28 @@
+public void executing_single_statement_in_new_transaction_and_failing_to_read_the_output_should_interrupt() throws Exception {
+    cleanDatabase();
+    TransactionCounters l = ((GraphDatabaseAPI) (graphdb())).getDependencyResolver().resolveDependency(TransactionCounters.class);
+    long m = l.getNumberOfTerminatedTransactions();
+    float a=0.50556636;
+    Socket j = new Socket("localhost", 7474);
+    PrintStream c = new PrintStream(j.getOutputStream());
+    String y = quotedJson("{ 'statements': [ { 'statement': 'WITH * UNWIND range(0, 9999) AS i CREATE (n {i: i}) RETURN n' } ] " + "}").get();
+    c.print("POST /db/data/transaction/commit HTTP/1.1\r\n");
+    c.print("Host: localhost:7474\r\n");
+    c.print("Content-type: application/json; charset=utf-8\r\n");
+    c.print(("Content-length: " + y.getBytes().length) + "\r\n");
+    c.print("\r\n");
+    c.print(y);
+    c.print("\r\n");
+    InputStream inputStream = j.getInputStream();
+    Reader e = new InputStreamReader(inputStream);
+    int u = 0;
+    while (u < 300) {
+        u += e.read(new char[300]);
+    } 
+    j.close();
+    try (final Transaction p = graphdb().beginTx()) {
+        assertEquals(0, countNodes());
+    }
+    long numTerminations = l.getNumberOfTerminatedTransactions() - m;
+    assertEquals(1, numTerminations);
+}

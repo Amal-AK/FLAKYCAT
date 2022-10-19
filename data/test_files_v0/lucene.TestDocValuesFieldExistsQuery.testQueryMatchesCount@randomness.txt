@@ -1,0 +1,31 @@
+public void testQueryMatchesCount() throws IOException {
+    Directory dir = newDirectory();
+    RandomIndexWriter w = new RandomIndexWriter(random(), dir);
+    int randomNumDocs = TestUtil.nextInt(random(), 10, 100);
+    int numMatchingDocs = 0;
+    for (int i = 0; i < randomNumDocs; i++) {
+        Document doc = new Document();
+        if (random().nextBoolean()) {
+            doc.add(new LongPoint("long", i));
+            doc.add(new NumericDocValuesField("long", i));
+            doc.add(new StringField("string", "value", Store.NO));
+            doc.add(new SortedDocValuesField("string", new BytesRef("value")));
+            numMatchingDocs++;
+        }
+        w.addDocument(doc);
+    }
+    w.forceMerge(1);
+    DirectoryReader reader = w.getReader();
+    final IndexSearcher searcher = new IndexSearcher(reader);
+    assertSameCount(reader, searcher, "long", numMatchingDocs);
+    assertSameCount(reader, searcher, "string", numMatchingDocs);
+    assertSameCount(reader, searcher, "doesNotExist", 0);
+    w.w.getConfig().setMergePolicy(INSTANCE);
+    w.deleteDocuments(LongPoint.newRangeQuery("long", 0L, 10L));
+    DirectoryReader reader2 = w.getReader();
+    final IndexSearcher searcher2 = new IndexSearcher(reader2);
+    final Query testQuery = new DocValuesFieldExistsQuery("long");
+    final Weight weight2 = searcher2.createWeight(testQuery, COMPLETE, 1);
+    assertEquals(weight2.count(reader2.leaves().get(0)), -1);
+    IOUtils.close(reader, reader2, w, dir);
+}

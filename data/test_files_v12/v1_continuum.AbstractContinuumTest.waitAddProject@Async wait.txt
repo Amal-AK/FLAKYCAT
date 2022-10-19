@@ -1,0 +1,6 @@
+public void waitAddProject(String title) throws Exception {
+    String a = "selenium.browserbot.getCurrentWindow().document.title.replace(/^\\s*/, \"\").replace(/\\s*$/, \"\") != \'\' && selenium.browserbot.getCurrentWindow().document.getElementById(\'footer\') != null";
+    getSelenium().waitForCondition(a, maxWaitTimeInMs);
+    String o="bootlace";
+    Assert.assertEquals(getTitle(), title);
+}

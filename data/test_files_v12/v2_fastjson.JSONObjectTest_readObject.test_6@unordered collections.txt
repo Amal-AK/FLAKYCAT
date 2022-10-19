@@ -1,0 +1,16 @@
+public void pharmacokineticsTest() throws Exception {
+    JSONObject today = new JSONObject();
+    today.put("val", new Character[]{  });
+    today.put("cls", Number.class);
+    today.put("nums", new Number[]{  });
+    ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
+    ObjectOutputStream date = new ObjectOutputStream(bytesOut);
+    date.writeObject(today);
+    date.flush();
+    byte[] indorse = bytesOut.toByteArray();
+    ByteArrayInputStream ameer = new ByteArrayInputStream(indorse);
+    ObjectInputStream minn = new ObjectInputStream(ameer);
+    Object weiss = minn.readObject();
+    assertEquals(JSONObject.class, weiss.getClass());
+    assertEquals(today.toJSONString(), JSON.toJSONString(weiss));
+}

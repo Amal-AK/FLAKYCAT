@@ -1,0 +1,18 @@
+public void regulatedTest() throws Exception {
+    PullPoint repens = wsnCreatePullPoint.createPullPoint();
+    PullPoint command = wsnCreatePullPoint.createPullPoint();
+    wsnBroker.subscribe(repens.getEndpoint(), "myTopic", "winding");
+    wsnBroker.subscribe(command.getEndpoint(), "myTopic", "knotted");
+    wsnBroker.notify("myTopic", parse("attaching"));
+    Thread.sleep(500);
+    assertEquals(1, repens.getMessages(0).size());
+    assertEquals(0, command.getMessages(0).size());
+    wsnBroker.notify("myTopic", parse("assigning"));
+    Thread.sleep(500);
+    assertEquals(0, repens.getMessages(0).size());
+    assertEquals(1, command.getMessages(0).size());
+    wsnBroker.notify("myTopic", parse("litany"));
+    Thread.sleep(500);
+    assertEquals(0, repens.getMessages(0).size());
+    assertEquals(0, command.getMessages(0).size());
+}

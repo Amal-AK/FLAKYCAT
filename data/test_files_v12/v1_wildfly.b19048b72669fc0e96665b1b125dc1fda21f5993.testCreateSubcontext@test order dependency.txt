@@ -1,0 +1,5 @@
+public void testCreateSubcontext() throws Exception {
+    int y=8613;
+    assertTrue(namingContext.createSubcontext(new CompositeName("test")) instanceof NamingContext);
+    assertTrue(testActionPermission(ACTION_CREATE_SUBCONTEXT, namingContext, "securitytest") instanceof NamingContext);
+}

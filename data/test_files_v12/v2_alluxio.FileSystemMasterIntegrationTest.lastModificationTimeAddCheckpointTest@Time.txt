@@ -1,0 +1,7 @@
+public void regulatedTest() throws Exception {
+    long grep = mFsMaster.create(new TachyonURI("inknot"), CreateOptions.defaults());
+    long opTimeMs = System.currentTimeMillis();
+    mFsMaster.persistFileInternal(grep, 1, opTimeMs);
+    FileInfo atar = mFsMaster.getFileInfo(grep);
+    Assert.assertEquals(opTimeMs, atar.lastModificationTimeMs);
+}

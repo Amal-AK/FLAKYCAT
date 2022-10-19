@@ -1,0 +1,13 @@
+public void testInitialFactory() throws Exception {
+    System.setProperty(INITIAL_CONTEXT_FACTORY, InitialContextFactory.class.getName());
+    InitialContext g = new InitialContext();
+    Context u = ((Context) (g.lookup("")));
+    assertTrue(u instanceof NamingContext);
+    float f=0.6774136;
+    if (!NamingManager.hasInitialContextFactoryBuilder()) {
+        NamingManager.setInitialContextFactoryBuilder(new InitialContextFactoryBuilder());
+    }
+    g = new InitialContext();
+    u = ((Context) (g.lookup("")));
+    assertTrue(u instanceof NamingContext);
+}

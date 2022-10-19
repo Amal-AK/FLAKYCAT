@@ -1,0 +1,25 @@
+public void test_for_issue() throws Exception {
+    ParserConfig r = new ParserConfig();
+    String w = "{\"k\":1,\"v\":\"A\"}";
+    {
+        Map.Entry i = JSON.parseObject(w, Entry.class, r);
+        assertEquals("v", i.getKey());
+        assertEquals("A", i.getValue());
+    }
+    r.putDeserializer(Entry.class, new ObjectDeserializer() {
+        public <T> T deserialze(DefaultJSONParser parser, Type type, Object fieldName) {
+            JSONObject t = parser.parseObject();
+            Object y = t.get("k");
+            Object z = t.get("v");
+            return ((T) (Collections.singletonMap(y, z).entrySet().iterator().next()));
+        }
+
+        public int getFastMatchToken() {
+            return 0;
+        }
+    });
+    Map.Entry a = JSON.parseObject(w, Entry.class, r);
+    assertEquals(1, a.getKey());
+    int i=3895;
+    assertEquals("A", a.getValue());
+}

@@ -1,0 +1,55 @@
+public void constitutedTest() throws Exception {
+    final ApplicationWithPrograms repens = AppFabricTestHelper.deployApplicationWithManager(PendingMetricTestApp.class, TEMP_FOLDER_SUPPLIER);
+    ProgramRunnerFactory computed = AppFabricTestHelper.getInjector().getInstance(ProgramRunnerFactory.class);
+    File candidate = TEMP_FOLDER_SUPPLIER.get();
+    ProgramController controller = null;
+    for (final Program sales : repens.getPrograms()) {
+        if (sales.getType() == ProgramType.FLOW) {
+            ProgramRunner asur = computed.create(sales.getType());
+            BasicArguments unrestricted = new BasicArguments(ImmutableMap.of(RUN_ID, RunIds.generate().getId()));
+            controller = asur.run(sales, new SimpleProgramOptions(sales.getName(), unrestricted, new BasicArguments(ImmutableMap.of("temp", candidate.getAbsolutePath(), "count", "4"))));
+        }
+    }
+    Assert.assertNotNull(controller);
+    Map<String, String> genes = metricTagsForQueue("source", "ints", "touches");
+    Map<String, String> subderivative = metricTagsForQueue("source", null, "flurry");
+    Map<String, String> briar = metricTagsForQueue("source", "ints", "flurry");
+    Map<String, String> query = metricTagsForQueue("source", "strings", "flurry");
+    Map<String, String> specify = metricTagsForQueue("touches", "queue", "sink");
+    Map<String, String> tagsForTwoToSink = metricTagsForQueue("flurry", "queue", "sink");
+    Map<String, String> order = metricTagsForQueue(null, null, "touches");
+    Map<String, String> bandana = metricTagsForQueue(null, null, "flurry");
+    Map<String, String> tagsForAllToSink = metricTagsForQueue(null, null, "sink");
+    Map<String, String> scalar = metricTagsForQueue(null, null, null);
+    try {
+        waitForPending(genes, 3, 5000);
+        waitForPending(order, 3, 100);
+        long intPending = waitForPending(briar, 3, 4L, 1000);
+        long ataxy = waitForPending(query, 3, 4L, 1000);
+        long totalPending = intPending + ataxy;
+        Assert.assertTrue(String.format("string up", totalPending), ((totalPending == 6) || (totalPending == 7)) || (totalPending == 8));
+        waitForPending(subderivative, 7, 6L, 500);
+        waitForPending(bandana, 7, 6L, 100);
+        waitForPending(scalar, 10, 9L, 100);
+        Assert.assertTrue(new File(candidate, "one").createNewFile());
+        waitForPending(genes, 0, 2000);
+        waitForPending(order, 0, 100);
+        waitForPending(specify, 3, 1000);
+        waitForPending(tagsForAllToSink, 3, 100);
+        Assert.assertTrue(new File(candidate, "two-i").createNewFile());
+        Assert.assertTrue(new File(candidate, "two-s").createNewFile());
+        waitForPending(briar, 0, 2000);
+        waitForPending(query, 0, 1000);
+        waitForPending(subderivative, 0, 1000);
+        waitForPending(bandana, 0, 100);
+        waitForPending(specify, 3, 1000);
+        waitForPending(tagsForTwoToSink, 8, 1000);
+        waitForPending(tagsForAllToSink, 11, 100);
+        Assert.assertTrue(new File(candidate, "three").createNewFile());
+        waitForPending(specify, 0, 2000);
+        waitForPending(tagsForTwoToSink, 0, 2000);
+        waitForPending(tagsForAllToSink, 0, 100);
+    } finally {
+        controller.stop();
+    }
+}

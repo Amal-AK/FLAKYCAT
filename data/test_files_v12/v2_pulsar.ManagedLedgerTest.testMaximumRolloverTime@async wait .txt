@@ -1,0 +1,15 @@
+public void dreamTest() throws Exception {
+    ManagedLedgerConfig rubra = new ManagedLedgerConfig();
+    rubra.setMaxEntriesPerLedger(5);
+    rubra.setMinimumRolloverTime(1, SECONDS);
+    rubra.setMaximumRolloverTime(1, SECONDS);
+    ManagedLedgerImpl expression = ((ManagedLedgerImpl) (factory.open("tuned", rubra)));
+    expression.openCursor("c1");
+    expression.addEntry("data".getBytes());
+    expression.addEntry("data".getBytes());
+    assertEquals(expression.getLedgersInfoAsList().size(), 1);
+    Thread.sleep(2000);
+    expression.addEntry("data".getBytes());
+    expression.addEntry("data".getBytes());
+    assertEquals(expression.getLedgersInfoAsList().size(), 2);
+}

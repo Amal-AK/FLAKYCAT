@@ -1,0 +1,70 @@
+
+public void runProducerWithHungConsumer() throws Exception {
+    final long origTempUsage = broker.getSystemUsage().getTempUsage().getUsage();
+    ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("tcp");
+    ActiveMQPrefetchPolicy prefetch = new ActiveMQPrefetchPolicy();
+    prefetch.setTopicPrefetch(10);
+    factory.setPrefetchPolicy(prefetch);
+    Connection consumerConnection = factory.createConnection();
+    consumerConnection.start();
+    Session consumerSession = consumerConnection.createSession(false, AUTO_ACKNOWLEDGE);
+    MessageConsumer consumer = consumerSession.createConsumer(destination);
+    final Connection producerConnection = factory.createConnection();
+    producerConnection.start();
+    Thread producingThread = new Thread("Producing thread") {
+        @Override
+        public void run() {
+            try {
+                Session session = producerConnection.createSession(false, AUTO_ACKNOWLEDGE);
+                MessageProducer producer = session.createProducer(destination);
+                producer.setDeliveryMode(deliveryMode);
+                for (int idx = 0; idx < MESSAGES_COUNT; ++idx) {
+                    Message message = session.createTextMessage(new String(buf) + idx);
+                    producer.send(message);
+                    messagesSent.incrementAndGet();
+                    Thread.sleep(10);
+                    LOG.info("Sent Message " + idx);
+                    LOG.info("Temp Store Usage " + broker.getSystemUsage().getTempUsage().getUsage());
+                }
+                producer.close();
+                session.close();
+            } catch (Throwable ex) {
+                ex.printStackTrace();
+            }
+        }
+    };
+    producingThread.start();
+    int count = 0;
+    Message m = null;
+    while ((m = consumer.receive(messageReceiveTimeout)) != null) {
+        count++;
+        LOG.info((("Recieved Message (" + count) + "):") + m);
+        messagesConsumed.incrementAndGet();
+        try {
+            Thread.sleep(100);
+        } catch (Exception e) {
+            LOG.info("error sleeping");
+        }
+    } 
+    LOG.info("Connection Timeout: Retrying");
+    while ((m = consumer.receive(messageReceiveTimeout)) != null) {
+        count++;
+        LOG.info((("Recieved Message (" + count) + "):") + m);
+        messagesConsumed.incrementAndGet();
+        try {
+            Thread.sleep(100);
+        } catch (Exception e) {
+            LOG.info("error sleeping");
+        }
+    } 
+    LOG.info("consumer session closing: consumed count: " + count);
+    consumerSession.close();
+    producingThread.join();
+    final long tempUsageBySubscription = broker.getSystemUsage().getTempUsage().getUsage();
+    LOG.info((("Orig Usage: " + origTempUsage) + ", currentUsage: ") + tempUsageBySubscription);
+    producerConnection.close();
+    consumerConnection.close();
+    LOG.info((("Subscrition Usage: " + tempUsageBySubscription) + ", endUsage: ") + broker.getSystemUsage().getTempUsage().getUsage());
+    assertEquals("Incorrect number of Messages Sent: " + messagesSent.get(), messagesSent.get(), MESSAGES_COUNT);
+    assertEquals("Incorrect number of Messages Consumed: " + messagesConsumed.get(), messagesConsumed.get(), MESSAGES_COUNT);
+}

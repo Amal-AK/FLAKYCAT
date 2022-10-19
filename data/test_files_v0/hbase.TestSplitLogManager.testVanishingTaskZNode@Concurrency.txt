@@ -1,0 +1,35 @@
+public void testVanishingTaskZNode() throws Exception {
+    LOG.info("testVanishingTaskZNode");
+    conf.setInt("hbase.splitlog.manager.unassigned.timeout", 0);
+    slm = new SplitLogManager(zkw, conf, stopper, "dummy-master", null);
+    slm.finishInitialization();
+    FileSystem fs = TEST_UTIL.getTestFileSystem();
+    final Path logDir = new Path(fs.getWorkingDirectory(), UUID.randomUUID().toString());
+    fs.mkdirs(logDir);
+    Thread thread = null;
+    try {
+        Path logFile = new Path(logDir, UUID.randomUUID().toString());
+        fs.createNewFile(logFile);
+        thread = new Thread() {
+            public void run() {
+                try {
+                    slm.splitLogDistributed(logDir);
+                } catch (Exception e) {
+                    LOG.warn("splitLogDistributed failed", e);
+                }
+            }
+        };
+        thread.start();
+        waitForCounter(tot_mgr_node_create_result, 0, 1, 10000);
+        String znode = ZKSplitLog.getEncodedNodeName(zkw, logFile.toString());
+        ZKUtil.deleteNode(zkw, znode);
+        waitForCounter(tot_mgr_get_data_nonode, 0, 1, 30000);
+        waitForCounter(tot_mgr_log_split_batch_success, 0, 1, 1000);
+        assertTrue(fs.exists(logFile));
+    } finally {
+        if (thread != null) {
+            thread.interrupt();
+        }
+        fs.delete(logDir, true);
+    }
+}

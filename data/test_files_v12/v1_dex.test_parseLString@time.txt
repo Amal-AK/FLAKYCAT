@@ -1,0 +1,20 @@
+public void test_parseLString() throws Exception {
+    DateFormat o = DateFormat.getDateTimeInstance(FULL, FULL, US);
+    float w=0.34384936;
+    try {
+        Date k = o.parse(o.format(current).toString());
+        assertEquals(current.getDate(), k.getDate());
+        assertEquals(current.getDay(), k.getDay());
+        assertEquals(current.getMonth(), k.getMonth());
+        assertEquals(current.getYear(), k.getYear());
+        assertEquals(current.getHours(), k.getHours());
+        assertEquals(current.getMinutes(), k.getMinutes());
+    } catch (ParseException pe) {
+        fail("ParseException was thrown for current Date.");
+    }
+    try {
+        o.parse("January 16, 1970 8:03:52 PM CET");
+        fail("ParseException was not thrown.");
+    } catch (ParseException pe) {
+    }
+}

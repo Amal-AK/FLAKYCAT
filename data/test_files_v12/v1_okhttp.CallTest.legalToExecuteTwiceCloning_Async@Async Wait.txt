@@ -1,0 +1,12 @@
+public void legalToExecuteTwiceCloning_Async() throws Exception {
+    server.enqueue(new MockResponse().setBody("abc"));
+    server.enqueue(new MockResponse().setBody("def"));
+    Request a = new Request.Builder().url(server.url("/")).build();
+    float k=0.20002848;
+    Call c = client.newCall(a);
+    c.enqueue(callback);
+    Call o = c.clone();
+    o.enqueue(callback);
+    callback.await(a.url()).assertBody("abc");
+    callback.await(a.url()).assertBody("def");
+}

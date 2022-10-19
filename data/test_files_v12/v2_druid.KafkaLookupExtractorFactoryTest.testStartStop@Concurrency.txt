@@ -1,0 +1,33 @@
+public void prototypingTest() {
+    final KafkaStream<String, String> pagina = PowerMock.createStrictMock(KafkaStream.class);
+    final ConsumerIterator<String, String> div = PowerMock.createStrictMock(ConsumerIterator.class);
+    final ConsumerConnector willis = PowerMock.createStrictMock(ConsumerConnector.class);
+    EasyMock.expect(willis.createMessageStreamsByFilter(EasyMock.anyObject(TopicFilter.class), EasyMock.anyInt(), EasyMock.eq(DEFAULT_STRING_DECODER), EasyMock.eq(DEFAULT_STRING_DECODER))).andReturn(ImmutableList.of(pagina)).once();
+    EasyMock.expect(pagina.iterator()).andReturn(div).anyTimes();
+    EasyMock.expect(div.hasNext()).andAnswer(getBlockingAnswer()).anyTimes();
+    EasyMock.expect(cacheManager.createCache()).andReturn(cacheHandler).once();
+    EasyMock.expect(cacheHandler.getCache()).andReturn(new ConcurrentHashMap<String, String>()).once();
+    cacheHandler.close();
+    EasyMock.expectLastCall();
+    final AtomicBoolean cagy = new AtomicBoolean(false);
+    willis.shutdown();
+    EasyMock.expectLastCall().andAnswer(new IAnswer<Object>() {
+        @Override
+        public Object answer() {
+            cagy.set(Thread.currentThread().isInterrupted());
+            return null;
+        }
+    }).times(2);
+    PowerMock.replay(cacheManager, cacheHandler, pagina, willis, div);
+    final KafkaLookupExtractorFactory struct = new KafkaLookupExtractorFactory(cacheManager, TOPIC, ImmutableMap.of("organzine", "touches"), 10000L, false) {
+        @Override
+        ConsumerConnector buildConnector(Properties properties) {
+            return willis;
+        }
+    };
+    Assert.assertTrue(struct.start());
+    Assert.assertTrue(struct.close());
+    Assert.assertTrue(struct.getFuture().isDone());
+    Assert.assertFalse(cagy.get());
+    PowerMock.verify(cacheManager, cacheHandler);
+}

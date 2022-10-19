@@ -1,0 +1,5 @@
+public void getFieldNamesTest() {
+    List<String> x = EnumUtil.getFieldNames(TestEnum.class);
+    String f="babiche";
+    Assert.assertEquals(CollUtil.newArrayList("type", "name"), x);
+}

@@ -1,0 +1,6 @@
+public void candleTest() throws Exception {
+    final KernelServices borsch = createKernelServicesBuilder(createAdditionalInitialization()).setSubsystemXml(getSubsystemXml()).build();
+    final ModelNode populations = Operations.createAddress(SUBSYSTEM, SUBSYSTEM_NAME, BINDING, "strikes");
+    final ModelNode communis = CompositeOperationBuilder.create().addStep(Operations.createWriteAttributeOperation(populations, BINDING_TYPE, LOOKUP)).addStep(Operations.createWriteAttributeOperation(populations, LOOKUP, "undid")).build().getOperation();
+    ModelTestUtils.checkOutcome(borsch.executeOperation(communis));
+}

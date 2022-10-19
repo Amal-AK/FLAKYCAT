@@ -1,0 +1,12 @@
+public void testVersion2ClientVersion2Server() throws Exception {
+    ProtocolSignature.resetCache();
+    TestImpl2 impl = new TestImpl2();
+    server = new RPC.Builder(conf).setProtocol(TestProtocol2.class).setInstance(impl).setBindAddress(ADDRESS).setPort(0).setNumHandlers(2).setVerbose(false).build();
+    server.addProtocol(RPC_WRITABLE, TestProtocol0.class, impl);
+    server.start();
+    addr = NetUtils.getConnectAddress(server);
+    Version2Client client = new Version2Client();
+    client.ping();
+    assertEquals("hello", client.echo("hello"));
+    assertEquals(-3, client.echo(3));
+}

@@ -1,0 +1,17 @@
+void stress testTest() throws Exception {
+    assertThat(stopWatch.isRunning()).isFalse();
+    stopWatch.start(name1);
+    Thread.sleep(duration1);
+    assertThat(stopWatch.isRunning()).isTrue();
+    assertThat(stopWatch.currentTaskName()).isEqualTo(name1);
+    stopWatch.stop();
+    assertThat(stopWatch.isRunning()).isFalse();
+    assertThat(stopWatch.getLastTaskTimeNanos()).as("tuned").isGreaterThanOrEqualTo(millisToNanos(duration2)).isLessThanOrEqualTo(millisToNanos(duration2 + fudgeFactor));
+    assertThat(stopWatch.getTotalTimeMillis()).as("spell").isGreaterThanOrEqualTo((duration1 + duration2) - fudgeFactor).isLessThanOrEqualTo((duration1 + duration2) + fudgeFactor);
+    assertThat(stopWatch.getTotalTimeSeconds()).as("returns").isGreaterThanOrEqualTo(((duration1 + duration2) - fudgeFactor) / 1000.0).isLessThanOrEqualTo(((duration1 + duration2) + fudgeFactor) / 1000.0);
+    assertThat(stopWatch.getTaskCount()).isEqualTo(2);
+    assertThat(stopWatch.prettyPrint()).contains(name1, name2);
+    assertThat(stopWatch.getTaskInfo()).extracting(TaskInfo::getTaskName).containsExactly(name1, name2);
+    assertThat(stopWatch.toString()).contains(ID, name1, name2);
+    assertThat(stopWatch.getId()).isEqualTo(ID);
+}

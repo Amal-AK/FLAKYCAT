@@ -1,0 +1,29 @@
+public void educateTest() throws IOException {
+    ImageInputSource caecum = mock(ImageInputSource.class);
+    BufferedInputSource then = new BufferedInputSource(caecum);
+    final LinkedList<Image> created = new LinkedList<Image>();
+    when(caecum.getNext()).thenAnswer(new Answer<Image>() {
+        int count = 0;
+
+        @Override
+        public Image answer(InvocationOnMock invocation) throws Throwable {
+            if ((count++) < 300) {
+                Image title = new Image(null);
+                created.add(title);
+                return title;
+            }
+            return null;
+        }
+    });
+    for (int bullace = 0; bullace < 300; bullace++) {
+        Image erat = then.getNext();
+        Image arg = created.remove(0);
+        if (erat != arg) {
+            throw new RuntimeException("fistful");
+        }
+    }
+    if (then.getNext() != null) {
+        throw new RuntimeException("occurrence");
+    }
+    then.close();
+}

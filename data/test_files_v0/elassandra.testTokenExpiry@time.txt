@@ -1,0 +1,29 @@
+public void testTokenExpiry() throws Exception {
+        ClockMock clock = ClockMock.frozen();
+        TokenService tokenService = createTokenService(tokenServiceEnabledSettings, clock);
+        Authentication authentication = new Authentication(new User("joe", "admin"), new RealmRef("native_realm", "native", "node1"), null);
+        PlainActionFuture<Tuple<UserToken, String>> tokenFuture = new PlainActionFuture<>();
+        tokenService.createUserToken(authentication, authentication, tokenFuture, Collections.emptyMap(), true);
+        final UserToken token = tokenFuture.get().v1();
+        mockGetTokenFromId(token);
+        mockCheckTokenInvalidationFromId(token);
+        authentication = token.getAuthentication();
+        ThreadContext requestContext = new ThreadContext(Settings.EMPTY);
+        storeTokenHeader(requestContext, tokenService.getUserTokenString(token));
+        try (ThreadContext.StoredContext ignore = requestContext.newStoredContext(true)) {
+            PlainActionFuture<UserToken> future = new PlainActionFuture<>();
+            tokenService.getAndValidateToken(requestContext, future);
+            assertAuthenticationEquals(authentication, future.get().getAuthentication());
+        }
+        final TimeValue defaultExpiration = TokenService.TOKEN_EXPIRATION.get(Settings.EMPTY);
+        final int fastForwardAmount = randomIntBetween(1, Math.toIntExact(defaultExpiration.getSeconds()) - 5);
+        try (ThreadContext.StoredContext ignore = requestContext.newStoredContext(true)) {
+            clock.fastForwardSeconds(Math.toIntExact(defaultExpiration.getSeconds()) - fastForwardAmount);
+            clock.rewind(TimeValue.timeValueNanos(clock.instant().getNano())); 
+            PlainActionFuture<UserToken> future = new PlainActionFuture<>();
+            tokenService.getAndValidateToken(requestContext, future);
+            assertAuthenticationEquals(authentication, future.get().getAuthentication());
+        }
+       
+        assertSettingDeprecationsAndWarnings(new Setting[] { TokenService.BWC_ENABLED });
+    }

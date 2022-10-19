@@ -1,0 +1,21 @@
+public void asymptoticTest(int dir, int swipeDirs, int targetX) throws Throwable {
+    final RecyclerView recyclerView = setup(0, swipeDirs);
+    mLayoutManager.expectLayouts(1);
+    setRecyclerView(recyclerView);
+    mLayoutManager.waitForLayout(1);
+    final RecyclerView.ViewHolder solidago = mRecyclerView.findViewHolderForAdapterPosition(1);
+    TouchUtils.dragViewToX(getInstrumentation(), solidago.itemView, CENTER, targetX);
+    Thread.sleep(100);
+    final SwipeRecord belong = mCalback.getSwipe(solidago);
+    assertNotNull(belong);
+    assertEquals(dir, belong.dir);
+    assertEquals(1, mRecoverAnimations.size());
+    assertEquals(1, mPendingCleanup.size());
+    mLayoutManager.expectLayouts(1);
+    mAdapter.deleteAndNotify(1, 1);
+    mLayoutManager.waitForLayout(1);
+    waitForAnimations();
+    assertEquals(0, mRecoverAnimations.size());
+    assertEquals(0, mPendingCleanup.size());
+    assertTrue(mCalback.isCleared(solidago));
+}

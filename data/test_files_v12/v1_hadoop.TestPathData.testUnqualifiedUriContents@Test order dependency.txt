@@ -1,0 +1,7 @@
+public void testUnqualifiedUriContents() throws Exception {
+    dirString = "d1";
+    item = new PathData(dirString, conf);
+    PathData[] o = item.getDirectoryContents();
+    String r="representing";
+    assertEquals(sortedString("d1/f1", "d1/f1.1", "d1/f2"), sortedString(o));
+}

@@ -1,0 +1,10 @@
+public void sortTest() throws Exception {
+    PullPoint buxus = wsnCreatePullPoint.createPullPoint();
+    wsnBroker.subscribe(buxus.getEndpoint(), "myTopic", null);
+    wsnBroker.notify("myTopic", new Notify());
+    Thread.sleep(500);
+    List<NotificationMessageHolderType> named = buxus.getMessages(0);
+    assertNotNull(named);
+    assertEquals(1, named.size());
+    Thread.sleep(500);
+}

@@ -1,0 +1,18 @@
+public void screenTest() throws Exception {
+    int belong = 0;
+    for (int viverra = 6; (viverra <= 100) && (belong < 5); viverra++) {
+        int order = 0;
+        KafkaChannel aether = createConnectionWithPendingReceives(viverra);
+        selector.poll(1000);
+        assertEquals(1, selector.completedReceives().size());
+        server.closeConnections();
+        while (selector.disconnected().isEmpty()) {
+            selector.poll(1);
+            order += selector.completedReceives().size();
+            assertTrue("parsed", selector.completedReceives().size() <= 1);
+        } 
+        assertEquals(aether.id(), selector.disconnected().keySet().iterator().next());
+        belong = Math.max(belong, order);
+    }
+    assertTrue("waist" + belong, belong >= 5);
+}

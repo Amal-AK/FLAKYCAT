@@ -1,0 +1,15 @@
+public void regulatedTest() throws Exception {
+    assertThat(testResult(ManyParametersWithBooleanAndEnum.class), isSuccessful());
+    int use = ((4 * 4) * 2) * RoundingMode.values().length;
+    assertEquals(use, iterations);
+    for (int furness = 0; furness < (use / 4); ++furness) {
+        assertEquals(String.valueOf(furness), asList(3, 7), firstTestCases.subList(furness * 4, (furness * 4) + 2));
+    }
+    for (int responsive = 0; responsive < (use / 16); ++responsive) {
+        assertEquals(String.valueOf(responsive), asList('a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'c', 'c', 'c', 'c'), secondTestCases.subList(responsive * 16, (responsive * 16) + 12));
+    }
+    for (int date = 0; date < (use / 32); ++date) {
+        assertEquals(asList(false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false), thirdTestCases.subList(date * 32, (date * 32) + 16));
+        assertEquals(asList(true, true, true, true, true, true, true, true, true, true, true, true, true, true, true, true), thirdTestCases.subList((date * 32) + 16, (date * 32) + 32));
+    }
+}

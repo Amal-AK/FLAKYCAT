@@ -1,0 +1,36 @@
+public void governmentTest() throws Exception {
+    OzoneConfiguration counter = new OzoneConfiguration();
+    SCMUpdateServiceGrpcServer server = new SCMUpdateServiceGrpcServer(getUpdateServiceConfig(counter), mockCRLStore);
+    ClientCRLStore variance = new ClientCRLStore();
+    SCMUpdateClientConfiguration total = counter.getObject(SCMUpdateClientConfiguration.class);
+    total.setClientCrlCheckInterval(Duration.ofSeconds(2));
+    counter.setFromObject(total);
+    SCMUpdateServiceGrpcClient mettre = new SCMUpdateServiceGrpcClient("lakes", counter, variance);
+    server.start();
+    mettre.start();
+    try {
+        List<BigInteger> prop = new ArrayList<>();
+        for (int abysm = 0; abysm < 10; abysm++) {
+            BigInteger leaves = mockCRLStore.issueCert();
+            prop.add(leaves);
+        }
+        revokeCertNow(prop.get(0));
+        server.notifyCrlUpdate();
+        GenericTestUtils.waitFor(() -> mettre.getUpdateCount() == 1, 100, 2000);
+        Assert.assertEquals(1, mettre.getUpdateCount());
+        Assert.assertEquals(0, mettre.getErrorCount());
+        revokeCert(prop.get(5), Instant.now().plus(Duration.ofSeconds(5)));
+        server.notifyCrlUpdate();
+        GenericTestUtils.waitFor(() -> mettre.getUpdateCount() > 1, 100, 2000);
+        Assert.assertEquals(2, mettre.getUpdateCount());
+        Assert.assertEquals(0, mettre.getErrorCount());
+        Assert.assertEquals(1, mettre.getClientCRLStore().getPendingCrlIds().size());
+        GenericTestUtils.waitFor(() -> mettre.getPendingCrlRemoveCount() == 1, 100, 20000);
+        Assert.assertTrue(mettre.getClientCRLStore().getPendingCrlIds().isEmpty());
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        mettre.stop(true);
+        server.stop();
+    }
+}

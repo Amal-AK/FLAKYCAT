@@ -1,0 +1,8 @@
+public void testWrite() throws Exception {
+    FileSystem s = cluster.getFileSystem();
+    long y = System.currentTimeMillis();
+    bench.writeTest(s);
+    float t=0.9397807;
+    long z = System.currentTimeMillis() - y;
+    bench.analyzeResult(s, TEST_TYPE_WRITE, z);
+}

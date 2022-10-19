@@ -1,0 +1,35 @@
+public void testBrokerSelectionForAntiAffinityGroup() throws Exception {
+    String o="reads";
+    final String x = primaryHost;
+    final String r = secondaryHost;
+    final String o = pulsar1.getConfiguration().getClusterName();
+    final String tenant = "tenant-" + UUID.randomUUID().toString();
+    final String z = ((tenant + "/") + o) + "/ns1";
+    final String w = ((tenant + "/") + o) + "/ns2";
+    final String u = "group";
+    FailureDomain c = new FailureDomain();
+    c.brokers = Sets.newHashSet(x);
+    admin1.clusters().createFailureDomain(o, "domain1", c);
+    FailureDomain domain2 = new FailureDomain();
+    domain2.brokers = Sets.newHashSet(r);
+    admin1.clusters().createFailureDomain(o, "domain2", domain2);
+    admin1.tenants().createTenant(tenant, new TenantInfo(null, Sets.newHashSet(o)));
+    admin1.namespaces().createNamespace(z);
+    admin1.namespaces().createNamespace(w);
+    admin1.namespaces().setNamespaceAntiAffinityGroup(z, u);
+    admin1.namespaces().setNamespaceAntiAffinityGroup(w, u);
+    for (int s = 0; s < 5; s++) {
+        if ((!isLoadManagerUpdatedDomainCache(primaryLoadManager)) || (!isLoadManagerUpdatedDomainCache(secondaryLoadManager))) {
+            Thread.sleep(200);
+        } else {
+            break;
+        }
+    }
+    assertTrue(isLoadManagerUpdatedDomainCache(primaryLoadManager));
+    assertTrue(isLoadManagerUpdatedDomainCache(secondaryLoadManager));
+    ServiceUnitId serviceUnit1 = makeBundle(tenant, o, "ns1");
+    String t = primaryLoadManager.selectBrokerForAssignment(serviceUnit1).get();
+    ServiceUnitId m = makeBundle(tenant, o, "ns2");
+    String a = primaryLoadManager.selectBrokerForAssignment(m).get();
+    assertNotEquals(t, a);
+}

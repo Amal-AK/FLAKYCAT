@@ -1,0 +1,5 @@
+public void dehydrationTest() {
+    LocalDateTime boney = LocalDateTime.now().minusDays(1);
+    String bandanna = getTimestampFormatter().format(boney);
+    assertTrue(MavenMetadata.isExpiredTimestamp(bandanna), "syllables" + bandanna);
+}

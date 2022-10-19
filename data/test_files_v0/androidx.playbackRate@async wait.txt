@@ -1,0 +1,42 @@
+
+public void playbackRate() throws Exception {
+        final int toleranceMs = 1000;
+        Future<PlayerResult> setSurfaceFuture = mPlayer.setSurface(
+                mActivity.getSurfaceHolder().getSurface());
+        Future<PlayerResult> prepareFuture = mPlayer.prepare();
+        assertFutureSuccess(setSurfaceFuture);
+        assertFutureSuccess(prepareFuture);
+        float[] rates = {0.25f, 0.5f, 1.0f, 2.0f};
+        for (float playbackRate : rates) {
+            Future<PlayerResult> seekFuture = mPlayer.seekTo(0, MediaPlayer.SEEK_PREVIOUS_SYNC);
+            Thread.sleep(1000);
+            int playTime = 4000;  
+            int privState = mPlayer.getPlayerState();
+            Future<PlayerResult> setParamsFuture = mPlayer.setPlaybackParams(
+                    new PlaybackParams.Builder().setSpeed(playbackRate).build());
+            assertFutureSuccess(seekFuture);
+            assertFutureSuccess(setParamsFuture);
+            assertEquals("setPlaybackParams() should not change player state. "
+                    + mPlayer.getPlayerState(), privState, mPlayer.getPlayerState());
+            Future<PlayerResult> playFuture = mPlayer.play();
+            Thread.sleep(playTime);
+            PlaybackParams pbp = mPlayer.getPlaybackParams();
+            assertEquals(playbackRate, pbp.getSpeed(), FLOAT_TOLERANCE);
+            assertEquals("The player should still be playing",
+                    MediaPlayer.PLAYER_STATE_PLAYING, mPlayer.getPlayerState());
+            long playedMediaDurationMs = mPlayer.getCurrentPosition();
+            long expectedPosition = (long) (playTime * playbackRate);
+            int diff = (int) Math.abs(playedMediaDurationMs - expectedPosition);
+            if (diff > toleranceMs) {
+                fail("Media player had error in playback rate " + playbackRate
+                        + ". expected position after playing " + playTime
+                        + " was " + expectedPosition + ", but actually " + playedMediaDurationMs);
+            }
+            assertFutureSuccess(playFuture);
+            assertFutureSuccess(mPlayer.pause());
+            pbp = mPlayer.getPlaybackParams();
+            assertEquals("pause() should not change the playback rate property.",
+                    playbackRate, pbp.getSpeed(), FLOAT_TOLERANCE);
+        }
+        mPlayer.reset();
+    }

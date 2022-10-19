@@ -1,0 +1,8 @@
+public void testFromDbField() throws Exception {
+    Field[] fields = Foo.class.getDeclaredFields();
+    assertTrue(fields.length >= 1);
+    DatabaseFieldConfig config = DatabaseFieldConfig.fromField(databaseType, "foo", fields[0]);
+    assertNotNull(config);
+    assertTrue(config.isCanBeNull());
+    assertEquals(fields[0].getName(), config.getFieldName());
+}

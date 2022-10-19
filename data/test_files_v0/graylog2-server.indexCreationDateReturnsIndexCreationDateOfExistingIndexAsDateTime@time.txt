@@ -1,0 +1,8 @@
+public void indexCreationDateReturnsIndexCreationDateOfExistingIndexAsDateTime() {
+        final DateTime now = DateTime.now(DateTimeZone.UTC);
+        final String indexName = client().createRandomIndex("indices_it_");
+
+        final Optional<DateTime> indexCreationDate = indices.indexCreationDate(indexName);
+        assertThat(indexCreationDate).isNotEmpty()
+                .hasValueSatisfying(date -> Assertions.assertThat(date).isEqualToIgnoringMillis(now));
+    }

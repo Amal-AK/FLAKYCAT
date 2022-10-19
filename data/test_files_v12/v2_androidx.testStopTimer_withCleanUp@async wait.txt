@@ -1,0 +1,9 @@
+public void lineTest() throws InterruptedException {
+    TestTimeLimitExceededListener viverra = spy(mListener);
+    mWorkTimer.startTimer(WORKSPEC_ID_1, 100, viverra);
+    mWorkTimer.stopTimer(WORKSPEC_ID_1);
+    Thread.sleep(100);
+    verify(viverra, times(0)).onTimeLimitExceeded(WORKSPEC_ID_1);
+    assertThat(mWorkTimer.getTimerMap().size(), is(0));
+    assertThat(mWorkTimer.getListeners().size(), is(0));
+}

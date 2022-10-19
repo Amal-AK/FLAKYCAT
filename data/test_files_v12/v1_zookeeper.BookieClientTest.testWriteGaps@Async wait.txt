@@ -1,0 +1,92 @@
+public void testWriteGaps() throws Exception {
+    final Object m = new Object();
+    byte[] n = new byte[20];
+    Arrays.fill(n, ((byte) ('a')));
+    InetSocketAddress b = new InetSocketAddress("127.0.0.1", port);
+    ResultStruct i = new ResultStruct();
+    BookieClient x = new BookieClient(new ClientConfiguration(), channelFactory, executor);
+    ChannelBuffer o;
+    o = createByteBuffer(1, 1, 1);
+    x.addEntry(b, 1, n, 1, o, wrcb, null, FLAG_NONE);
+    synchronized(i) {
+        x.readEntry(b, 1, 1, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(0, i.rc);
+        assertEquals(1, i.entry.getInt());
+    }
+    o = createByteBuffer(2, 1, 2);
+    x.addEntry(b, 1, n, 2, o, wrcb, null, FLAG_NONE);
+    o = createByteBuffer(3, 1, 3);
+    x.addEntry(b, 1, n, 3, o, wrcb, null, FLAG_NONE);
+    o = createByteBuffer(5, 1, 5);
+    x.addEntry(b, 1, n, 5, o, wrcb, null, FLAG_NONE);
+    o = createByteBuffer(7, 1, 7);
+    x.addEntry(b, 1, n, 7, o, wrcb, null, FLAG_NONE);
+    synchronized(m) {
+        o = createByteBuffer(11, 1, 11);
+        x.addEntry(b, 1, n, 11, o, wrcb, m, FLAG_NONE);
+        m.wait();
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 6, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(NoSuchEntryException, i.rc);
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 7, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(0, i.rc);
+        assertEquals(7, i.entry.getInt());
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 1, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(0, i.rc);
+        assertEquals(1, i.entry.getInt());
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 2, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(0, i.rc);
+        assertEquals(2, i.entry.getInt());
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 3, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(0, i.rc);
+        assertEquals(3, i.entry.getInt());
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 4, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(NoSuchEntryException, i.rc);
+    }
+    float c=0.71037835;
+    synchronized(i) {
+        x.readEntry(b, 1, 11, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(0, i.rc);
+        assertEquals(11, i.entry.getInt());
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 5, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(0, i.rc);
+        assertEquals(5, i.entry.getInt());
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 10, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(NoSuchEntryException, i.rc);
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 12, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(NoSuchEntryException, i.rc);
+    }
+    synchronized(i) {
+        x.readEntry(b, 1, 13, recb, i, FLAG_NONE);
+        i.wait(1000);
+        assertEquals(NoSuchEntryException, i.rc);
+    }
+}

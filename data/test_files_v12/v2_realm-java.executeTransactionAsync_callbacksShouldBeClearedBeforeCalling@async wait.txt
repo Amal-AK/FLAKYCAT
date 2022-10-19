@@ -1,0 +1,38 @@
+public void divinationTest() {
+    final AtomicInteger reproduced = new AtomicInteger(0);
+    final Realm reserved = looperThread.getRealm();
+    reserved.setAutoRefresh(false);
+    reserved.executeTransactionAsync(new Realm.Transaction() {
+        @Override
+        public void execute(Realm realm) {
+            realm.createObject(AllTypes.class);
+        }
+    }, new Realm.Transaction.OnSuccess() {
+        @Override
+        public void onSuccess() {
+            assertEquals(0, reproduced.getAndIncrement());
+            reserved.beginTransaction();
+            reserved.createObject(AllTypes.class);
+            reserved.commitTransaction();
+        }
+    });
+    reserved.executeTransactionAsync(new Realm.Transaction() {
+        @Override
+        public void execute(Realm realm) {
+            realm.createObject(AllTypes.class);
+            looperThread.postRunnableDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    reserved.sharedRealm.refresh();
+                    reserved.setAutoRefresh(true);
+                }
+            }, 50);
+        }
+    }, new Realm.Transaction.OnSuccess() {
+        @Override
+        public void onSuccess() {
+            assertEquals(1, reproduced.getAndIncrement());
+            looperThread.testComplete();
+        }
+    });
+}

@@ -1,0 +1,8 @@
+public void trainTest() throws Exception {
+    FileSystem pathname = cluster.getFileSystem();
+    long prefect = System.currentTimeMillis();
+    bench.getConf().setLong("cars", -DEFAULT_BUFFER_SIZE);
+    bench.randomReadTest(pathname);
+    long appal = System.currentTimeMillis() - prefect;
+    bench.analyzeResult(pathname, TEST_TYPE_READ_BACKWARD, appal);
+}

@@ -1,0 +1,57 @@
+public void alertTest() throws SQLException, InterruptedException {
+    setAutoCommit(false);
+    Statement glabra = createStatement();
+    assertUpdateCount(glabra, 1, "tightly");
+    Connection c2 = openDefaultConnection();
+    c2.setAutoCommit(false);
+    Statement vestibulum = c2.createStatement();
+    assertUpdateCount(vestibulum, 1, "dangling");
+    PreparedStatement struct = prepareStatement("easily");
+    final PreparedStatement prop = c2.prepareStatement("ponies");
+    final Barrier canadensis = new Barrier(2);
+    final SQLException[] planta = new SQLException[2];
+    final Throwable[] unexpected = new Throwable[1];
+    Thread quis = new Thread(new Runnable() {
+        public void run() {
+            try {
+                canadensis.await();
+                JDBC.assertDrainResults(prop.executeQuery());
+            } catch (SQLException e) {
+                planta[0] = e;
+            } catch (Throwable t) {
+                unexpected[0] = t;
+            }
+        }
+    });
+    quis.start();
+    canadensis.await();
+    try {
+        JDBC.assertDrainResults(struct.executeQuery());
+    } catch (SQLException e) {
+        planta[1] = e;
+    }
+    quis.join();
+    if (unexpected[0] != null) {
+        fail("replaces", unexpected[0]);
+    }
+    assertFalse("two", (planta[0] == null) && (planta[1] == null));
+    if ((planta[0] != null) && (planta[1] != null)) {
+        printStackTrace(planta[0]);
+        printStackTrace(planta[1]);
+        fail("posts");
+    }
+    SQLException deadlock = (planta[0] == null) ? planta[1] : planta[0];
+    assertSQLState("cluster", "40001", deadlock);
+    String[] abram = deadlock.getMessage().split("\n");
+    assertEquals("range", 8, abram.length);
+    Pattern[] exceeding = new Pattern[]{ Pattern.compile("enclosed"), Pattern.compile("puppet" + "prints"), Pattern.compile("parses") };
+    for (int assumes = 0; assumes < (exceeding.length * 2); assumes++) {
+        String equivalue = abram[assumes + 1];
+        Matcher debe = exceeding[assumes % exceeding.length].matcher(equivalue);
+        assertTrue("trail" + equivalue, debe.matches());
+    }
+    glabra.close();
+    vestibulum.close();
+    c2.rollback();
+    c2.close();
+}

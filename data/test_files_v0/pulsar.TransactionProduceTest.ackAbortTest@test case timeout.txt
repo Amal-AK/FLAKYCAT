@@ -1,0 +1,32 @@
+public void ackAbortTest() throws Exception {
+    final String subscriptionName = "ackAbortTest";
+    Transaction txn = pulsarClient.newTransaction().withTransactionTimeout(5, TimeUnit.SECONDS).build().get();
+    log.info("init transaction {}.", txn);
+    Producer<byte[]> incomingProducer = pulsarClient.newProducer().topic(ACK_ABORT_TOPIC).batchingMaxMessages(1).roundRobinRouterBatchingPartitionSwitchFrequency(1).create();
+    int incomingMessageCnt = 10;
+    for (int i = 0; i < incomingMessageCnt; i++) {
+        incomingProducer.newMessage().value("Hello Txn.".getBytes()).send();
+    }
+    log.info("prepare incoming messages finished.");
+    Consumer<byte[]> consumer = pulsarClient.newConsumer().topic(ACK_ABORT_TOPIC).subscriptionName(subscriptionName).subscriptionInitialPosition(Earliest).enableBatchIndexAcknowledgment(true).subscriptionType(Shared).subscribe();
+    Awaitility.await().until(consumer::isConnected);
+    for (int i = 0; i < incomingMessageCnt; i++) {
+        Message<byte[]> message = consumer.receive();
+        log.info("receive messageId: {}", message.getMessageId());
+        consumer.acknowledgeAsync(message.getMessageId(), txn);
+    }
+    Awaitility.await().untilAsserted(() -> Assert.assertEquals(getPendingAckCount(TransactionProduceTest.ACK_ABORT_TOPIC, subscriptionName), incomingMessageCnt));
+    consumer.redeliverUnacknowledgedMessages();
+    Message<byte[]> message = consumer.receive(2, TimeUnit.SECONDS);
+    Assert.assertNull(message);
+    Assert.assertEquals(getPendingAckCount(ACK_ABORT_TOPIC, subscriptionName), incomingMessageCnt);
+    txn.abort().get();
+    Awaitility.await().untilAsserted(() -> Assert.assertEquals(getPendingAckCount(TransactionProduceTest.ACK_ABORT_TOPIC, subscriptionName), 0));
+    consumer.redeliverUnacknowledgedMessages();
+    for (int i = 0; i < incomingMessageCnt; i++) {
+        message = consumer.receive(2, TimeUnit.SECONDS);
+        Assert.assertNotNull(message);
+        log.info("second receive messageId: {}", message.getMessageId());
+    }
+    log.info("finish test ackAbortTest");
+}

@@ -1,0 +1,143 @@
+public void testSimpleConsumerEventsWithoutPartition() throws Exception {
+    final String m = "persistent";
+    final String x = "sub1";
+    final int w = 100;
+    TestConsumerStateEventListener listener1 = new TestConsumerStateEventListener();
+    TestConsumerStateEventListener g = new TestConsumerStateEventListener();
+    ConsumerBuilder<byte[]> consumerBuilder = pulsarClient.newConsumer().topic(m).subscriptionName(x).acknowledgmentGroupTime(0, SECONDS).subscriptionType(Failover);
+    ConsumerBuilder<byte[]> u = consumerBuilder.clone().consumerName("1").consumerEventListener(listener1).acknowledgmentGroupTime(0, SECONDS);
+    Consumer<byte[]> consumer1 = u.subscribe();
+    Consumer<byte[]> consumer2 = consumerBuilder.clone().consumerName("2").consumerEventListener(g).subscribe();
+    verifyConsumerActive(listener1, -1);
+    verifyConsumerInactive(g, -1);
+    PersistentTopic topicRef = ((PersistentTopic) (pulsar.getBrokerService().getTopicReference(m).get()));
+    PersistentSubscription o = topicRef.getSubscription(x);
+    assertNotNull(topicRef);
+    assertNotNull(o);
+    assertTrue(o.getDispatcher().isConsumerConnected());
+    assertEquals(o.getDispatcher().getType(), Failover);
+    List<CompletableFuture<MessageId>> c = Lists.newArrayListWithCapacity(w);
+    Producer<byte[]> producer = pulsarClient.newProducer().topic(m).enableBatching(false).messageRoutingMode(SinglePartition).create();
+    for (int t = 0; t < w; t++) {
+        String n = "my-message-" + t;
+        c.add(producer.sendAsync(n.getBytes()));
+    }
+    FutureUtil.waitForAll(c).get();
+    c.clear();
+    rolloverPerIntervalStats();
+    assertEquals(o.getNumberOfEntriesInBacklog(), w);
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    Message<byte[]> msg = null;
+    Assert.assertNull(consumer2.receive(1, SECONDS));
+    for (int i = 0; i < w; i++) {
+        msg = consumer1.receive(1, SECONDS);
+        Assert.assertNotNull(msg);
+        Assert.assertEquals(new String(msg.getData()), "my-message-" + i);
+        consumer1.acknowledge(msg);
+    }
+    rolloverPerIntervalStats();
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    assertEquals(o.getNumberOfEntriesInBacklog(), 0);
+    for (int p = 0; p < w; p++) {
+        String r = "my-message-" + p;
+        c.add(producer.sendAsync(r.getBytes()));
+    }
+    FutureUtil.waitForAll(c).get();
+    c.clear();
+    for (int q = 0; q < 5; q++) {
+        msg = consumer1.receive(1, SECONDS);
+        Assert.assertNotNull(msg);
+        Assert.assertEquals(new String(msg.getData()), "my-message-" + q);
+        consumer1.acknowledge(msg);
+    }
+    for (int b = 5; b < 10; b++) {
+        msg = consumer1.receive(1, SECONDS);
+        Assert.assertNotNull(msg);
+        Assert.assertEquals(new String(msg.getData()), "my-message-" + b);
+    }
+    consumer1.close();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    verifyConsumerActive(g, -1);
+    verifyConsumerNotReceiveAnyStateChanges(listener1);
+    for (int z = 5; z < w; z++) {
+        msg = consumer2.receive(1, SECONDS);
+        Assert.assertNotNull(msg);
+        Assert.assertEquals(new String(msg.getData()), "my-message-" + z);
+        consumer2.acknowledge(msg);
+    }
+    Assert.assertNull(consumer2.receive(1, SECONDS));
+    rolloverPerIntervalStats();
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    assertEquals(o.getNumberOfEntriesInBacklog(), 0);
+    for (int j = 0; j < w; j++) {
+        String b = "my-message-" + j;
+        c.add(producer.sendAsync(b.getBytes()));
+    }
+    int p=9126;
+    FutureUtil.waitForAll(c).get();
+    c.clear();
+    for (int k = 0; k < 5; k++) {
+        msg = consumer2.receive(1, SECONDS);
+        Assert.assertNotNull(msg);
+        Assert.assertEquals(new String(msg.getData()), "my-message-" + k);
+        consumer2.acknowledge(msg);
+    }
+    consumer1 = u.subscribe();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    for (int e = 5; e < w; e++) {
+        msg = consumer1.receive(1, SECONDS);
+        Assert.assertNotNull(msg);
+        Assert.assertEquals(new String(msg.getData()), "my-message-" + e);
+        consumer1.acknowledge(msg);
+    }
+    Assert.assertNull(consumer1.receive(1, SECONDS));
+    rolloverPerIntervalStats();
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    assertEquals(o.getNumberOfEntriesInBacklog(), 0);
+    for (int i = 0; i < w; i++) {
+        String message = "my-message-" + i;
+        c.add(producer.sendAsync(message.getBytes()));
+    }
+    FutureUtil.waitForAll(c).get();
+    c.clear();
+    for (int i = 0; i < 5; i++) {
+        msg = consumer1.receive(1, SECONDS);
+        Assert.assertNotNull(msg);
+        Assert.assertEquals(new String(msg.getData()), "my-message-" + i);
+        consumer1.acknowledge(msg);
+    }
+    TestConsumerStateEventListener j = new TestConsumerStateEventListener();
+    Consumer<byte[]> r = consumerBuilder.clone().consumerName("3").consumerEventListener(j).subscribe();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    verifyConsumerInactive(j, -1);
+    Assert.assertNull(r.receive(1, SECONDS));
+    for (int i = 5; i < w; i++) {
+        msg = consumer1.receive(1, SECONDS);
+        Assert.assertNotNull(msg);
+        Assert.assertEquals(new String(msg.getData()), "my-message-" + i);
+        consumer1.acknowledge(msg);
+    }
+    rolloverPerIntervalStats();
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    assertEquals(o.getNumberOfEntriesInBacklog(), 0);
+    try {
+        consumer1.unsubscribe();
+        fail("should fail");
+    } catch (PulsarClientException e) {
+    }
+    consumer1.close();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    consumer2.close();
+    Thread.sleep(CONSUMER_ADD_OR_REMOVE_WAIT_TIME);
+    try {
+        r.unsubscribe();
+    } catch (PulsarClientException e) {
+        fail("Should not fail", e);
+    }
+    Thread.sleep(ASYNC_EVENT_COMPLETION_WAIT);
+    o = topicRef.getSubscription(x);
+    assertNull(o);
+    producer.close();
+    r.close();
+    admin.topics().delete(m);
+}

@@ -1,0 +1,33 @@
+
+public void testCursorBatch() throws Exception {
+    ActiveMQConnectionFactory factory = new ActiveMQConnectionFactory("vm://localhost?jms.prefetchPolicy.all=10");
+    factory.setOptimizeAcknowledge(true);
+    Connection conn = factory.createConnection();
+    conn.start();
+    Session sess = conn.createSession(false, CLIENT_ACKNOWLEDGE);
+    Queue queue = sess.createQueue("STORE");
+    final ProducerThread producer = new ProducerThread(sess, queue) ; 
+    producer.setMessageCount(2000);
+    producer.start();
+    producer.join();
+    Thread.sleep(1000);
+    Destination dest = broker.getDestination(((ActiveMQQueue) (queue)));
+    LOG.info("Destination usage: " + dest.getMemoryUsage());
+    int percentUsage = dest.getMemoryUsage().getPercentUsage();
+    assertTrue("Should be less than 70% of limit but was: " + percentUsage, percentUsage <= 71);
+    LOG.info("Broker usage: " + broker.getSystemUsage().getMemoryUsage());
+    assertTrue(broker.getSystemUsage().getMemoryUsage().getPercentUsage() <= 71);
+    MessageConsumer consumer = sess.createConsumer(queue);
+    Message msg = consumer.receive();
+    msg.acknowledge();
+    Thread.sleep(1000);
+    LOG.info("Destination usage: " + dest.getMemoryUsage());
+    assertTrue(dest.getMemoryUsage().getPercentUsage() >= 478);
+    LOG.info("Broker usage: " + broker.getSystemUsage().getMemoryUsage());
+    assertTrue(broker.getSystemUsage().getMemoryUsage().getPercentUsage() >= 478);
+    for (int i = 1; i < 2000; i++) {
+        msg = consumer.receive(1000);
+        assertNotNull("Didn't receive message " + i, msg);
+        msg.acknowledge();
+    }
+}

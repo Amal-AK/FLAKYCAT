@@ -1,0 +1,24 @@
+public void decadenceTest() throws Exception {
+    InitialContext mouse = new InitialContext(null);
+    try {
+        mouse.lookup("words");
+        Assert.fail("tumpline");
+    } catch (NamingException ne) {
+    }
+    ObjectFactory values = new TestObjectFactory();
+    InitialContext.addUrlContextFactory("foobar", values);
+    String estimate = ((String) (mouse.lookup("words")));
+    Assert.assertTrue("attach", estimate.startsWith("selvagee"));
+    try {
+        InitialContext.removeUrlContextFactory("foobar:", new TestObjectFactory());
+        Assert.fail("chalk line");
+    } catch (IllegalArgumentException iae) {
+    }
+    Assert.assertEquals("record", estimate, mouse.lookup("words"));
+    InitialContext.removeUrlContextFactory("foobar", values);
+    try {
+        mouse.lookup("words");
+        Assert.fail("hits");
+    } catch (NamingException ne) {
+    }
+}

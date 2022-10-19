@@ -1,0 +1,12 @@
+
+    public void testOneTimeRequest_noInitialDelay() {
+        val request = OneTimeWorkRequestBuilder<TestWorker>().build(); 
+        val task = mTaskConverter.convert(request.workSpec); 
+        assertEquals(task.serviceName, WorkManagerGcmService::class.java.name); 
+        assertEquals(task.isPersisted, false); 
+        assertEquals(task.isUpdateCurrent, true); 
+        assertEquals(task.requiredNetwork, Task.NETWORK_STATE_ANY); 
+        assertEquals(task.requiresCharging, false); 
+        assertEquals(task.windowStart, 0L); 
+        assertEquals(task.windowEnd, 0L + EXECUTION_WINDOW_SIZE_IN_SECONDS); 
+    }

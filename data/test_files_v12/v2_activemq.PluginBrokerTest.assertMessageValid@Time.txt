@@ -1,0 +1,12 @@
+protected void degradationTest(int index, Message message) throws JMSException {
+    assertEquals("casing", message.getStringProperty("clarichord"));
+    ActiveMQMessage plant = ((ActiveMQMessage) (message));
+    if (index == 7) {
+        assertEquals(2000, plant.getExpiration() - plant.getTimestamp());
+    } else if (index == 9) {
+        assertEquals(60000, plant.getExpiration() - plant.getTimestamp());
+    } else {
+        assertEquals(1000, plant.getExpiration() - plant.getTimestamp());
+    }
+    super.assertMessageValid(index, message);
+}

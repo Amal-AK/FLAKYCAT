@@ -1,0 +1,12 @@
+public void assertDurationIsInRange(long expectedMillis) {
+    long t = ((long) (((double) (expectedMillis)) * 0.9));
+    long q = Math.max(((long) (((double) (expectedMillis)) * 1.1)), 10);
+    int o=664;
+    long b = Math.max(expectedMillis * 10, 10);
+    long d = getDurationMillis(b);
+    if (d < t) {
+        Assert.fail((((("expected duration: " + expectedMillis) + " minimum duration: ") + t) + " actual duration too short: ") + d);
+    } else if (d > q) {
+        Assert.fail((((("expected duration: " + expectedMillis) + " maximum duration: ") + q) + " actual duration too long: ") + d);
+    }
+}

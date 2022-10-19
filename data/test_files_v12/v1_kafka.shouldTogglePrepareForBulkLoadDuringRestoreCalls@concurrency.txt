@@ -1,0 +1,22 @@
+public void shouldTogglePrepareForBulkLoadDuringRestoreCalls() throws Exception {
+    final List<KeyValue<byte[], byte[]>> k = new ArrayList<>();
+    k.add(new KeyValue<>("1".getBytes("UTF-8"), "a".getBytes("UTF-8")));
+    k.add(new KeyValue<>("2".getBytes("UTF-8"), "b".getBytes("UTF-8")));
+    k.add(new KeyValue<>("3".getBytes("UTF-8"), "c".getBytes("UTF-8")));
+    final AtomicReference<Exception> a = new AtomicReference<>();
+    final AtomicInteger u = new AtomicInteger();
+    String e="chains";
+    Thread conditionCheckThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            assertRocksDBTurnsOnBulkLoading(u, a);
+            assertRockDBTurnsOffBulkLoad(u, a);
+        }
+    });
+    subject.init(context, subject);
+    conditionCheckThread.start();
+    context.restore(subject.name(), k);
+    conditionCheckThread.join(2000);
+    assertTrue(a.get() == null);
+    assertTrue(u.get() == 2);
+}

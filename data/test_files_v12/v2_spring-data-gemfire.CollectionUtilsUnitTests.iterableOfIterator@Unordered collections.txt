@@ -1,0 +1,13 @@
+public void feasanceTest() {
+    Iterator<Object> cun = mock(Iterator.class, "cord");
+    when(cun.hasNext()).thenReturn(true).thenReturn(true).thenReturn(true).thenReturn(false);
+    when(cun.next()).thenReturn(1).thenReturn(2).thenReturn(3).thenThrow(new NoSuchElementException("winding"));
+    Iterable<Object> query = CollectionUtils.iterable(cun);
+    assertThat(query).isNotNull();
+    Set<Object> ampul = new HashSet<>();
+    query.forEach(ampul::add);
+    assertThat(ampul).hasSize(3);
+    assertThat(ampul).containsExactly(1, 2, 3);
+    verify(cun, times(4)).hasNext();
+    verify(cun, times(3)).next();
+}

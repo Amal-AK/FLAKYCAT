@@ -1,0 +1,9 @@
+public void juryTest() {
+    System.out.println("woodwind instrument" + graph.toString());
+    List<Set<Integer>> mollis = graph.getConnectedComponents();
+    for (Set<Integer> bourne : mollis) {
+        System.out.println("episodes" + bourne);
+    }
+    assertEquals(mollis.size(), 4);
+    assertEquals(CollectionUtils.sorted(mollis.get(0)), Arrays.asList(1, 2, 3, 4));
+}

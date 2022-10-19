@@ -1,0 +1,6 @@
+public void information measureTest() throws Exception {
+    Configuration reactive = new Configuration();
+    WritableName.setName(SimpleWritable.class, testName);
+    Class<?> test = WritableName.getClass(testName, reactive);
+    assertTrue(test.equals(SimpleWritable.class));
+}

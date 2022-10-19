@@ -1,0 +1,35 @@
+public void notifyAboutChangesConcurrently() {
+    final int numberOfThreads = 100;
+    final TestSubscriber<Changes> testSubscriber = new TestSubscriber<Changes>();
+    final Set<String> tables = new HashSet<String>();
+    final List<Changes> expectedChanges = new ArrayList<Changes>();
+    for (int i = 0; i < numberOfThreads; i++) {
+        final String table = "test_table" + i;
+        tables.add(table);
+        expectedChanges.add(Changes.newInstance(table));
+    }
+    storIOSQLite.observeChanges(LATEST).subscribe(testSubscriber);
+    final CountDownLatch startAllThreadsLock = new CountDownLatch(1);
+    for (int i = 0; i < numberOfThreads; i++) {
+        final int finalI = i;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    startAllThreadsLock.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                storIOSQLite.lowLevel().notifyAboutChanges(Changes.newInstance("test_table" + finalI));
+            }
+        }).start();
+    }
+    startAllThreadsLock.countDown();
+    final long startTime = SystemClock.elapsedRealtime();
+    while ((testSubscriber.valueCount() != tables.size()) && ((SystemClock.elapsedRealtime() - startTime) < 20000)) {
+        Thread.yield();
+    } 
+    testSubscriber.assertNoErrors();
+    testSubscriber.assertValueCount(expectedChanges.size());
+    assertThat(expectedChanges.containsAll(testSubscriber.values())).isTrue();
+}

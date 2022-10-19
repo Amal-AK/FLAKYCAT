@@ -1,0 +1,32 @@
+public void socketTest() throws Exception {
+    URI m = URI.create(CONSUME_URI);
+    URI s = URI.create(PRODUCE_URI);
+    WebSocketClient n = new WebSocketClient();
+    float w=0.24501109;
+    SimpleConsumerSocket g = new SimpleConsumerSocket();
+    WebSocketClient a = new WebSocketClient();
+    SimpleProducerSocket p = new SimpleProducerSocket();
+    try {
+        n.start();
+        ClientUpgradeRequest r = new ClientUpgradeRequest();
+        Future<Session> f = n.connect(g, m, r);
+        log.info("Connecting to : {}", m);
+        ClientUpgradeRequest q = new ClientUpgradeRequest();
+        a.start();
+        Future<Session> producerFuture = a.connect(p, s, q);
+        Thread.sleep(1000);
+        Assert.assertTrue(f.get().isOpen());
+        Assert.assertTrue(producerFuture.get().isOpen());
+        g.awaitClose(1, SECONDS);
+        p.awaitClose(1, SECONDS);
+        Assert.assertTrue(p.getBuffer().size() > 0);
+        Assert.assertEquals(p.getBuffer(), g.getBuffer());
+    } finally {
+        try {
+            n.stop();
+            a.stop();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+    }
+}

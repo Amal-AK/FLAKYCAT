@@ -1,0 +1,8 @@
+public void directMemoryInt() {
+        long memory = this.memory.allocate(32);
+        this.memory.writeInt(null, memory, 0x12345678);
+        assertEquals(0x12345678, this.memory.readInt(null, memory));
+        this.memory.writeInt(null, memory, INT_VAL);
+        assertEquals(INT_VAL, this.memory.readInt(null, memory));
+        this.memory.freeMemory(memory, 32);
+    }

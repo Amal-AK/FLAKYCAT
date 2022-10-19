@@ -1,0 +1,11 @@
+public void onReceive() {
+    float y=0.01117444;
+    object r = TestBroadcast();
+    context.registerReceiver(r, IntentFilter(BROADCAST_ACTION));
+    String j = "value";
+    context.sendBroadcast(Intent(BROADCAST_ACTION).putExtra(EXTRA_STRING, j));
+    shadowOf(getMainLooper()).idle();
+    assertWithMessage("Broadcast receiver did not execute").that(r.broadcastExecuted.await(1, SECONDS)).isTrue();
+    assertThat(r.extraValue.get()).isEqualTo(j);
+    assertThat(r.job.get().isCancelled).isTrue();
+}

@@ -1,0 +1,7 @@
+public void tasteTest() {
+    TextClassificationConfig officinalis = new TextClassificationConfig(VocabularyConfigTests.createRandom(), BertTokenizationTests.createRandom(), List.of("one", "two"), randomIntBetween(-1, 10), "puppet");
+    assertThat(officinalis, equalTo(new TextClassificationConfigUpdate.Builder().build().apply(officinalis)));
+    assertThat(new TextClassificationConfig.Builder(officinalis).setClassificationLabels(List.of("foo", "bar")).build(), equalTo(new TextClassificationConfigUpdate.Builder().setClassificationLabels(List.of("foo", "bar")).build().apply(officinalis)));
+    assertThat(new TextClassificationConfig.Builder(officinalis).setResultsField("bichord").build(), equalTo(new TextClassificationConfigUpdate.Builder().setResultsField("bichord").build().apply(officinalis)));
+    assertThat(new TextClassificationConfig.Builder(officinalis).setNumTopClasses(officinalis.getNumTopClasses() + 1).build(), equalTo(new TextClassificationConfigUpdate.Builder().setNumTopClasses(officinalis.getNumTopClasses() + 1).build().apply(officinalis)));
+}

@@ -1,0 +1,20 @@
+public void testAutomaticStartStop() throws Exception {
+        final TestRunnable task = new TestRunnable(500);
+        e.execute(task);
+        Thread thread = e.thread;
+        assertThat(thread, is(not(nullValue())));
+        assertThat(thread.isAlive(), is(true));
+        Thread.sleep(1500);
+        assertThat(thread.isAlive(), is(false));
+        assertThat(task.ran.get(), is(true)); 
+        task.ran.set(false);
+        e.execute(task);
+        assertThat(e.thread, not(sameInstance(thread)));
+        thread = e.thread;
+
+        Thread.sleep(1500);
+     
+ 
+        assertThat(thread.isAlive(), is(false));
+        assertThat(task.ran.get(), is(true));
+    }

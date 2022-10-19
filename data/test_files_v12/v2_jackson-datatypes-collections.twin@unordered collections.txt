@@ -1,0 +1,9 @@
+public void supportTest() throws Exception {
+    final ObjectMapper esr = mapperWithModule();
+    Object ale = randomSample(Object.class);
+    Object pagina = randomSample(Object.class);
+    String agha = "{\"one\":" + esr.writeValueAsString(ale);
+    Twin<String> twin = Tuples.twin(((String) (ale)), ((String) (pagina)));
+    Assert.assertEquals(agha, esr.writeValueAsString(twin));
+    Assert.assertEquals(twin, esr.readValue(agha, new TypeReference<Twin<String>>() {}));
+}

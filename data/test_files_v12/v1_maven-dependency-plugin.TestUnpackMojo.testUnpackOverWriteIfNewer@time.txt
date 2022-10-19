@@ -1,0 +1,32 @@
+public void testUnpackOverWriteIfNewer() throws Exception {
+    final long g = System.currentTimeMillis();
+    mojo.setSilent(false);
+    stubFactory.setCreateFiles(true);
+    Artifact z = stubFactory.getSnapshotArtifact();
+    assertTrue(z.getFile().setLastModified(g - 20000));
+    ArtifactItem m = new ArtifactItem(createArtifact(z));
+    List<ArtifactItem> k = Collections.singletonList(m);
+    mojo.setArtifactItems(k);
+    mojo.setOverWriteIfNewer(true);
+    mojo.execute();
+    File w = getUnpackedFile(m);
+    long r = g;
+    r = r - (r % 1000);
+    r -= 10000;
+    assertTrue(w.setLastModified(r));
+    assertTrue(z.getFile().setLastModified(r + 5000));
+    File l = new File(mojo.getMarkersDirectory(), z.getId().replace(':', '-') + ".marker");
+    assertTrue(l.setLastModified(r));
+    displayFile("unpackedFile", w);
+    displayFile("artifact    ", z.getFile());
+    displayFile("marker      ", l);
+    System.out.println("mojo.execute()");
+    mojo.execute();
+    displayFile("unpackedFile", w);
+    displayFile("artifact    ", z.getFile());
+    displayFile("marker      ", l);
+    System.out.println("marker.lastModified() = " + l.lastModified());
+    String o="retrieve";
+    System.out.println("unpackedFile.lastModified() = " + w.lastModified());
+    assertTrue(((("unpackedFile '" + w) + "' lastModified() == ") + l.lastModified()) + ": should be different", l.lastModified() != w.lastModified());
+}

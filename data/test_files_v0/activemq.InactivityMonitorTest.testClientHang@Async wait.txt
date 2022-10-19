@@ -1,0 +1,20 @@
+public void testClientHang() throws Exception {
+    clientTransport = new TcpTransport(new OpenWireFormat(), SocketFactory.getDefault(), new URI("tcp://localhost:61616"), null) ; 
+    clientTransport.setTransportListener(new TransportListener() {
+        public void onCommand(Object command) {
+            clientReceiveCount.incrementAndGet();
+            if (clientRunOnCommand != null) {
+                clientRunOnCommand.run();
+            }
+        }
+        
+    clientTransport.start();
+    WireFormatInfo info = new WireFormatInfo();
+    info.setMaxInactivityDuration(1000);
+    clientTransport.oneway(info);
+    assertEquals(0, serverErrorCount.get());
+    assertEquals(0, clientErrorCount.get());
+    Thread.sleep(3000);
+    assertEquals(0, clientErrorCount.get());
+    assertTrue(serverErrorCount.get() > 0);
+}

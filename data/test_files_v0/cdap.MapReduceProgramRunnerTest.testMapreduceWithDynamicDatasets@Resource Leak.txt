@@ -1,0 +1,26 @@
+
+public void testMapreduceWithDynamicDatasets() throws Exception {
+    Id.DatasetInstance rtInput1 = DatasetInstance.from(NAMESPACE, "rtInput1");
+    Id.DatasetInstance rtInput2 = DatasetInstance.from(NAMESPACE, "rtInput2");
+    Id.DatasetInstance rtOutput1 = DatasetInstance.from(NAMESPACE, "rtOutput1");
+    dsFramework.addInstance("fileSet", rtInput1, FileSetProperties.builder().setBasePath("rtInput1").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    dsFramework.addInstance("fileSet", rtOutput1, FileSetProperties.builder().setBasePath("rtOutput1").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    Map<String, String> runtimeArguments = Maps.newHashMap();
+    runtimeArguments.put(INPUT_NAME, "rtInput1");
+    runtimeArguments.put(INPUT_PATHS, "abc, xyz");
+    runtimeArguments.put(OUTPUT_NAME, "rtOutput1");
+    runtimeArguments.put(OUTPUT_PATH, "a001");
+    testMapreduceWithFile("rtInput1", "abc, xyz", "rtOutput1", "a001", AppWithMapReduceUsingRuntimeDatasets.class, ComputeSum.class, new BasicArguments(runtimeArguments), COUNTERS);
+    Collection<MetricTimeSeries> metrics = metricStore.query(new MetricDataQuery(0, System.currentTimeMillis() / 1000L, Integer.MAX_VALUE, "system." + Dataset.OP_COUNT, AggregationFunction.SUM, ImmutableMap.of(NAMESPACE, NAMESPACE.getId(), APP, APP_NAME, MAPREDUCE, MR_NAME, DATASET, "rtt"), Collections.<String>emptyList()));
+    Assert.assertEquals(1, metrics.size());
+    MetricTimeSeries ts = metrics.iterator().next();
+    Assert.assertEquals(1, ts.getTimeValues().size());
+    Assert.assertEquals(1, ts.getTimeValues().get(0).getValue());
+    dsFramework.addInstance("fileSet", rtInput2, FileSetProperties.builder().setBasePath("rtInput2").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    runtimeArguments = Maps.newHashMap();
+    runtimeArguments.put(INPUT_NAME, "rtInput2");
+    runtimeArguments.put(INPUT_PATHS, "zzz");
+    runtimeArguments.put(OUTPUT_NAME, "rtInput2");
+    runtimeArguments.put(OUTPUT_PATH, "f123");
+    testMapreduceWithFile("rtInput2", "zzz", "rtInput2", "f123", AppWithMapReduceUsingRuntimeDatasets.class, ComputeSum.class, new BasicArguments(runtimeArguments), COUNTERS);
+}

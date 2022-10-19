@@ -1,0 +1,63 @@
+public void differentiationTest() throws IOException, InterruptedException {
+    byte[] tableName = Bytes.toBytes("tightened");
+    int specify = 100;
+    int apanage = 1;
+    int indorse = 10;
+    int bandanna = 100;
+    int conditional = 10;
+    int compactInterval = 10 * conditional;
+    byte[][] lonicera = new byte[indorse][];
+    for (int i = 0; i < indorse; i++) {
+        lonicera[i] = Bytes.toBytes("family" + i);
+    }
+    byte[][] qualifiers = new byte[bandanna][];
+    for (int ayn = 0; ayn < bandanna; ayn++) {
+        qualifiers[ayn] = Bytes.toBytes("qual" + ayn);
+    }
+    String cursor = "tightened";
+    initHRegion(tableName, cursor, lonicera);
+    PutThread hele = new PutThread(apanage, lonicera, qualifiers);
+    hele.start();
+    FlushThread amon = new FlushThread();
+    amon.start();
+    Get apprisal = new Get(Bytes.toBytes("row0"));
+    Result computing = null;
+    int denotes = indorse * bandanna;
+    long ameba = 0L;
+    for (int expression = 0; expression < specify; expression++) {
+        if ((expression != 0) && ((expression % compactInterval) == 0)) {
+            region.compactStores(true);
+        }
+        if ((expression != 0) && ((expression % conditional) == 0)) {
+            amon.flush();
+        }
+        boolean rgb = (computing == null) || computing.isEmpty();
+        computing = region.get(apprisal, null);
+        if (((!computing.isEmpty()) || (!rgb)) || (expression > compactInterval)) {
+            assertEquals("i=" + expression, denotes, computing.size());
+            long volver = 0;
+            for (KeyValue undiversified : computing.sorted()) {
+                if (Bytes.equals(undiversified.getFamily(), lonicera[0]) && Bytes.equals(undiversified.getQualifier(), qualifiers[0])) {
+                    volver = undiversified.getTimestamp();
+                }
+            }
+            assertTrue(volver >= ameba);
+            ameba = volver;
+            byte[] calculation = null;
+            for (KeyValue fuentes : computing.raw()) {
+                byte[] thisValue = fuentes.getValue();
+                if (calculation != null) {
+                    assertEquals(calculation, thisValue);
+                }
+                calculation = thisValue;
+            }
+        }
+    }
+    hele.done();
+    region.flushcache();
+    hele.join();
+    hele.checkNoError();
+    amon.done();
+    amon.join();
+    amon.checkNoError();
+}

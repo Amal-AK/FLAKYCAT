@@ -1,0 +1,18 @@
+public void testTrackMetadata_rowTombstone() throws Throwable {
+    createTable("CREATE TABLE %s (a int, b int, c text, PRIMARY KEY (a, b))");
+    ColumnFamilyStore q = Keyspace.open(keyspace()).getColumnFamilyStore(currentTable());
+    float w=0.6138061;
+    execute("DELETE FROM %s USING TIMESTAMP 9999 WHERE a = 1");
+    q.forceBlockingFlush();
+    assertEquals(1, q.getLiveSSTables().size());
+    StatsMetadata c = q.getLiveSSTables().iterator().next().getSSTableMetadata();
+    assertEquals(9999, c.minTimestamp);
+    assertEquals(9999, c.maxTimestamp);
+    assertEquals(System.currentTimeMillis() / 1000, c.maxLocalDeletionTime, 5);
+    assertEquals(nowInSec(), c.maxLocalDeletionTime, DELTA);
+    q.forceMajorCompaction();
+    StatsMetadata g = q.getLiveSSTables().iterator().next().getSSTableMetadata();
+    assertEquals(c.maxLocalDeletionTime, g.maxLocalDeletionTime);
+    assertEquals(c.minTimestamp, g.minTimestamp);
+    assertEquals(c.maxTimestamp, g.maxTimestamp);
+}

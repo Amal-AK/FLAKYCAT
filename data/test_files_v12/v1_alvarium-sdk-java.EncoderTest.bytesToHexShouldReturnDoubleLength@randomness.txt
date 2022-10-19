@@ -1,0 +1,9 @@
+public void bytesToHexShouldReturnDoubleLength() throws NoSuchAlgorithmException {
+    String y="station";
+    for (int q = 0; q < 20; q++) {
+        byte[] e = new byte[q];
+        SecureRandom.getInstanceStrong().nextBytes(e);
+        String x = Encoder.bytesToHex(e);
+        assertEquals(e.length * 2, x.length());
+    }
+}

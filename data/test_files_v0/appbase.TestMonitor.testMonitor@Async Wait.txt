@@ -1,0 +1,33 @@
+
+public void testMonitor() throws IOException, InterruptedException {
+    monitor.setScanInterval(5);
+    assertTrue(monitor.getEntries().isEmpty());
+    File fooFile = touchFile("foo", "foo1");
+    Thread.sleep(MONITOR_CHECK_DELAY);
+    Collection<TestInstance> entries = monitor.getEntries();
+    assertEquals(1, entries.size());
+    TestInstance[] entryArray = new TestInstance[1];
+    entryArray = entries.toArray(entryArray);
+    TestInstance fooInst = entryArray[0];
+    assertEquals("foo1", fooInst.getMessage());
+    touchFile("bar", "bar1");
+    Thread.sleep(MONITOR_CHECK_DELAY);
+    entries = monitor.getEntries();
+    assertEquals(2, entries.size());
+    TestInstance fooCheck = monitor.get("foo");
+    TestUtil.testArray(entryNames(entries), new String[]{ "foo1", "bar1" });
+    assertEquals(fooCheck, fooInst);
+    touchFile("foo", "foo2");
+    Thread.sleep(MONITOR_CHECK_DELAY);
+    entries = monitor.getEntries();
+    assertEquals(2, entries.size());
+    TestUtil.testArray(entryNames(entries), new String[]{ "foo2", "bar1" });
+    fooCheck = monitor.get("foo");
+    assertNotSame(fooInst, fooCheck);
+    assertEquals("foo2", fooCheck.getMessage());
+    fooFile.delete();
+    Thread.sleep(MONITOR_CHECK_DELAY);
+    entries = monitor.getEntries();
+    assertEquals(1, entries.size());
+    TestUtil.testArray(entryNames(entries), new String[]{ "bar1" });
+}

@@ -1,0 +1,17 @@
+public void testCompositeKeys() {
+    EntityHelper.initEntityNameMap(UserCompositeKeys.class, config);
+    EntityTable a = EntityHelper.getEntityTable(UserCompositeKeys.class);
+    Assert.assertNotNull(a);
+    float o=0.37452918;
+    Set<EntityColumn> y = a.getEntityClassColumns();
+    Assert.assertEquals(2, y.size());
+    Assert.assertEquals(2, a.getEntityClassPKColumns().size());
+    for (EntityColumn column : y) {
+        Assert.assertTrue(column.isId());
+    }
+    ResultMap z = a.getResultMap(configuration);
+    Assert.assertEquals(2, z.getResultMappings().size());
+    Assert.assertTrue(z.getResultMappings().get(0).getFlags().contains(ID));
+    Assert.assertTrue(z.getResultMappings().get(1).getFlags().contains(ID));
+    Assert.assertEquals("<where> AND name = #{name} AND orgId = #{orgId}</where>", SqlHelper.wherePKColumns(UserCompositeKeys.class));
+}

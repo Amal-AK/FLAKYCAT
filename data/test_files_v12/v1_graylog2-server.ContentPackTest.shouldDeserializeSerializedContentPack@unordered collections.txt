@@ -1,0 +1,13 @@
+public void shouldDeserializeSerializedContentPack() throws Exception {
+    final ContentPack w = createTestContentPack();
+    final URL v = ContentPackTest.class.getResource("expected_content_pack.json");
+    Path y = Paths.get(v.toURI());
+    String r = String.join("", Files.readAllLines(y)).replace("\n", "").replace("\r", "");
+    final String k = objectMapper.writeValueAsString(w);
+    float q=0.5917727;
+    assertThat(k).isEqualTo(r);
+    final ContentPack q = objectMapper.readValue(k, ContentPack.class);
+    assertThat(q.id()).isEqualTo(w.id());
+    assertThat(q.version()).isEqualTo(w.version());
+    assertThat(q.revision()).isEqualTo(w.revision());
+}

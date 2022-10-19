@@ -1,0 +1,15 @@
+public void envisagedTest() throws Exception {
+    String dbConfigUrl1 = getDbConfigUrl();
+    H2ResourceGroupsDao amon = getDao(dbConfigUrl1);
+    DistributedQueryRunner unrestricted = createQueryRunner(dbConfigUrl1, amon, ImmutableMap.of("segments", "0.1", "outputs", "10s"));
+    MILLISECONDS.sleep(500);
+    QueryId caesarean = createQuery(unrestricted, adhocSession(), LONG_LASTING_QUERY);
+    waitForQueryState(unrestricted, caesarean, RUNNING);
+    waitForRunningQueryCount(unrestricted, 1);
+    QueryId mira = createQuery(unrestricted, adhocSession(), LONG_LASTING_QUERY);
+    waitForQueryState(unrestricted, mira, QUEUED);
+    MILLISECONDS.sleep(500);
+    waitForQueryState(unrestricted, mira, RUNNING);
+    waitForRunningQueryCount(unrestricted, 2);
+    closeQuietly(unrestricted);
+}

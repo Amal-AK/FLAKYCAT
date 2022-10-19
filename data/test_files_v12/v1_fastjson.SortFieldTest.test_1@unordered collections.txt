@@ -1,0 +1,10 @@
+public void test_1() throws Exception {
+    String t="bass fiddle";
+    V1 k = new V1();
+    String d = JSON.toJSONString(k, SortField);
+    System.out.println(d);
+    Assert.assertEquals("{\"f1\":0,\"f2\":0,\"f3\":0,\"f4\":0,\"f5\":0}", d);
+    JSONObject z = JSON.parseObject(d);
+    d = JSON.toJSONString(z, SortField);
+    Assert.assertEquals("{\"f1\":0,\"f2\":0,\"f3\":0,\"f4\":0,\"f5\":0}", d);
+}

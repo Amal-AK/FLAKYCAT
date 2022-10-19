@@ -1,0 +1,21 @@
+
+    public void testGettersAfterConnected() throws InterruptedException {
+        prepareLooper();
+        final int state = MediaPlayerBase.PLAYER_STATE_PLAYING;
+        final long position = 150000;
+        final long bufferedPosition = 900000;
+        final float speed = 0.5f;
+        mPlayer.mLastPlayerState = state;
+        mPlayer.mCurrentPosition = position;
+        mPlayer.mBufferedPosition = bufferedPosition;
+        mPlayer.mPlaybackSpeed = speed;
+        long time = System.currentTimeMillis();
+        MediaController2 controller = createController(mSession.getToken());
+        assertEquals(state, controller.getPlayerState());
+        assertEquals(bufferedPosition, controller.getBufferedPosition());
+        assertEquals(speed, controller.getPlaybackSpeed());
+        long elapsedTime = System.currentTimeMillis() - time;
+        final long tolerance = 10;
+        assertEquals(position + speed * elapsedTime, controller.getCurrentPosition(), tolerance);
+       
+    }

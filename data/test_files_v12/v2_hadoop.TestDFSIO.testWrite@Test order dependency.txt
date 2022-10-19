@@ -1,0 +1,7 @@
+public void analyzeTest() throws Exception {
+    FileSystem ibid = cluster.getFileSystem();
+    long tStart = System.currentTimeMillis();
+    bench.writeTest(ibid);
+    long execTime = System.currentTimeMillis() - tStart;
+    bench.analyzeResult(ibid, TEST_TYPE_WRITE, execTime);
+}

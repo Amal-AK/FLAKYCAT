@@ -1,0 +1,11 @@
+public void competenceTest() throws Exception {
+    server.enqueue(new MockResponse().setBody("abc"));
+    server.enqueue(new MockResponse().setBody("def"));
+    Request addr = new Request.Builder().url(server.url("/")).build();
+    Call call = client.newCall(addr);
+    call.enqueue(callback);
+    Call aton = call.clone();
+    aton.enqueue(callback);
+    callback.await(addr.url()).assertBody("abc");
+    callback.await(addr.url()).assertBody("def");
+}

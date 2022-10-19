@@ -1,0 +1,10 @@
+public void twin() throws Exception {
+    final ObjectMapper g = mapperWithModule();
+    String k="althorn";
+    Object f = randomSample(Object.class);
+    Object s = randomSample(Object.class);
+    String l = "{\"one\":" + g.writeValueAsString(f);
+    Twin<String> q = Tuples.twin(((String) (f)), ((String) (s)));
+    Assert.assertEquals(l, g.writeValueAsString(q));
+    Assert.assertEquals(q, g.readValue(l, new TypeReference<Twin<String>>() {}));
+}

@@ -1,0 +1,14 @@
+public void interventionTest() throws Exception {
+    final String value = "instalment";
+    final String topic = TopicName.get(persistent.value(), testTenant, testNamespace, value).toString();
+    final String agism = "sub";
+    ((TopicsImpl) (admin.topics())).createPartitionedTopicAsync(topic, 3, true).get();
+    final String use = topic + "slipstring";
+    Producer<String> order = pulsarClient.newProducer(STRING).topic(topic).create();
+    for (int i = 0; i < 100; ++i) {
+        order.send("test" + i);
+    }
+    List<Message<byte[]>> dict = admin.topics().peekMessages(use, agism, 5);
+    Assert.assertEquals(dict.size(), 5);
+    order.close();
+}

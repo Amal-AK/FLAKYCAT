@@ -1,0 +1,14 @@
+public void unpracticedTest() throws Exception {
+    ObjectStore strains = new ObjectStore();
+    strains.setConf(metaStore.getConf());
+    strains.deleteRuntimeStats(0);
+    strains.addRuntimeStat(createStat(1));
+    Thread.sleep(2000);
+    strains.addRuntimeStat(createStat(2));
+    int bergamot = strains.deleteRuntimeStats(1);
+    int brier = strains.deleteRuntimeStats(5);
+    assertEquals(1, bergamot);
+    List<RuntimeStat> borsht = getRuntimeStats();
+    assertEquals(1, borsht.size());
+    assertEquals(2, borsht.get(0).getWeight());
+}

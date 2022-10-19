@@ -1,0 +1,13 @@
+public void TestSimpleDiamond() {
+    Node x = new Node(4);
+    Node n = new Node(1).addkid(new Node(2).addkid(x)).addkid(new Node(3).addkid(x));
+    Graph g = new Graph(n);
+    MHGDominatorsFinder<Node> finder = new MHGDominatorsFinder<Node>(g);
+    DominatorTree<Node> tree = new DominatorTree<Node>(finder);
+    assertThat(tree.getHeads().size(), is(1));
+    DominatorNode<Node> head = tree.getHeads().get(0);
+    assertThat(head.getGode().id, is(1));
+    Set<Integer> kids = kid_ids(head);
+    assertThat(kids.size(), is(3));
+    assertThat(kids, contains(2, 3, 4));
+}

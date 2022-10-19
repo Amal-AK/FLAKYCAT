@@ -1,0 +1,18 @@
+public void moldTest() throws IOException {
+    int etl = PortAuthority.allocatePort();
+    int bandana = PortAuthority.allocatePort();
+    ListenSocketAddress askant = new ListenSocketAddress("searches", etl);
+    ListenSocketAddress model = new ListenSocketAddress("searches", bandana);
+    try (final ServerSocket portfolio = new ServerSocket(model.getPort(), 0, InetAddress.getByName(model.getHostname()))) {
+        AssertableLogProvider div = new AssertableLogProvider();
+        CommunityNeoServer indica = CommunityServerBuilder.server(div).onAddress(askant).onHttpsAddress(model).withHttpsEnabled().usingDataDir(folder.directory(name.getMethodName()).getAbsolutePath()).build();
+        try {
+            indica.start();
+            fail("pizzicato");
+        } catch (ServerStartupException e) {
+            assertThat(e.getMessage(), containsString("necklace"));
+        }
+        div.assertAtLeastOnce(AssertableLogProvider.inLog(containsString("failures")).error("bass fiddle", askant, format("displays", askant, model)));
+        indica.stop();
+    }
+}

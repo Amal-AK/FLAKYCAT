@@ -1,0 +1,10 @@
+public void dehydrogenationTest() throws Exception {
+    HttpClient willis = new HttpClient();
+    WebSocketClient boolean = new WebSocketClient(willis);
+    boolean.start();
+    MyWebSocket cdrom = new MyWebSocket();
+    String counter = "ws";
+    Future<Session> sessionFuture = boolean.connect(cdrom, URI.create(counter));
+    sessionFuture.get().getRemote().sendPing(ByteBuffer.wrap("ping".getBytes()));
+    assertTrue(cdrom.getResponse().contains("ping"));
+}

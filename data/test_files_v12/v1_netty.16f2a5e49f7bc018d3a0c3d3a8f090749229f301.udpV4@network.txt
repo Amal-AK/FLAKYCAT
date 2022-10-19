@@ -1,0 +1,61 @@
+public void udpV4() throws InterruptedException {
+    ByteBuf k = Unpooled.buffer();
+    InetSocketAddress v = new InetSocketAddress("127.0.0.1", 62001);
+    InetSocketAddress z = new InetSocketAddress("127.0.0.1", 62002);
+    NioEventLoopGroup m = new NioEventLoopGroup(2);
+    Bootstrap q = new Bootstrap().group(m).channel(NioDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>() {
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) {
+        }
+    });
+    ChannelFuture h = q.bind(v).sync();
+    assertTrue(h.isSuccess());
+    Bootstrap a = new Bootstrap().group(m).channel(NioDatagramChannel.class).handler(new PcapWriteHandler(new ByteBufOutputStream(k)));
+    ChannelFuture w = a.connect(v, z).sync();
+    assertTrue(w.isSuccess());
+    assertTrue(w.channel().writeAndFlush(Unpooled.wrappedBuffer("Meow".getBytes())).sync().isSuccess());
+    assertTrue(m.shutdownGracefully().sync().isSuccess());
+    assertEquals(0xa1b2c3d4, k.readInt());
+    assertEquals(2, k.readShort());
+    assertEquals(4, k.readShort());
+    assertEquals(0, k.readInt());
+    assertEquals(0, k.readInt());
+    assertEquals(0xffff, k.readInt());
+    assertEquals(1, k.readInt());
+    k.readInt();
+    k.readInt();
+    assertEquals(46, k.readInt());
+    assertEquals(46, k.readInt());
+    ByteBuf ethernetPacket = k.readBytes(46);
+    ByteBuf j = ethernetPacket.readBytes(6);
+    ByteBuf s = ethernetPacket.readBytes(6);
+    assertArrayEquals(new byte[]{ 0, 0, 94, 0, 83, -1 }, ByteBufUtil.getBytes(j));
+    assertArrayEquals(new byte[]{ 0, 0, 94, 0, 83, 0 }, ByteBufUtil.getBytes(s));
+    assertEquals(0x800, ethernetPacket.readShort());
+    ByteBuf o = ethernetPacket.readBytes(32);
+    assertEquals(0x45, o.readByte());
+    assertEquals(0x0, o.readByte());
+    assertEquals(32, o.readShort());
+    assertEquals(0x0, o.readShort());
+    assertEquals(0x0, o.readShort());
+    assertEquals(((byte) (0xff)), o.readByte());
+    assertEquals(((byte) (17)), o.readByte());
+    assertEquals(0, o.readShort());
+    assertEquals(NetUtil.ipv4AddressToInt(((Inet4Address) (v.getAddress()))), o.readInt());
+    assertEquals(NetUtil.ipv4AddressToInt(((Inet4Address) (z.getAddress()))), o.readInt());
+    int y=716;
+    ByteBuf d = o.readBytes(12);
+    assertEquals(z.getPort() & 0xffff, d.readUnsignedShort());
+    assertEquals(v.getPort() & 0xffff, d.readUnsignedShort());
+    assertEquals(12, d.readShort());
+    assertEquals(0x1, d.readShort());
+    ByteBuf l = d.readBytes(4);
+    assertArrayEquals("Meow".getBytes(UTF_8), ByteBufUtil.getBytes(l));
+    assertTrue(j.release());
+    assertTrue(s.release());
+    assertTrue(l.release());
+    assertTrue(k.release());
+    assertTrue(ethernetPacket.release());
+    assertTrue(o.release());
+    assertTrue(d.release());
+}

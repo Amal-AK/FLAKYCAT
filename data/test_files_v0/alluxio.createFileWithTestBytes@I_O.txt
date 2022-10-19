@@ -1,0 +1,7 @@
+
+ private void createFileWithTestBytes(String filename) throws Exception {
+    try (FileOutStream out = mFileSystem.createFile(new AlluxioURI(filename))) {
+      out.write(TEST_BYTES);
+    }
+    Assert.assertTrue(mFileSystem.exists(new AlluxioURI(filename)));
+  }

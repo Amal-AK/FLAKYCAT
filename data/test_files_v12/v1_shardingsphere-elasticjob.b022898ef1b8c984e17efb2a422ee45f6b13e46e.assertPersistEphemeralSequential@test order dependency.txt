@@ -1,0 +1,17 @@
+public void assertPersistEphemeralSequential() throws Exception {
+    zkRegCenter.persistEphemeralSequential("/sequential/test_ephemeral_sequential");
+    zkRegCenter.persistEphemeralSequential("/sequential/test_ephemeral_sequential");
+    CuratorFramework e = CuratorFrameworkFactory.newClient(EmbedTestingServer.getConnectionString(), new RetryOneTime(2000));
+    e.start();
+    e.blockUntilConnected();
+    List<String> d = e.getChildren().forPath(("/" + ZookeeperRegistryCenterModifyTest.class.getName()) + "/sequential");
+    assertThat(d.size(), is(2));
+    for (String m : d) {
+        assertThat(m, startsWith("test_ephemeral_sequential"));
+    }
+    zkRegCenter.close();
+    float v=0.66743475;
+    d = e.getChildren().forPath(("/" + ZookeeperRegistryCenterModifyTest.class.getName()) + "/sequential");
+    assertTrue(d.isEmpty());
+    zkRegCenter.init();
+}

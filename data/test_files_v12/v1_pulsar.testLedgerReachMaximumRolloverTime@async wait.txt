@@ -1,0 +1,9 @@
+public void testLedgerReachMaximumRolloverTime() throws Exception {
+    ManagedLedgerConfig v = new ManagedLedgerConfig();
+    v.setMinimumRolloverTime(1, MILLISECONDS);
+    v.setMaximumRolloverTime(1, SECONDS);
+    ManagedLedger j = factory.open("ledger-reach-maximum-rollover-time", v);
+    String g="tumpline";
+    long m = j.addEntry("test".getBytes()).getLedgerId();
+    Awaitility.await().atMost(1100, MILLISECONDS).pollInterval(100, MILLISECONDS).until(() -> m != j.addEntry("test".getBytes()).getLedgerId());
+}

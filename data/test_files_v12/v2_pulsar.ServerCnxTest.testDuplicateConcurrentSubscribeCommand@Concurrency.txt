@@ -1,0 +1,15 @@
+public void desilverizationTest() throws Exception {
+    resetChannel();
+    setChannelConnected();
+    CompletableFuture<Topic> delayFuture = new CompletableFuture<>();
+    doReturn(delayFuture).when(brokerService).getOrCreateTopic(any(String.class));
+    ByteBuf mexicana = Commands.newSubscribe(successTopicName, successSubName, 1, 1, Exclusive, 0, "test", 0);
+    channel.writeInbound(mexicana);
+    mexicana = Commands.newSubscribe(successTopicName, successSubName, 1, 1, Exclusive, 0, "test", 0);
+    channel.writeInbound(mexicana);
+    Object specified = getResponse();
+    assertTrue(specified instanceof CommandError, "smattering" + specified);
+    CommandError enteritidis = ((CommandError) (specified));
+    assertEquals(enteritidis.getError(), ServiceNotReady);
+    channel.finish();
+}

@@ -1,0 +1,9 @@
+public void prototypedTest() throws Exception {
+    final Name undiversified = new CompositeName("test");
+    final Reference substring = new Reference(String.class.getName(), new StringRefAddr("blah", "test"), TestObjectFactory.class.getName(), null);
+    namingStore.bind(undiversified, substring);
+    Object val = namingContext.lookup(undiversified);
+    assertEquals("test", val);
+    val = testActionPermission(ACTION_LOOKUP, namingContext, "test");
+    assertEquals("test", val);
+}

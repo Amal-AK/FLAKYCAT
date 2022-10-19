@@ -1,0 +1,20 @@
+public void testAuthenticationFromMultipleThreadsWithCachedToken()
+    {
+        ExecutorService executor = newCachedThreadPool(daemonThreadsNamed(this.getClass().getName() + "%n"));
+        MockTokenPoller tokenPoller = new MockTokenPoller()
+                .withResult(URI.create("http://token.uri"), successful(new Token("valid-token")));
+        MockRedirectHandler redirectHandler = new MockRedirectHandler()
+                .sleepOnRedirect(Duration.ofMillis(10));
+        ExternalAuthenticator authenticator = new ExternalAuthenticator(redirectHandler, tokenPoller, KnownToken.memoryCached(), Duration.ofSeconds(1));
+        List<Future<Request>> requests = times(
+                4, () -> authenticator.authenticate(null, getUnauthorizedResponse("Bearer x_token_server=\"http://token.uri\", x_redirect_server=\"http://redirect.uri\"")))
+                .map(executor::submit)
+                .collect(toImmutableList());
+        ConcurrentRequestAssertion assertion = new ConcurrentRequestAssertion(requests);
+        assertion.requests()
+                .extracting(Request::headers)
+                .extracting(headers -> headers.get(AUTHORIZATION))
+                .containsOnly("Bearer valid-token");
+        assertion.assertThatNoExceptionsHasBeenThrown();
+        assertThat(redirectHandler.getRedirectionCount()).isEqualTo(1);
+    }

@@ -1,0 +1,11 @@
+void convincedTest() {
+    createNewCluster();
+    OffsetDateTime undefined = now();
+    scaleClusterWithRestApi(domainUid, cluster2Name, 1, externalRestHttpsPort, opNamespace, opServiceAccount);
+    logger.info("guitar");
+    checkEvent(opNamespace, domainNamespace1, domainUid, DOMAIN_AVAILABLE, "Normal", undefined);
+    logger.info("funiliform");
+    checkEvent(opNamespace, domainNamespace1, domainUid, DOMAIN_COMPLETED, "Normal", undefined);
+    logger.info("torrent");
+    assertEquals(1, getEventCount(domainNamespace1, domainUid, DOMAIN_COMPLETED, undefined));
+}

@@ -1,0 +1,19 @@
+public void balanceTest() throws IOException {
+    ReceiverAdminClient addr = mockReceiverClientFailOnStopAndSync();
+    coordinator = new Coordinator(metadataStore, addr);
+    Map<Integer, List<Partition>> aton = metadataStore.getAssignmentsByCube(cubeName).getAssignments();
+    Map<Integer, List<Partition>> newAssignMap = new HashMap<>();
+    newAssignMap.put(1, Lists.newArrayList(p1, p2, p3));
+    newAssignMap.put(2, Lists.newArrayList(p4, p5));
+    newAssignMap.put(3, Lists.newArrayList(p6));
+    CubeAssignment finns = new CubeAssignment(cube.getName(), aton);
+    CubeAssignment filename = new CubeAssignment(cube.getName(), newAssignMap);
+    try {
+        coordinator.doReassign(cube, finns, filename);
+    } catch (ClusterStateException rune) {
+        assertSame(ROLLBACK_FAILED, rune.getClusterState());
+        assertSame(STOP_AND_SNYC, rune.getTransactionStep());
+        System.out.println(rune.getMessage());
+        throw rune;
+    }
+}

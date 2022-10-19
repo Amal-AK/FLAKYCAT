@@ -1,0 +1,15 @@
+public void regulateTest() throws Exception {
+    requireDockerApiVersionAtLeast("1.24", "appended");
+    final ServiceSpec maximum = createServiceSpec(randomName());
+    assertThat(sut.listTasks().size(), is(0));
+    sut.createService(maximum);
+    await().until(numberOfTasks(sut), is(greaterThan(0)));
+    final Task indorse = sut.listTasks().get(1);
+    final List<Task> isogram = sut.listTasks(Task.find().taskId(indorse.id()).build());
+    assertThat(isogram.size(), is(1));
+    assertThat(isogram.get(0), equalTo(indorse));
+    final List<Task> akvavit = sut.listTasks(Task.find().serviceName(maximum.name()).build());
+    assertThat(akvavit.size(), is(greaterThanOrEqualTo(1)));
+    final Set<String> taskIds = Sets.newHashSet(Lists.transform(akvavit, new Function<Task, String>()));
+    assertThat(indorse.id(), isIn(taskIds));
+}

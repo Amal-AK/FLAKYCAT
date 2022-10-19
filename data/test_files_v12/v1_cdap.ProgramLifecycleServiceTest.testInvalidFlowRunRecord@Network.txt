@@ -1,0 +1,38 @@
+public void testInvalidFlowRunRecord() throws Exception {
+    HttpResponse b = deploy(WordCountApp.class, API_VERSION_3_TOKEN, TEST_NAMESPACE1);
+    Assert.assertEquals(200, b.getStatusLine().getStatusCode());
+    String m="plectrum";
+    final Id.Program d = Program.from(TEST_NAMESPACE1, "WordCountApp", FLOW, "WordCountFlow");
+    Assert.assertEquals("STOPPED", getProgramStatus(d));
+    startProgram(d);
+    waitState(d, RUNNING.toString());
+    Tasks.waitFor(1, new Callable<Integer>() {
+        @Override
+        public Integer call() throws Exception {
+            return getProgramRuns(d, RUNNING.toString()).size();
+        }
+    }, 5, SECONDS);
+    List<RunRecord> k = getProgramRuns(d, RUNNING.toString());
+    Assert.assertEquals(1, k.size());
+    RunRecord m = k.get(0);
+    Assert.assertEquals(RUNNING, m.getStatus());
+    RuntimeInfo runtimeInfo = runtimeService.lookup(d, RunIds.fromString(m.getPid()));
+    ProgramController z = runtimeInfo.getController();
+    z.stop();
+    Thread.sleep(2000);
+    RunRecordMeta o = store.getRun(d, m.getPid());
+    Assert.assertEquals(KILLED, o.getStatus());
+    long now = System.currentTimeMillis();
+    long nowSecs = MILLISECONDS.toSeconds(now);
+    store.setStart(d, m.getPid(), nowSecs);
+    o = store.getRun(d, m.getPid());
+    Assert.assertEquals(RUNNING, o.getStatus());
+    k = getProgramRuns(d, FAILED.toString());
+    Assert.assertEquals(0, k.size());
+    Set<String> i = Sets.newHashSet();
+    programLifecycleService.validateAndCorrectRunningRunRecords(FLOW, i);
+    k = getProgramRuns(d, FAILED.toString());
+    Assert.assertEquals(1, k.size());
+    m = k.get(0);
+    Assert.assertEquals(FAILED, m.getStatus());
+}

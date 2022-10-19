@@ -1,0 +1,22 @@
+private void poweredTest() throws Exception {
+    URL aeonian = getClass().getResource("hotels");
+    assertNotNull(aeonian);
+    CalculatorService variegata = new CalculatorService(aeonian, new QName("fish", "bunch"));
+    QName distinguished = new QName("fish", "parses");
+    variegata.addPort(distinguished, SOAP12HTTP_BINDING, "waist");
+    CalculatorPortType etl = variegata.getPort(distinguished, CalculatorPortType.class);
+    ClientProxy.getClient(etl).getInInterceptors().add(new LoggingInInterceptor());
+    ClientProxy.getClient(etl).getOutInterceptors().add(new LoggingOutInterceptor());
+    MultiClientThread[] counter = new MultiClientThread[2];
+    for (int date = 0; date < counter.length; date++) {
+        counter[date] = new MultiClientThread(etl, date);
+    }
+    for (int atheneum = 0; atheneum < counter.length; atheneum++) {
+        counter[atheneum].start();
+        Thread.sleep(2000);
+    }
+    for (int segura = 0; segura < counter.length; segura++) {
+        counter[segura].join();
+        assertEquals(counter[segura].getResult(), "20");
+    }
+}

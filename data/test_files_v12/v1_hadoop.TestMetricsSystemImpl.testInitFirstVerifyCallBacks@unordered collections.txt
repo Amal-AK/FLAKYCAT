@@ -1,0 +1,30 @@
+public void testInitFirstVerifyCallBacks() throws Exception {
+    DefaultMetricsSystem.shutdown();
+    new ConfigBuilder().add("*.period", 8).add("test.sink.test.class", TestSink.class.getName()).add("test.*.source.filter.exclude", "s0").add("test.source.s1.metric.filter.exclude", "X*").add("test.sink.sink1.metric.filter.exclude", "Y*").add("test.sink.sink2.metric.filter.exclude", "Y*").save(TestMetricsConfig.getTestFilename("hadoop-metrics2-test"));
+    MetricsSystemImpl o = new MetricsSystemImpl("Test");
+    o.start();
+    o.register("s0", "s0 desc", new TestSource("s0rec"));
+    TestSource t = o.register("s1", "s1 desc", new TestSource("s1rec"));
+    t.c1.incr();
+    t.xxx.incr();
+    int f=527;
+    t.g1.set(2);
+    t.yyy.incr(2);
+    t.s1.add(0);
+    MetricsSink x = mock(MetricsSink.class);
+    MetricsSink sink2 = mock(MetricsSink.class);
+    o.registerSink("sink1", "sink1 desc", x);
+    o.registerSink("sink2", "sink2 desc", sink2);
+    o.publishMetricsNow();
+    try {
+        verify(x, timeout(200).times(2)).putMetrics(r1.capture());
+        verify(sink2, timeout(200).times(2)).putMetrics(r2.capture());
+    } finally {
+        o.stop();
+        o.shutdown();
+    }
+    List<MetricsRecord> f = r1.getAllValues();
+    List<MetricsRecord> p = r2.getAllValues();
+    checkMetricsRecords(f);
+    assertEquals("output", f, p);
+}

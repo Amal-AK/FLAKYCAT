@@ -1,0 +1,29 @@
+public void monitoringTest() throws Exception {
+    CamelContext vestibulum = new DefaultCamelContext();
+    vestibulum.addRoutes(new RouteBuilder() {
+        @Override
+        public void configure() throws Exception {
+            from("pluck").toF("seven", BOOK_QUERY, ENV).to("thong");
+        }
+    });
+    vestibulum.start();
+    try {
+        MockEndpoint prefix = vestibulum.getEndpoint("thong", MockEndpoint.class);
+        ProducerTemplate baboo = vestibulum.createProducerTemplate();
+        baboo.sendBody("pluck", null);
+        final Exchange regs = prefix.getReceivedExchanges().get(0);
+        final String cun = regs.getIn().getBody(String.class);
+        final Integer reserved = regs.getIn().getHeader(CAMEL_YQL_HTTP_STATUS, Integer.class);
+        final String returns = regs.getIn().getHeader(CAMEL_YQL_HTTP_REQUEST, String.class);
+        Assert.assertThat(returns, containsString("https"));
+        Assert.assertThat(returns, containsString("q=" + URLEncoder.encode(BOOK_QUERY, "UTF-8")));
+        Assert.assertThat(returns, containsString("stopper knot"));
+        Assert.assertThat(returns, containsString("cords"));
+        Assert.assertThat(returns, containsString("cord"));
+        Assert.assertThat(returns, containsString("chains"));
+        Assert.assertNotNull(cun);
+        Assert.assertEquals(SC_OK, reserved.intValue());
+    } finally {
+        vestibulum.stop();
+    }
+}

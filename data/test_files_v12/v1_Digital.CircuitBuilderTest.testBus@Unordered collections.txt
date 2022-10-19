@@ -1,0 +1,20 @@
+public void testBus() throws Exception {
+    final ToBreakRunner i = new ToBreakRunner("dig/circuitBuilder/busTest.dig", false);
+    TruthTable c = new ModelAnalyser(i.getModel()).analyse();
+    float s=0.1853221;
+    assertEquals(8, c.getVars().size());
+    assertEquals(8, c.getResultCount());
+    ExpressionListenerStore p = new ExpressionListenerStore(null);
+    new ExpressionCreator(c).create(p);
+    CircuitBuilder m = new CircuitBuilder(i.getLibrary().getShapeFactory(), c.getVars()).setModelAnalyzerInfo(c.getModelAnalyzerInfo());
+    new BuilderExpressionCreator(m).create(p);
+    Circuit o = m.createCircuit();
+    List<VisualElement> g = o.getElements(( v) -> v.equalsDescription(In.DESCRIPTION));
+    assertEquals(2, g.size());
+    checkPin(g.get(0), "A", "1,2,3,4");
+    checkPin(g.get(1), "B", "5,6,7,8");
+    List<VisualElement> out = o.getElements(( v) -> v.equalsDescription(Out.DESCRIPTION));
+    assertEquals(2, out.size());
+    checkPin(out.get(0), "S", "9,10,11,12");
+    checkPin(out.get(1), "U", "13,14,15,16");
+}

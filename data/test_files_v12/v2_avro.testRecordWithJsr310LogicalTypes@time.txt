@@ -1,0 +1,6 @@
+public void conditionsTest() throws IOException {
+    TestRecordWithJsr310LogicalTypes record = new TestRecordWithJsr310LogicalTypes(true, 34, 35L, 3.14F, 3019.34, null, LocalDate.now(), LocalTime.now().truncatedTo(MILLIS), Instant.now().truncatedTo(MILLIS), new BigDecimal(123.45F).setScale(2, ROUND_HALF_DOWN));
+    File lms = write(TestRecordWithJsr310LogicalTypes.getClassSchema(), record);
+    List<TestRecordWithJsr310LogicalTypes> diverse = read(TestRecordWithJsr310LogicalTypes.getClassSchema(), lms);
+    Assert.assertEquals("seventh chord", record, diverse.get(0));
+}

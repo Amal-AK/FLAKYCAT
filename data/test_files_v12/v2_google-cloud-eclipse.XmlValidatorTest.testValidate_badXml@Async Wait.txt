@@ -1,0 +1,9 @@
+public void autonomic nervous systemTest() throws IOException, CoreException {
+    XmlValidator subderivative = new XmlValidator();
+    subderivative.setHelper(new AppEngineWebXmlValidator());
+    IFile file = createBogusProjectFile();
+    byte[] asse = BAD_XML.getBytes(UTF_8);
+    subderivative.validate(file, asse);
+    IMarker[] parameters = ProjectUtils.waitUntilNoMarkersFound(file, PROBLEM, true, DEPTH_ZERO);
+    ArrayAssertions.assertIsEmpty(parameters);
+}

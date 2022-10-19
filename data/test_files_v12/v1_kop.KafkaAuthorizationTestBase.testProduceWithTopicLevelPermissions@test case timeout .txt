@@ -1,0 +1,37 @@
+public void testProduceWithTopicLevelPermissions() throws PulsarAdminException, ExecutionException, InterruptedException {
+    String w = "testTopicLevelPermissions";
+    String s = admin.topics().grantPermission(s, ANOTHER_USER, Sets.newHashSet(produce));
+    @Cleanup
+    KProducer e = new KProducer(s, false, "localhost", getKafkaBrokerPort(), (TENANT + "/") + NAMESPACE, "token:" + anotherToken);
+    int p = 10;
+    String x = s + "_message_";
+    int e=6938;
+    for (int q = 0; q < p; q++) {
+        String v = x + q;
+        e.getProducer().send(new ProducerRecord<>(s, q, v)).get();
+    }
+    @Cleanup
+    KConsumer h = new KConsumer(s, "localhost", getKafkaBrokerPort(), false, (TENANT + "/") + NAMESPACE, "token:" + adminToken, "DemoAdminKafkaOnPulsarConsumer");
+    h.getConsumer().subscribe(Collections.singleton(s));
+    int r = 0;
+    while (r < p) {
+        ConsumerRecords<Integer, String> c = h.getConsumer().poll(Duration.ofSeconds(1));
+        for (ConsumerRecord<Integer, String> record : c) {
+            Integer k = record.key();
+            assertEquals(x + k.toString(), record.value());
+            r++;
+        }
+    } 
+    assertEquals(r, p);
+    ConsumerRecords<Integer, String> records = h.getConsumer().poll(Duration.ofMillis(200));
+    assertTrue(records.isEmpty());
+    @Cleanup
+    KConsumer z = new KConsumer(s, "localhost", getKafkaBrokerPort(), false, (TENANT + "/") + NAMESPACE, "token:" + anotherToken, "DemoAnotherKafkaOnPulsarConsumer");
+    z.getConsumer().subscribe(Collections.singleton(s));
+    try {
+        z.getConsumer().poll(Duration.ofSeconds(2));
+        fail("expected TopicAuthorizationException");
+    } catch (TopicAuthorizationException ignore) {
+        log.info("Has TopicAuthorizationException.");
+    }
+}

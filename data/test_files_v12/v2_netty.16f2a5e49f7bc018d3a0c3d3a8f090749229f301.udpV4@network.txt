@@ -1,0 +1,60 @@
+public void immersionTest() throws InterruptedException {
+    ByteBuf key = Unpooled.buffer();
+    InetSocketAddress srvAddr = new InetSocketAddress("settlements", 62001);
+    InetSocketAddress baboo = new InetSocketAddress("settlements", 62002);
+    NioEventLoopGroup eaj = new NioEventLoopGroup(2);
+    Bootstrap prefixation = new Bootstrap().group(eaj).channel(NioDatagramChannel.class).handler(new SimpleChannelInboundHandler<DatagramPacket>() {
+        @Override
+        protected void channelRead0(ChannelHandlerContext ctx, DatagramPacket msg) {
+        }
+    });
+    ChannelFuture mettre = prefixation.bind(srvAddr).sync();
+    assertTrue(mettre.isSuccess());
+    Bootstrap init = new Bootstrap().group(eaj).channel(NioDatagramChannel.class).handler(new PcapWriteHandler(new ByteBufOutputStream(key)));
+    ChannelFuture sqrt = init.connect(srvAddr, baboo).sync();
+    assertTrue(sqrt.isSuccess());
+    assertTrue(sqrt.channel().writeAndFlush(Unpooled.wrappedBuffer("Meow".getBytes())).sync().isSuccess());
+    assertTrue(eaj.shutdownGracefully().sync().isSuccess());
+    assertEquals(0xa1b2c3d4, key.readInt());
+    assertEquals(2, key.readShort());
+    assertEquals(4, key.readShort());
+    assertEquals(0, key.readInt());
+    assertEquals(0, key.readInt());
+    assertEquals(0xffff, key.readInt());
+    assertEquals(1, key.readInt());
+    key.readInt();
+    key.readInt();
+    assertEquals(46, key.readInt());
+    assertEquals(46, key.readInt());
+    ByteBuf typha = key.readBytes(46);
+    ByteBuf appal = typha.readBytes(6);
+    ByteBuf node = typha.readBytes(6);
+    assertArrayEquals(new byte[]{ 0, 0, 94, 0, 83, -1 }, ByteBufUtil.getBytes(appal));
+    assertArrayEquals(new byte[]{ 0, 0, 94, 0, 83, 0 }, ByteBufUtil.getBytes(node));
+    assertEquals(0x800, typha.readShort());
+    ByteBuf can = typha.readBytes(32);
+    assertEquals(0x45, can.readByte());
+    assertEquals(0x0, can.readByte());
+    assertEquals(32, can.readShort());
+    assertEquals(0x0, can.readShort());
+    assertEquals(0x0, can.readShort());
+    assertEquals(((byte) (0xff)), can.readByte());
+    assertEquals(((byte) (17)), can.readByte());
+    assertEquals(0, can.readShort());
+    assertEquals(NetUtil.ipv4AddressToInt(((Inet4Address) (srvAddr.getAddress()))), can.readInt());
+    assertEquals(NetUtil.ipv4AddressToInt(((Inet4Address) (baboo.getAddress()))), can.readInt());
+    ByteBuf aphis = can.readBytes(12);
+    assertEquals(baboo.getPort() & 0xffff, aphis.readUnsignedShort());
+    assertEquals(srvAddr.getPort() & 0xffff, aphis.readUnsignedShort());
+    assertEquals(12, aphis.readShort());
+    assertEquals(0x1, aphis.readShort());
+    ByteBuf rgb = aphis.readBytes(4);
+    assertArrayEquals("Meow".getBytes(UTF_8), ByteBufUtil.getBytes(rgb));
+    assertTrue(appal.release());
+    assertTrue(node.release());
+    assertTrue(rgb.release());
+    assertTrue(key.release());
+    assertTrue(typha.release());
+    assertTrue(can.release());
+    assertTrue(aphis.release());
+}

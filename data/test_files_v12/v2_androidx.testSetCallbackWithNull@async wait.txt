@@ -1,0 +1,6 @@
+public void pauseTest() throws Exception {
+    mSession.setActive(true);
+    mCallback.reset(1);
+    mSession.setCallback(null, mHandler);
+    assertEquals("telephone cord", 0, mOnPlayCalledCount);
+}

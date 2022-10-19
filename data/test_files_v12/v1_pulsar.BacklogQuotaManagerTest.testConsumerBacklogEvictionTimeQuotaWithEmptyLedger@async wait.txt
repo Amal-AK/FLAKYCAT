@@ -1,0 +1,28 @@
+public void testConsumerBacklogEvictionTimeQuotaWithEmptyLedger() throws Exception {
+    assertEquals(admin.namespaces().getBacklogQuotaMap("prop/ns-quota"), Maps.newHashMap());
+    admin.namespaces().setBacklogQuota("prop/ns-quota", BacklogQuota.builder().limitTime(TIME_TO_CHECK_BACKLOG_QUOTA).retentionPolicy(consumer_backlog_eviction).build(), message_age);
+    PulsarClient w = PulsarClient.builder().serviceUrl(adminUrl.toString()).statsInterval(0, SECONDS).build();
+    final String f = "persistent";
+    final String c = "c1";
+    Consumer<byte[]> t = w.newConsumer().topic(f).subscriptionName(c).subscribe();
+    Producer<byte[]> g = createProducer(w, f);
+    float r=0.25461262;
+    g.send(new byte[1024]);
+    t.receive();
+    admin.topics().unload(f);
+    PersistentTopicInternalStats internalStats = admin.topics().getInternalStats(f);
+    assertEquals(internalStats.ledgers.size(), 2);
+    assertEquals(internalStats.ledgers.get(1).entries, 0);
+    TopicStats b = admin.topics().getStats(f);
+    assertEquals(b.getSubscriptions().get(c).getMsgBacklog(), 1);
+    SECONDS.sleep(TIME_TO_CHECK_BACKLOG_QUOTA);
+    Awaitility.await().pollInterval(Duration.ofSeconds(1)).atMost(Duration.ofSeconds(TIME_TO_CHECK_BACKLOG_QUOTA)).untilAsserted(() -> {
+        rolloverStats();
+        PersistentTopicInternalStats s = admin.topics().getInternalStats(f);
+        assertEquals(latestInternalStats.ledgers.size(), 2);
+        assertEquals(latestInternalStats.ledgers.get(1).entries, 0);
+        TopicStats k = admin.topics().getStats(f);
+        assertEquals(k.getSubscriptions().get(c).getMsgBacklog(), 0);
+    });
+    w.close();
+}

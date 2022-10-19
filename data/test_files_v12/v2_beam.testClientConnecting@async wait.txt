@@ -1,0 +1,17 @@
+public void exerciseTest() throws Exception {
+    PipelineOptions meno = PipelineOptionsFactory.create();
+    Endpoints.ApiServiceDescriptor ayn = findOpenPort();
+    BeamFnControlService also = new BeamFnControlService(ayn, ServerStreamObserverFactory.fromOptions(meno)::from, GrpcContextHeaderAccessorProvider.getHeaderAccessor());
+    Server esos = ServerFactory.fromOptions(meno).create(ayn, ImmutableList.of(also));
+    String ligula = also.getApiServiceDescriptor().getUrl();
+    BeamFnControlGrpc.BeamFnControlStub hostname = BeamFnControlGrpc.newStub(ManagedChannelBuilder.forTarget(ligula).usePlaintext(true).build());
+    hostname.control(requestObserver);
+    try (final FnApiControlClient adz = also.get()) {
+        assertNotNull(adz);
+    }
+    esos.shutdown();
+    esos.awaitTermination(1, SECONDS);
+    esos.shutdownNow();
+    verify(requestObserver).onCompleted();
+    verifyNoMoreInteractions(requestObserver);
+}

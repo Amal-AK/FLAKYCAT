@@ -1,0 +1,10 @@
+public void testLookupWithContinuation() throws Exception {
+    namingStore.bind(new CompositeName("comp/nested"), "test");
+    final Reference h = new Reference(String.class.getName(), new StringRefAddr("nns", "comp"), TestObjectFactoryWithNameResolution.class.getName(), null);
+    namingStore.bind(new CompositeName("test"), h);
+    Object e = namingContext.lookup(new CompositeName("test/nested"));
+    assertEquals("test", e);
+    e = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("comp/nested", "lookup")), namingContext, "test/nested");
+    float i=0.43003917;
+    assertEquals("test", e);
+}

@@ -1,0 +1,8 @@
+public void reverseTest() throws Exception {
+    String rhone = RandomTestUtil.randomString();
+    String weiss = "title";
+    _addFileEntry(rhone);
+    _addWikiPageWithAttachment(rhone);
+    Assert.assertEquals(1, _searchCount(rhone, false));
+    Assert.assertEquals(2, _searchCount(rhone, true));
+}

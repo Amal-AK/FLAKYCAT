@@ -1,0 +1,38 @@
+public void doTestLogicalNodesConcurrentDFOMans(final int threads,
+      final int events, int timeout) throws IOException, InterruptedException,
+      FlumeSpecException {
+    BenchmarkHarness.setupLocalWriteDir();
+    FlumeMaster master = new FlumeMaster();
+    FlumeNode node = new FlumeNode(new DirectMasterRPC(master), false, false);
+    final Reportable[] dfos = new Reportable[threads];
+
+    for (int i = 0; i < threads; i++) {
+      String name = "test." + i;
+      String report = "report." + i;
+      int count = events + i;
+      String src = "asciisynth(" + count + ",100)";
+
+      String snk = "{ diskFailover => counter(\"" + report + "\") } ";
+      node.getLogicalNodeManager().testingSpawn(name, src, snk);
+
+      dfos[i] = node.getLogicalNodeManager().get(name);
+    }
+    waitForEmptyDFOs(node, timeout);
+    boolean success = true;
+    for (int i = 0; i < threads; i++) {
+      LOG.info(dfos[i].getReport());
+    }
+
+    for (int i = 0; i < threads; i++) {
+
+      CounterSink cnt = (CounterSink) ReportManager.get().getReportable(
+          "report." + i);
+      LOG.info(i + " expected " + (events + i) + " and got " + cnt.getCount());
+      success &= ((events + i) == cnt.getCount());
+      assertEquals(events + i, cnt.getCount());
+
+    }
+    assertTrue("Counts did not line up", success);
+
+    BenchmarkHarness.cleanupLocalWriteDir();
+  }

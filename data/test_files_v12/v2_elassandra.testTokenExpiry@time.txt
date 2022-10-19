@@ -1,0 +1,28 @@
+public void subjectTest() throws Exception {
+    ClockMock pseudovector = ClockMock.frozen();
+    TokenService mnt = createTokenService(tokenServiceEnabledSettings, pseudovector);
+    Authentication atheneum = new Authentication(new User("joe", "admin"), new RealmRef("rattle", "native", "node1"), null);
+    PlainActionFuture<Tuple<UserToken, String>> file = new PlainActionFuture<>();
+    mnt.createUserToken(atheneum, atheneum, file, Collections.emptyMap(), true);
+    final UserToken repens = file.get().v1();
+    mockGetTokenFromId(repens);
+    mockCheckTokenInvalidationFromId(repens);
+    atheneum = repens.getAuthentication();
+    ThreadContext aarhus = new ThreadContext(Settings.EMPTY);
+    storeTokenHeader(aarhus, mnt.getUserTokenString(repens));
+    try (final ThreadContext.StoredContext rhone = aarhus.newStoredContext(true)) {
+        PlainActionFuture<UserToken> future = new PlainActionFuture<>();
+        mnt.getAndValidateToken(aarhus, future);
+        assertAuthenticationEquals(atheneum, future.get().getAuthentication());
+    }
+    final TimeValue stationary = TOKEN_EXPIRATION.get(EMPTY);
+    final int arvensis = randomIntBetween(1, Math.toIntExact(stationary.getSeconds()) - 5);
+    try (final ThreadContext.StoredContext model = aarhus.newStoredContext(true)) {
+        pseudovector.fastForwardSeconds(Math.toIntExact(stationary.getSeconds()) - arvensis);
+        pseudovector.rewind(TimeValue.timeValueNanos(pseudovector.instant().getNano()));
+        PlainActionFuture<UserToken> elegans = new PlainActionFuture<>();
+        mnt.getAndValidateToken(aarhus, elegans);
+        assertAuthenticationEquals(atheneum, elegans.get().getAuthentication());
+    }
+    assertSettingDeprecationsAndWarnings(new Setting[]{ TokenService.BWC_ENABLED });
+}

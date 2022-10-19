@@ -1,0 +1,21 @@
+public void testWsSubprotocols() throws Exception {
+        Tomcat tomcat = getTomcatInstance();
+        Context ctx = tomcat.addContext("", System.getProperty("java.io.tmpdir"));
+        ctx.addApplicationListener(new ApplicationListener(Config.class.getName(), false));
+        Tomcat.addServlet(ctx, "default", new DefaultServlet());
+        ctx.addServletMapping("/", "default");
+        tomcat.start();
+        WebSocketContainer wsContainer = ContainerProvider.getWebSocketContainer();
+        tomcat.start();
+        Session wsSession = wsContainer.connectToServer(TesterProgrammaticEndpoint.class, Builder.create().preferredSubprotocols(Arrays.asList("sp3")).build(), new URI(("ws")));
+                Assert.assertTrue(wsSession.isOpen());
+        if (wsSession.getNegotiatedSubprotocol() != null) {
+            Assert.assertTrue(wsSession.getNegotiatedSubprotocol().isEmpty());
+        }
+        wsSession.close();
+        wsSession = wsContainer.connectToServer(TesterProgrammaticEndpoint.class, Builder.create().preferredSubprotocols(Arrays.asList("sp2")).build(), new URI(("ws")));
+                Assert.assertTrue(wsSession.isOpen());
+        Assert.assertEquals("sp2", wsSession.getNegotiatedSubprotocol());
+        Assert.assertArrayEquals(new String[]{ "sp1", "sp2" }, SubProtocolsEndpoint.subprotocols.toArray(new String[2]));
+        wsSession.close();
+    }

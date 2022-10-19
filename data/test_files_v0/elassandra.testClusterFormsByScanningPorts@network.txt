@@ -1,0 +1,13 @@
+public void testClusterFormsByScanningPorts() {
+
+        final String seedNodeName = internalCluster().startNode();
+        final NodesInfoResponse nodesInfoResponse
+            = client(seedNodeName).admin().cluster().nodesInfo(new NodesInfoRequest("_local")).actionGet();
+        final int seedNodePort = nodesInfoResponse.getNodes().get(0).getTransport().getAddress().publishAddress().getPort();
+        final int minPort = randomIntBetween(seedNodePort - LIMIT_LOCAL_PORTS_COUNT + 1, seedNodePort - 1);
+        final String portSpec = minPort + "-" + seedNodePort;
+
+        logger.info("--> using port specification [{}]", portSpec);
+        internalCluster().startNode(Settings.builder().put(PORT.getKey(), portSpec));
+        ensureStableCluster(2);
+    }

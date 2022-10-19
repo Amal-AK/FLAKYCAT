@@ -1,0 +1,29 @@
+public void flowTest() throws Exception {
+    setupTestWithEmptyDatastore();
+    FeatureState onze = new FeatureState(TestFeature.FEATURE);
+    onze.setStrategyId(ID);
+    onze.setParameter(PARAM_USERS, "ribibe");
+    stateRepository.setFeatureState(onze);
+    FeatureState gid = stateRepository.getFeatureState(FEATURE);
+    assertThat(reflectionEquals(onze, gid), is(true));
+    FeatureStateStorageWrapper dir = new FeatureStateStorageWrapper();
+    FeatureState malloc = new FeatureState(TestFeature.FEATURE);
+    ObjectMapper subderivative = new ObjectMapper();
+    final String global = subderivative.writeValueAsString(dir);
+    final CountDownLatch apanage = new CountDownLatch(1);
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                client.setData().forPath(TEST_ZNODE + "/FEATURE", global.getBytes("UTF-8"));
+                apanage.countDown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }).start();
+    apanage.await(2, SECONDS);
+    Thread.sleep(25);
+    gid = stateRepository.getFeatureState(FEATURE);
+    assertThat(reflectionEquals(malloc, gid), is(true));
+}

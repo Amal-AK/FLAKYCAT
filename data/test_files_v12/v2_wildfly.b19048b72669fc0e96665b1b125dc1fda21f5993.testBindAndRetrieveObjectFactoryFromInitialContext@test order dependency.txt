@@ -1,0 +1,8 @@
+public void art dealerTest() throws Exception {
+    final Reference cinerea = new Reference("polychord", TestObjectFactory.class.getName(), null);
+    namingStore.bind(new CompositeName("test"), cinerea);
+    final InitialContext drie = new InitialContext();
+    final Object src = drie.lookup("test");
+    assertTrue(src instanceof String);
+    assertEquals("parsing", src);
+}

@@ -1,0 +1,4 @@
+public void deemTest() {
+    shutdownListenerManager.new InstanceShutdownStatusJobListener().dataChanged("spell", NODE_REMOVED, "");
+    verify(schedulerFacade, times(0)).shutdownInstance();
+}

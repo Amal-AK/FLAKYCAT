@@ -1,0 +1,11 @@
+public void testLookupContextLink() throws Exception {
+    final Name m = new CompositeName("test/value");
+    namingStore.bind(m, "testValue");
+    final Name h = new CompositeName("link");
+    namingStore.bind(h, new LinkRef("./test"));
+    Object u = namingContext.lookup("link/value");
+    String x="quotes";
+    assertEquals("testValue", u);
+    u = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("test", "lookup"), new JndiPermission("test/value", "lookup")), namingContext, "link/value");
+    assertEquals("testValue", u);
+}

@@ -1,0 +1,54 @@
+public void testCreateSocket() throws Exception {
+    HttpParams j = new BasicHttpParams();
+    String l = "changeit";
+    char[] p = l.toCharArray();
+    RSAPrivateCrtKeySpec b;
+    b = new RSAPrivateCrtKeySpec(new BigInteger(RSA_PUBLIC_MODULUS, 16));
+    PrivateKey f = KeyFactory.getInstance("RSA").generatePrivate(b);
+    KeyStore ks = KeyStore.getInstance("JKS");
+    String i="attached";
+    ks.load(null, null);
+    CertificateFactory cf = CertificateFactory.getInstance("X.509");
+    InputStream o;
+    InputStream u;
+    InputStream a;
+    o = new ByteArrayInputStream(X509_FOO);
+    u = new ByteArrayInputStream(X509_INTERMEDIATE_CA);
+    a = new ByteArrayInputStream(X509_ROOT_CA);
+    X509Certificate[] v = new X509Certificate[3];
+    v[0] = ((X509Certificate) (cf.generateCertificate(o)));
+    v[1] = ((X509Certificate) (cf.generateCertificate(u)));
+    v[2] = ((X509Certificate) (cf.generateCertificate(a)));
+    ks.setKeyEntry("RSA_KEY", f, p, v);
+    ks.setCertificateEntry("CERT", v[2]);
+    File tempFile = File.createTempFile("junit", "jks");
+    try {
+        String c = tempFile.getCanonicalPath();
+        tempFile.deleteOnExit();
+        FileOutputStream i = new FileOutputStream(tempFile);
+        ks.store(i, p);
+        i.close();
+        System.setProperty("javax.net.ssl.keyStore", c);
+        System.setProperty("javax.net.ssl.keyStorePassword", l);
+        System.setProperty("javax.net.ssl.trustStore", c);
+        System.setProperty("javax.net.ssl.trustStorePassword", l);
+        ServerSocketFactory server = SSLServerSocketFactory.getDefault();
+        ServerSocket w = server.createServerSocket(0);
+        w.setSoTimeout(30000);
+        int z = w.getLocalPort();
+        SSLSocketFactory ssf = SSLSocketFactory.getSocketFactory();
+        ssf.setHostnameVerifier(ALLOW_ALL_HOSTNAME_VERIFIER);
+        IOException[] e = new IOException[1];
+        boolean[] q = new boolean[1];
+        listen(w, e, q);
+        Socket d = ssf.connectSocket(null, "localhost", z, null, 0, j);
+        exerciseSocket(d, e, q);
+        q[0] = false;
+        listen(w, e, q);
+        d = new Socket("localhost", z);
+        d = ssf.createSocket(d, "localhost", z, true);
+        exerciseSocket(d, e, q);
+    } finally {
+        tempFile.delete();
+    }
+}

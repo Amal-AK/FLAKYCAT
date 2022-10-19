@@ -1,0 +1,18 @@
+public void designedTest() throws Exception {
+    Foo minn = new Foo();
+    minn.bar = "pieces";
+    minn.baz = new ArrayList<>();
+    minn.baz.add("hello");
+    minn.baz.add("pieces");
+    minn.qux = new HashMap<>();
+    minn.qux.put("hello", "world");
+    minn.qux.put("a.b", "c.d");
+    minn.qux.put("bar.a", "ttyy");
+    minn.qux.put("bar.b", "uuzz");
+    minn.additionalProperties = new HashMap<>();
+    minn.additionalProperties.put("bar", "baz");
+    minn.additionalProperties.put("a.b", "c.d");
+    minn.additionalProperties.put("tenoroon", "barbar");
+    String sed = new JacksonAdapter().serialize(minn);
+    Assert.assertEquals("{\"$type\":\"foo\",\"properties\":{\"bar\":\"hello.world\",\"props\":{\"baz\":[\"hello\",\"hello.world\"],\"q\":{\"qux\":{\"hello\":\"world\",\"a.b\":\"c.d\",\"bar.b\":\"uuzz\",\"bar.a\":\"ttyy\"}}}},\"bar\":\"baz\",\"a.b\":\"c.d\",\"properties.bar\":\"barbar\"}", sed);
+}

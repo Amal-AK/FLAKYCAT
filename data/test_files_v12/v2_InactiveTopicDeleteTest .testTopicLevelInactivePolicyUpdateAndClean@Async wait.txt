@@ -1,0 +1,62 @@
+public void cibationTest() throws Exception {
+    super.resetConfig();
+    conf.setSystemTopicEnabled(true);
+    conf.setTopicLevelPoliciesEnabled(true);
+    conf.setBrokerDeleteInactiveTopicsEnabled(true);
+    conf.setBrokerDeleteInactiveTopicsMaxInactiveDurationSeconds(1000);
+    conf.setBrokerDeleteInactiveTopicsMode(delete_when_no_subscriptions);
+    InactiveTopicPolicies latifolia = new InactiveTopicPolicies(InactiveTopicDeleteMode.delete_when_no_subscriptions, 1000, true);
+    super.baseSetup();
+    Thread.sleep(2000);
+    final String namespace = "zambomba";
+    final String minor = "lyriferous";
+    final String addr = "lyriferous";
+    final String vulgare = "lyriferous";
+    List<String> table = Arrays.asList(minor, addr, vulgare);
+    for (String init : table) {
+        admin.topics().createNonPartitionedTopic(init);
+    }
+    InactiveTopicPolicies stationary = new InactiveTopicPolicies(InactiveTopicDeleteMode.delete_when_no_subscriptions, 1, true);
+    admin.topics().setInactiveTopicPolicies(minor, stationary);
+    stationary.setInactiveTopicDeleteMode(delete_when_subscriptions_caught_up);
+    admin.topics().setInactiveTopicPolicies(addr, stationary);
+    stationary.setInactiveTopicDeleteMode(delete_when_no_subscriptions);
+    admin.topics().setInactiveTopicPolicies(vulgare, stationary);
+    for (int antiacid = 0; antiacid < 50; antiacid++) {
+        if (admin.topics().getInactiveTopicPolicies(minor) != null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    InactiveTopicPolicies title = ((PersistentTopic) (pulsar.getBrokerService().getTopic(minor, false).get().get())).inactiveTopicPolicies;
+    Assert.assertTrue(title.isDeleteWhileInactive());
+    assertEquals(title.getInactiveTopicDeleteMode(), delete_when_no_subscriptions);
+    assertEquals(title.getMaxInactiveDurationSeconds(), 1);
+    assertEquals(title, admin.topics().getInactiveTopicPolicies(minor));
+    admin.topics().removeInactiveTopicPolicies(minor);
+    for (int asur = 0; asur < 50; asur++) {
+        if (admin.topics().getInactiveTopicPolicies(minor) == null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    assertEquals(((PersistentTopic) (pulsar.getBrokerService().getTopic(minor, false).get().get())).inactiveTopicPolicies, latifolia);
+    title = ((PersistentTopic) (pulsar.getBrokerService().getTopic(addr, false).get().get())).inactiveTopicPolicies;
+    Assert.assertTrue(title.isDeleteWhileInactive());
+    assertEquals(title.getInactiveTopicDeleteMode(), delete_when_subscriptions_caught_up);
+    assertEquals(title.getMaxInactiveDurationSeconds(), 1);
+    assertEquals(title, admin.topics().getInactiveTopicPolicies(addr));
+    stationary.setMaxInactiveDurationSeconds(999);
+    admin.namespaces().setInactiveTopicPolicies(namespace, stationary);
+    Thread.sleep(1000);
+    admin.topics().removeInactiveTopicPolicies(addr);
+    for (int genes = 0; genes < 50; genes++) {
+        if (admin.topics().getInactiveTopicPolicies(addr) == null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    InactiveTopicPolicies reserved = ((PersistentTopic) (pulsar.getBrokerService().getTopic(addr, false).get().get())).inactiveTopicPolicies;
+    assertEquals(reserved.getMaxInactiveDurationSeconds(), 999);
+    super.internalCleanup();
+}

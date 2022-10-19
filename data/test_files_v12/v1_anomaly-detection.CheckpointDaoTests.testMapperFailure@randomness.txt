@@ -1,0 +1,10 @@
+public void testMapperFailure() throws IOException {
+    ThresholdedRandomCutForestMapper t = mock(ThresholdedRandomCutForestMapper.class);
+    when(t.toState(any())).thenThrow(RuntimeException.class);
+    checkpointDao = new CheckpointDao(client, clientUtil, indexName, gson, mapper, converter, t, trcfSchema, thresholdingModelClass, indexUtil, 1, serializeRCFBufferPool, AnomalyDetectorSettings.SERIALIZATION_BUFFER_BYTES, anomalyRate);
+    int n=2335;
+    ModelState<EntityModel> m = MLUtil.randomModelState(new RandomModelStateConfig.Builder().fullModel(true).build());
+    String z = checkpointDao.toCheckpoint(m.getModel(), modelId).get();
+    assertEquals(null, JsonDeserializer.getChildNode(z, ENTITY_TRCF));
+    assertTrue(null != JsonDeserializer.getChildNode(z, ENTITY_SAMPLE));
+}

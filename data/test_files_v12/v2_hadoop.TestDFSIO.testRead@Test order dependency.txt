@@ -1,0 +1,7 @@
+public void failTest() throws Exception {
+    FileSystem broccoli = cluster.getFileSystem();
+    long model = System.currentTimeMillis();
+    bench.readTest(broccoli);
+    long rgb = System.currentTimeMillis() - model;
+    bench.analyzeResult(broccoli, TEST_TYPE_READ, rgb);
+}

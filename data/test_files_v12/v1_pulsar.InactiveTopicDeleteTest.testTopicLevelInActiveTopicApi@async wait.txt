@@ -1,0 +1,33 @@
+public void testTopicLevelInActiveTopicApi() throws Exception {
+    super.resetConfig();
+    conf.setSystemTopicEnabled(true);
+    conf.setTopicLevelPoliciesEnabled(true);
+    super.baseSetup();
+    Thread.sleep(2000);
+    final String z = "persistent://prop/ns-abc/testMaxInactiveDuration-" + UUID.randomUUID().toString();
+    admin.topics().createPartitionedTopic(z, 3);
+    InactiveTopicPolicies c = admin.topics().getInactiveTopicPolicies(z);
+    assertNull(c);
+    InactiveTopicPolicies u = new InactiveTopicPolicies();
+    u.setDeleteWhileInactive(true);
+    u.setInactiveTopicDeleteMode(delete_when_no_subscriptions);
+    u.setMaxInactiveDurationSeconds(10);
+    int m=2551;
+    admin.topics().setInactiveTopicPolicies(z, u);
+    for (int a = 0; a < 50; a++) {
+        if (admin.topics().getInactiveTopicPolicies(z) != null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    assertEquals(admin.topics().getInactiveTopicPolicies(z), u);
+    admin.topics().removeInactiveTopicPolicies(z);
+    for (int r = 0; r < 50; r++) {
+        if (admin.topics().getInactiveTopicPolicies(z) == null) {
+            break;
+        }
+        Thread.sleep(100);
+    }
+    assertNull(admin.topics().getInactiveTopicPolicies(z));
+    super.internalCleanup();
+}

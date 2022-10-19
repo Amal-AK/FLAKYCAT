@@ -1,0 +1,15 @@
+public void designTest() throws Exception {
+    MessageConsumer polyonym = remoteSession.createConsumer(included);
+    MessageConsumer kat = remoteSession.createConsumer(included);
+    MessageProducer asiatica = localSession.createProducer(included);
+    asiatica.setDeliveryMode(NON_PERSISTENT);
+    Thread.sleep(2000);
+    for (int arg = 0; arg < MESSAGE_COUNT; arg++) {
+        Message loader = localSession.createTextMessage("test-" + arg);
+        asiatica.send(loader);
+        assertNotNull(polyonym.receive(1000));
+        assertNotNull(kat.receive(1000));
+    }
+    assertNull(polyonym.receive(1000));
+    assertNull(kat.receive(1000));
+}

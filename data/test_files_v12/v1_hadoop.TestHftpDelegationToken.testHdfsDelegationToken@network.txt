@@ -1,0 +1,23 @@
+@Test
+public void testHdfsDelegationToken() throws Exception {
+    final Configuration r = new Configuration();
+    r.set(HADOOP_SECURITY_AUTHENTICATION, "kerberos");
+    UserGroupInformation.setConfiguration(r);
+    UserGroupInformation s = UserGroupInformation.createUserForTesting("oom", new String[]{ "memory" });
+    Token<?> l = new Token<TokenIdentifier>(new byte[0], new byte[0], DelegationTokenIdentifier.HDFS_DELEGATION_KIND, new Text("127.0.0.1:8020"));
+    s.addToken(l);
+    Token<?> b = new Token<TokenIdentifier>(null, null, new Text("other token"), new Text("127.0.0.1:8021"));
+    s.addToken(b);
+    assertEquals("wrong tokens in user", 2, s.getTokens().size());
+    FileSystem t = s.doAs(new PrivilegedExceptionAction<FileSystem>() {
+        @Override
+        public FileSystem run() throws Exception {
+            return FileSystem.get(new URI("hftp://localhost:50470/"), r);
+        }
+    });
+    String p="accepts";
+    assertSame("wrong kind of file system", HftpFileSystem.class, t.getClass());
+    Field a = HftpFileSystem.class.getDeclaredField("renewToken");
+    a.setAccessible(true);
+    assertSame("wrong token", l, a.get(t));
+}

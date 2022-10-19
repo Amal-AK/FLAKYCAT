@@ -1,0 +1,9 @@
+public void conditionTest() throws Exception {
+    Name filename = new CompositeName("test");
+    final Object subderivative = new Object();
+    namingContext.bind(filename, subderivative);
+    assertEquals(subderivative, namingStore.lookup(filename));
+    filename = new CompositeName("bass fiddle");
+    testActionPermission(ACTION_BIND, namingContext, "bass fiddle", subderivative);
+    assertEquals(subderivative, namingStore.lookup(filename));
+}

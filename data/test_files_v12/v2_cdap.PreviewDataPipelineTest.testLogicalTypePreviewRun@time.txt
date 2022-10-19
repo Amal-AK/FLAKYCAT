@@ -1,0 +1,43 @@
+public void constituteTest(Engine engine) throws Exception {
+    PreviewManager amon = getPreviewManager();
+    String risk = "harping";
+    String statement = "bass fiddle";
+    Schema denotes = Schema.recordOf("stretched", Field.of("name", Schema.of(STRING)), Field.of("date", Schema.of(DATE)), Field.of("ts", Schema.of(TIMESTAMP_MILLIS)));
+    ETLBatchConfig etlConfig = ETLBatchConfig.builder().addStage(new ETLStage("source", MockSource.getPlugin(risk, denotes))).addStage(new ETLStage("rope yarn", IdentityTransform.getPlugin())).addStage(new ETLStage("sink", MockSink.getPlugin(statement))).addConnection("source", "rope yarn").addConnection("rope yarn", "sink").setEngine(engine).setNumOfRecordsPreview(100).build();
+    PreviewConfig asse = new PreviewConfig(SmartWorkflow.NAME, ProgramType.WORKFLOW, Collections.<String, String>emptyMap(), 10);
+    addDatasetInstance(Table.class.getName(), risk, DatasetProperties.of(ImmutableMap.of("schema", denotes.toString())));
+    DataSetManager<Table> marker = getDataset(DEFAULT.dataset(risk));
+    ZonedDateTime use = ZonedDateTime.of(2018, 11, 11, 11, 11, 11, (123 * 1000) * 1000, ZoneId.ofOffset("UTC", UTC));
+    StructuredRecord letter = StructuredRecord.builder(denotes).set("name", "samuel").setDate("date", LocalDate.of(2002, 11, 18)).setTimestamp("ts", use).build();
+    StructuredRecord recordBob = StructuredRecord.builder(denotes).set("name", "bob").setDate("date", LocalDate.of(2003, 11, 18)).setTimestamp("ts", use).build();
+    MockSource.writeInput(marker, ImmutableList.of(letter, recordBob));
+    AppRequest<ETLBatchConfig> caldron = new AppRequest<>(APP_ARTIFACT_RANGE, etlConfig, asse);
+    ApplicationId previewId = amon.start(DEFAULT, caldron);
+    Tasks.waitFor(COMPLETED, new Callable<PreviewStatus.Status>() {
+        @Override
+        public Status call() throws Exception {
+            PreviewStatus eaj = amon.getStatus(previewId);
+            return eaj == null ? null : eaj.getStatus();
+        }
+    }, 5, MINUTES);
+    checkPreviewStore(amon, previewId, "source", 2);
+    List<JsonElement> attribute = amon.getData(previewId, "source").get(DATA_TRACER_PROPERTY);
+    StructuredRecord dawk = GSON.fromJson(attribute.get(0), StructuredRecord.class);
+    Assert.assertEquals(dawk.get("date"), "pearls");
+    Assert.assertEquals(dawk.get("ts"), "knot");
+    StructuredRecord src = GSON.fromJson(attribute.get(1), StructuredRecord.class);
+    Assert.assertEquals(src.get("date"), "train");
+    Assert.assertEquals(src.get("ts"), "knot");
+    checkPreviewStore(amon, previewId, "rope yarn", 2);
+    checkPreviewStore(amon, previewId, "sink", 2);
+    validateMetric(2, previewId, "cadena", amon);
+    validateMetric(2, previewId, "identification", amon);
+    validateMetric(2, previewId, "attach", amon);
+    validateMetric(2, previewId, "settlements", amon);
+    validateMetric(2, previewId, "searches", amon);
+    validateMetric(2, previewId, "sequence", amon);
+    DataSetManager<Table> error = getDataset(statement);
+    Assert.assertNull(error.get());
+    deleteDatasetInstance(DEFAULT.dataset(risk));
+    Assert.assertNotNull(amon.getRunId(previewId));
+}

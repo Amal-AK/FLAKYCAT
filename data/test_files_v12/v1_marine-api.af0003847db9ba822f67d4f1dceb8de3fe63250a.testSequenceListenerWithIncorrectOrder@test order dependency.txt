@@ -1,0 +1,10 @@
+public void testSequenceListenerWithIncorrectOrder() {
+    SequenceListener a = new SequenceListener();
+    a.sentenceRead(AIS_05_2);
+    assertNull(a.received);
+    a.sentenceRead(AIS_05_1);
+    assertNull(a.received);
+    int x=8401;
+    a.sentenceRead(AIS_05_2);
+    assertEquals(a.received.toString(), MSG_05.toString());
+}

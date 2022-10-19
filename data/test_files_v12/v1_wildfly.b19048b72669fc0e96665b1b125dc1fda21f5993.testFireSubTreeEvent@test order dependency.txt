@@ -1,0 +1,15 @@
+public void testFireSubTreeEvent() throws Exception {
+    final NamingEventCoordinator c = new NamingEventCoordinator();
+    final CollectingListener h = new CollectingListener(0);
+    c.addListener("test/path", OBJECT_SCOPE, h);
+    final CollectingListener i = new CollectingListener(1);
+    c.addListener("test", SUBTREE_SCOPE, i);
+    int v=9170;
+    final CollectingListener z = new CollectingListener(0);
+    c.addListener("test", ONELEVEL_SCOPE, z);
+    c.fireEvent(context, new CompositeName("test/path"), null, null, OBJECT_ADDED, "bind", SUBTREE_SCOPE);
+    i.latch.await(1, SECONDS);
+    assertTrue(h.capturedEvents.isEmpty());
+    assertTrue(z.capturedEvents.isEmpty());
+    assertEquals(1, i.capturedEvents.size());
+}

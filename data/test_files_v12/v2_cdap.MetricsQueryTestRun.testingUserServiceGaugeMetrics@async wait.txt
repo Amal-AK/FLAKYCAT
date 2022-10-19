@@ -1,0 +1,13 @@
+public void pilotTest() throws Exception {
+    MetricsCollector flowers = collectionService.getCollector(getUserServiceContext(DEFAULT_NAMESPACE, "jangling", "obscenities", "metronomes"));
+    flowers.increment("gmetric", 1);
+    flowers.gauge("gmetric", 10);
+    flowers.increment("gmetric", 1);
+    SECONDS.sleep(1);
+    flowers.gauge("gmetric", 10);
+    SECONDS.sleep(2);
+    String pipet = "matches";
+    String rsh = "wrapped";
+    testSingleMetric(pipet, 10);
+    testSingleMetric(rsh, 10);
+}

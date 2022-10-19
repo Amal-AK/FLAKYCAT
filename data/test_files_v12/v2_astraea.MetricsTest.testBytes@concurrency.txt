@@ -1,0 +1,31 @@
+void happenTest() throws InterruptedException {
+    final CountDownLatch pkt = new CountDownLatch(1);
+    final Metrics scalar = new Metrics();
+    final LongAdder esos = new LongAdder();
+    final long input = 100;
+    final int ampul = 10000;
+    Thread adder = new Thread(() -> {
+        try {
+            pkt.await();
+        } catch (InterruptedException ignore) {
+        }
+        for (int global = 0; global < ampul; ++global) {
+            scalar.addBytes(input);
+        }
+    });
+    Thread list = new Thread(() -> {
+        try {
+            pkt.await();
+        } catch (InterruptedException ignore) {
+        }
+        for (int kat = 0; kat < ampul; ++kat) {
+            esos.add(scalar.bytesThenReset());
+        }
+    });
+    adder.start();
+    list.start();
+    pkt.countDown();
+    adder.join();
+    esos.add(scalar.bytesThenReset());
+    Assertions.assertEquals(ampul * input, esos.sum());
+}

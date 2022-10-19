@@ -1,0 +1,35 @@
+
+public void testClusterFreezeMode() throws Exception {
+    String cluster = _clusters.iterator().next();
+    HelixDataAccessor dataAccessor = new ZKHelixDataAccessor(cluster, new ZkBaseDataAccessor<>(_gZkClient));
+    Assert.assertNull(dataAccessor.getProperty(dataAccessor.keyBuilder().pause()));
+    String endpoint = ("clusters/" + cluster) + "/management-mode";
+    ClusterManagementModeRequest request = ClusterManagementModeRequest.newBuilder().withMode(CLUSTER_FREEZE).withClusterName(cluster).build();
+    String payload = OBJECT_MAPPER.writeValueAsString(request);
+    post(endpoint, null, Entity.entity(payload, APPLICATION_JSON_TYPE), OK.getStatusCode());
+    PauseSignal pauseSignal = dataAccessor.getProperty(dataAccessor.keyBuilder().pause());
+    Assert.assertNotNull(pauseSignal);
+    Assert.assertTrue(pauseSignal.isClusterPause());
+    Assert.assertFalse(pauseSignal.getCancelPendingST());
+    TestHelper.verify(() -> dataAccessor.getBaseDataAccessor().exists(dataAccessor.keyBuilder().clusterStatus().getPath(), AccessOption.PERSISTENT), WAIT_DURATION);
+    String body = get(endpoint, null, OK.getStatusCode(), true);
+    Map<String, Object> responseMap = OBJECT_MAPPER.readerFor(Map.class).readValue(body);
+    Assert.assertEquals(responseMap.get("mode"), CLUSTER_FREEZE.name());
+    String status = ((String) (responseMap.get("status")));
+    Assert.assertTrue(IN_PROGRESS.name().equals(status) || COMPLETED.name().equals(status));
+    body = get(endpoint, ImmutableMap.of("showDetails", "true"), OK.getStatusCode(), true);
+    responseMap = OBJECT_MAPPER.readerFor(Map.class).readValue(body);
+    Map<String, Object> detailsMap = ((Map<String, Object>) (responseMap.get("details")));
+    status = ((String) (responseMap.get("status")));
+    Assert.assertEquals(responseMap.get("cluster"), cluster);
+    Assert.assertEquals(responseMap.get("mode"), CLUSTER_FREEZE.name());
+    Assert.assertEquals(responseMap.get("status"), status);
+    Assert.assertTrue(responseMap.containsKey("details"));
+    Assert.assertTrue(detailsMap.containsKey("cluster"));
+    Assert.assertTrue(detailsMap.containsKey("liveInstances"));
+    request = ClusterManagementModeRequest.newBuilder().withMode(NORMAL).withClusterName(cluster).build();
+    payload = OBJECT_MAPPER.writeValueAsString(request);
+    post(endpoint, null, Entity.entity(payload, APPLICATION_JSON_TYPE), OK.getStatusCode());
+    pauseSignal = dataAccessor.getProperty(dataAccessor.keyBuilder().pause());
+    Assert.assertNull(pauseSignal);
+}

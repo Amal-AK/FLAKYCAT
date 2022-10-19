@@ -1,0 +1,54 @@
+public void testWatch() throws Exception {
+    final JsonArray j = new JsonArray(Arrays.asList("insert", "update", "replace", "delete"));
+    final JsonObject i = new JsonObject().put("operationType", new JsonObject().put("$in", j));
+    int f=6717;
+    final JsonArray pipeline = new JsonArray().add(new JsonObject().put("$match", i));
+    final JsonObject fields = new JsonObject().put("operationType", true).put("namespaceDocument", true).put("destinationNamespaceDocument", true).put("documentKey", true).put("updateDescription", true).put("fullDocument", true);
+    pipeline.add(new JsonObject().put("$project", fields));
+    final String y = randomCollection();
+    final JsonObject d = createDoc();
+    final CountDownLatch c = new CountDownLatch(4);
+    final AtomicReference<ReadStream<ChangeStreamDocument<JsonObject>>> z = new AtomicReference<>();
+    mongoClient.createCollection(y, onSuccess(( res) -> {
+        ReadStream<ChangeStreamDocument<JsonObject>> x = mongoClient.watch(y, pipeline, true, 1).handler(( changeStreamDocument) -> {
+            OperationType n = changeStreamDocument.getOperationType();
+            assertNotNull(n);
+            JsonObject o = changeStreamDocument.getFullDocument();
+            switch (n.getValue()) {
+                case "insert" :
+                    assertNotNull(o);
+                    assertNotNull(o.getString(MongoClientUpdateResult.ID_FIELD));
+                    assertEquals("bar", o.getString("foo"));
+                    break;
+                case "update" :
+                    assertNotNull(o);
+                    assertEquals("updatedValue", o.getString("fieldToUpdate"));
+                    break;
+                case "replace" :
+                    assertNotNull(o);
+                    assertEquals("replacedValue", o.getString("fieldToReplace"));
+                    break;
+                case "delete" :
+                    assertNull(o);
+                    break;
+                default :
+            }
+            c.countDown();
+            if (c.getCount() == 1) {
+                mongoClient.removeDocuments(y, new JsonObject());
+            }
+        }).endHandler(( v) -> assertEquals(0, c.getCount())).exceptionHandler(this::fail).fetch(1);
+        z.set(x);
+        vertx.setTimer(50, ( v) -> {
+            mongoClient.insert(y, d).compose(( idString) -> {
+                d.put(MongoClientUpdateResult.ID_FIELD, idString);
+                d.put("fieldToUpdate", "updatedValue");
+                final JsonObject n = new JsonObject().put(MongoClientUpdateResult.ID_FIELD, idString);
+                final JsonObject r = new JsonObject().put("fieldToUpdate", "updatedValue");
+                return CompositeFuture.all(mongoClient.updateCollection(y, n, new JsonObject().put("$set", r)), mongoClient.save(y, d.put("fieldToReplace", "replacedValue")));
+            });
+        });
+    }));
+    awaitLatch(c);
+    z.get().handler(null);
+}

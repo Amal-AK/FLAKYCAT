@@ -1,0 +1,20 @@
+
+public void testPublishFailsForClosedConnection() throws JMSException {
+    Connection tempConnection = factory.createConnection();
+    Session tempSession = tempConnection.createSession(false, AUTO_ACKNOWLEDGE);
+    TemporaryQueue queue = tempSession.createTemporaryQueue();
+    Session session = connection.createSession(false, AUTO_ACKNOWLEDGE);
+    connection.start();
+    MessageProducer producer = session.createProducer(queue);
+    producer.setDeliveryMode(NON_PERSISTENT);
+    TextMessage message = session.createTextMessage("First");
+    producer.send(message);
+    tempConnection.close();
+    try {
+        message = session.createTextMessage("Hello");
+        producer.send(message);
+        fail("Send should fail since temp destination should not exist anymore.");
+    } catch (JMSException e) {
+        assertTrue("failed to throw an exception", true);
+    }
+}

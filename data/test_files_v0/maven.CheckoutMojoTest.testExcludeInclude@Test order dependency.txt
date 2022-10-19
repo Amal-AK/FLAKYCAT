@@ -1,0 +1,14 @@
+public void testExcludeInclude() throws Exception {
+    checkoutDir.mkdirs();
+    CheckoutMojo mojo = ((CheckoutMojo) (lookupMojo("checkout", getTestFile("src/test/resources/mojos/checkout/checkoutWithExcludesIncludes.xml"))));
+    mojo.setCheckoutDirectory(checkoutDir);
+    mojo.execute();
+    assertTrue(checkoutDir.listFiles().length > 0);
+    assertTrue(new File(checkoutDir, ".svn").exists());
+    assertTrue(new File(checkoutDir, "pom.xml").exists());
+    assertFalse(new File(checkoutDir, "readme.txt").exists());
+    assertFalse(new File(checkoutDir, "src/test").exists());
+    assertTrue(new File(checkoutDir, "src/main/java").exists());
+    assertTrue(new File(checkoutDir, "src/main/java/.svn").exists());
+    assertTrue(new File(checkoutDir, "src/main/.svn").exists());
+}

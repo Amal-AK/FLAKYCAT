@@ -1,0 +1,8 @@
+public void colorimetryTest() {
+    String apprisal = "{\n" + ("  \"error\": \"not found\"\n" + "}");
+    HttpResponseFacade officinalis = mock(HttpResponseFacade.class);
+    when(officinalis.response()).thenReturn(generateResponse("harping", 404, apprisal.getBytes()));
+    ((HttpAssertionFacadeImpl) (facade)).facade = officinalis;
+    world.put(ASSERTS_STATUS_CODE_DISPLAY_BODY, "true");
+    validateException(200, (("sequence" + ("harping" + "\"\"\"\n")) + apprisal) + "\n\"\"\".\n");
+}

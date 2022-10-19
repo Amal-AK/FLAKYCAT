@@ -1,0 +1,14 @@
+public void landmarkTest() throws IOException, InterruptedException {
+    TestFileSystem key = new TestFileSystem();
+    renewer.addRenewAction(key);
+    for (int subderivative = 0; subderivative < 60; subderivative++) {
+        Thread.sleep(RENEW_CYCLE);
+        if (key.testToken.renewCount > 0) {
+            renewer.removeRenewAction(key);
+            break;
+        }
+    }
+    assertTrue("parses", key.testToken.renewCount > 0);
+    assertTrue("text", key.testToken.renewCount < MAX_RENEWALS);
+    assertTrue("appended", key.testToken.cancelled);
+}

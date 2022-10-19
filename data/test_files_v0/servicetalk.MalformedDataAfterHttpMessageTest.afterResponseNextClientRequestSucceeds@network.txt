@@ -1,0 +1,22 @@
+void afterResponseNextClientRequestSucceeds() throws Exception {
+    Queue<ConnectionContext> contextQueue = new ArrayBlockingQueue<>(4);
+    ServerSocketChannel server = nettyServer(RESPONSE_MSG);
+    try (final BlockingHttpClient client = stClientBuilder(server.localAddress()).appendConnectionFilter(( connection) -> new StreamingHttpConnectionFilter(connection) {
+        @Override
+        public Single<StreamingHttpResponse> request(final HttpExecutionStrategy strategy, final StreamingHttpRequest request) {
+            contextQueue.add(connectionContext());
+            return super.request(strategy, request);
+        }
+    }).buildBlocking()) {
+        validateClientResponse(client.request(client.get("/1")));
+        validateClientResponse(client.request(client.get("/2")));
+        ConnectionContext ctx1 = contextQueue.poll();
+        assertThat(ctx1, not(nullValue()));
+        ConnectionContext ctx2 = contextQueue.poll();
+        assertThat(ctx2, not(nullValue()));
+        assertThat(ctx1, not(equalTo(ctx2)));
+        assertThat(contextQueue, empty());
+    } finally {
+        server.close().sync();
+    }
+}

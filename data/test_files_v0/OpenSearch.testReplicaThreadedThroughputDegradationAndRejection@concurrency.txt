@@ -1,0 +1,21 @@
+public void testReplicaThreadedThroughputDegradationAndRejection() throws Exception {
+        Settings settings = Settings.builder().put(IndexingPressure.MAX_INDEXING_BYTES.getKey(), "10KB")
+            .put(ShardIndexingPressureSettings.SHARD_INDEXING_PRESSURE_ENABLED.getKey(), true)
+            .put(ShardIndexingPressureSettings.SHARD_INDEXING_PRESSURE_ENFORCED.getKey(), true)
+            .put(ShardIndexingPressureMemoryManager.THROUGHPUT_DEGRADATION_LIMITS.getKey(), 1)
+            .put(ShardIndexingPressureSettings.REQUEST_SIZE_WINDOW.getKey(), 100)
+            .build();
+        final int NUM_THREADS = scaledRandomIntBetween(100, 120);
+        ShardIndexingPressure shardIndexingPressure = new ShardIndexingPressure(settings, clusterService);
+        Index index = new Index("IndexName", "UUID");
+        ShardId shardId1 = new ShardId(index, 0);
+        fireConcurrentAndParallelRequestsForUniformThroughPut(NUM_THREADS, shardIndexingPressure, shardId1, 100, 100,
+            OperationType.REPLICA);
+        fireAllThenCompleteConcurrentRequestsWithUniformDelay(ShardIndexingPressureSettings.REQUEST_SIZE_WINDOW.get(settings),
+            shardIndexingPressure, shardId1, 100, 200, OperationType.REPLICA);
+        expectThrows(OpenSearchRejectedExecutionException.class,
+            () -> shardIndexingPressure.markReplicaOperationStarted(shardId1, 11 * 1024, false));
+        assertEquals(0, shardIndexingPressure.coldStats().getIndexingPressureShardStats(shardId1).getCurrentReplicaBytes());
+        assertEquals(15, shardIndexingPressure.coldStats().getIndexingPressureShardStats(shardId1).getCurrentReplicaLimits());
+       
+    }

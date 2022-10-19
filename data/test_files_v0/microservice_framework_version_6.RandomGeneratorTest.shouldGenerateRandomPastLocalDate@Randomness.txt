@@ -1,0 +1,6 @@
+public void shouldGenerateRandomPastLocalDate() {
+    final LocalDateTime startDate = now().atStartOfDay();
+    final LocalDateTime endDate = now().minus(Period.ofYears(5)).atStartOfDay();
+    final Generator<LocalDate> pastLocalDateGenerator = RandomGenerator.PAST_LOCAL_DATE;
+    typeCheck(pastLocalDateGenerator, ( s) -> !(s.isBefore(endDate.toLocalDate()) || s.isAfter(startDate.toLocalDate()))).verify(times(NUMBER_OF_TIMES));
+}

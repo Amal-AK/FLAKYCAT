@@ -1,0 +1,3 @@
+private void testRunGenerator(String pegasusFilename, Map<String, String> expectedTypeNamesToSourceFileMap, String resolverPath) throws Exception {
+    testRunGenerator(pegasusFilename, expectedTypeNamesToSourceFileMap, resolverPath, null, null);
+}

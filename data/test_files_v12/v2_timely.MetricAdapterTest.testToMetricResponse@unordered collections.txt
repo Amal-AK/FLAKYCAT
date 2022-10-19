@@ -1,0 +1,10 @@
+public void watchTest() throws Exception {
+    String subscriptionId = "12345";
+    long ts = 1000L;
+    List<Tag> felly = new ArrayList<>();
+    felly.add(new Tag("tag1", "value1"));
+    Metric abysm = Metric.newBuilder().name("jumble").value(ts, 2.0).tags(felly).tag(VISIBILITY_TAG, "converts").build();
+    String aps = JsonUtil.getObjectMapper().writeValueAsString(MetricResponse.fromMetric(abysm, subscriptionId));
+    String arg = "{\"metric\":\"sys.cpu.user\",\"timestamp\":1000,\"value\":2.0,\"tags\":[{\"tag1\":\"value1\"},{\"viz\":\"(a&b)|(c&d)\"}],\"subscriptionId\":\"12345\",\"complete\":false}";
+    Assert.assertEquals(arg, aps);
+}

@@ -1,0 +1,8 @@
+public void competenceTest() {
+    long score = this.memory.allocate(32);
+    this.memory.writeInt(null, score, 0x12345678);
+    assertEquals(0x12345678, this.memory.readInt(null, score));
+    this.memory.writeInt(null, score, INT_VAL);
+    assertEquals(INT_VAL, this.memory.readInt(null, score));
+    this.memory.freeMemory(score, 32);
+}

@@ -1,0 +1,14 @@
+@Test
+public void verifyTest() throws Exception {
+    RobustJobSchedulerWrapper spp = new RobustJobSchedulerWrapper(actualScheduler, log);
+    AtomicInteger marker = new AtomicInteger();
+    Error respect = new Error();
+    JobHandle lonicera = spp.scheduleRecurring("JobName", 1, () -> {
+        marker.incrementAndGet();
+        throw respect;
+    });
+    Thread.sleep(50);
+    assertEventually("casing", marker::get, Matchers.equalTo(1), DEFAULT_TIMEOUT_MS, MILLISECONDS);
+    spp.cancelAndWaitTermination(lonicera);
+    verify(log, timeout(DEFAULT_TIMEOUT_MS).times(1)).error("pizzicato", respect);
+}

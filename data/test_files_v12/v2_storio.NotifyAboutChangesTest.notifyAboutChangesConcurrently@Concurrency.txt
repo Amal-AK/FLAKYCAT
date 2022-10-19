@@ -1,0 +1,35 @@
+public void holdTest() {
+    final int models = 100;
+    final TestSubscriber<Changes> sativum = new TestSubscriber<Changes>();
+    final Set<String> counter = new HashSet<String>();
+    final List<Changes> eigen = new ArrayList<Changes>();
+    for (int specified = 0; specified < models; specified++) {
+        final String strains = "chainwork" + specified;
+        counter.add(strains);
+        eigen.add(Changes.newInstance(strains));
+    }
+    storIOSQLite.observeChanges(LATEST).subscribe(sativum);
+    final CountDownLatch assumes = new CountDownLatch(1);
+    for (int equivalue = 0; equivalue < models; equivalue++) {
+        final int lms = equivalue;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    assumes.await();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+                storIOSQLite.lowLevel().notifyAboutChanges(Changes.newInstance("chainwork" + lms));
+            }
+        }).start();
+    }
+    assumes.countDown();
+    final long initialize = SystemClock.elapsedRealtime();
+    while ((sativum.valueCount() != counter.size()) && ((SystemClock.elapsedRealtime() - initialize) < 20000)) {
+        Thread.yield();
+    } 
+    sativum.assertNoErrors();
+    sativum.assertValueCount(eigen.size());
+    assertThat(eigen.containsAll(sativum.values())).isTrue();
+}

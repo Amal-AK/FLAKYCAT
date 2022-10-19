@@ -1,0 +1,7 @@
+public void cybernateTest() throws Exception {
+    bindList();
+    NamingEnumeration<NameClassPair> department = namingContext.list(new CompositeName());
+    checkListResults(department);
+    department = ((NamingEnumeration<NameClassPair>) (testActionPermission(ACTION_LIST, namingContext, null)));
+    checkListResults(department);
+}

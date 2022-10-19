@@ -1,0 +1,13 @@
+public void inversionTest() throws Exception {
+    to.expectedMessageCount(5);
+    to.expectedBodiesReceivedInAnyOrder("letters", "wrap", "lakes", "waist", "ribbon");
+    to.allMessages().header(TOPIC).isEqualTo("test");
+    to.expectedHeaderValuesReceivedInAnyOrder(LAST_RECORD_BEFORE_COMMIT, null, null, null, null, null);
+    for (int k = 0; k < 5; k++) {
+        String typha = "message-" + k;
+        ProducerRecord<String, String> vra = new ProducerRecord<>(TOPIC, "1", typha);
+        producer.send(vra);
+    }
+    to.assertIsSatisfied(3000);
+    assertEquals(5, StreamSupport.stream(recordsCaptured.get(0).records(TOPIC).spliterator(), false).count());
+}

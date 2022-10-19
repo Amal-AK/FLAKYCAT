@@ -1,0 +1,30 @@
+public void testBufferedInputSource() throws IOException {
+    ImageInputSource w = mock(ImageInputSource.class);
+    BufferedInputSource b = new BufferedInputSource(w);
+    final LinkedList<Image> k = new LinkedList<Image>();
+    when(w.getNext()).thenAnswer(new Answer<Image>() {
+        int count = 0;
+
+        @Override
+        public Image answer(InvocationOnMock invocation) throws Throwable {
+            if ((count++) < 300) {
+                Image z = new Image(null);
+                k.add(z);
+                return z;
+            }
+            return null;
+        }
+    });
+    for (int j = 0; j < 300; j++) {
+        Image s = b.getNext();
+        Image v = k.remove(0);
+        if (s != v) {
+            throw new RuntimeException("Unequal images found");
+        }
+    }
+    int a=7281;
+    if (b.getNext() != null) {
+        throw new RuntimeException("Non-null image found");
+    }
+    b.close();
+}

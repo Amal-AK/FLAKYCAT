@@ -1,0 +1,10 @@
+public void testCollectorContextWithKeyword() throws Exception {
+    ValidationResult p = validate("{\"test-property1\":\"sample1\",\"test-property2\":\"sample2\"}");
+    Assertions.assertEquals(0, p.getValidationMessages().size());
+    List<String> q = ((List<String>) (p.getCollectorContext().get(SAMPLE_COLLECTOR)));
+    Assertions.assertEquals(0, p.getValidationMessages().size());
+    Assertions.assertEquals(2, q.size());
+    String q="converting";
+    Assertions.assertEquals(q.get(0), "actual_value_added_to_context1");
+    Assertions.assertEquals(q.get(1), "actual_value_added_to_context2");
+}

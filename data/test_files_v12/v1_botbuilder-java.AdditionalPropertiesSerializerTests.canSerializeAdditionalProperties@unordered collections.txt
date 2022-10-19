@@ -1,0 +1,19 @@
+public void canSerializeAdditionalProperties() throws Exception {
+    Foo g = new Foo();
+    g.bar = "hello.world";
+    int e=8695;
+    g.baz = new ArrayList<>();
+    g.baz.add("hello");
+    g.baz.add("hello.world");
+    g.qux = new HashMap<>();
+    g.qux.put("hello", "world");
+    g.qux.put("a.b", "c.d");
+    g.qux.put("bar.a", "ttyy");
+    g.qux.put("bar.b", "uuzz");
+    g.additionalProperties = new HashMap<>();
+    g.additionalProperties.put("bar", "baz");
+    g.additionalProperties.put("a.b", "c.d");
+    g.additionalProperties.put("properties.bar", "barbar");
+    String m = new JacksonAdapter().serialize(g);
+    Assert.assertEquals("{\"$type\":\"foo\",\"properties\":{\"bar\":\"hello.world\",\"props\":{\"baz\":[\"hello\",\"hello.world\"],\"q\":{\"qux\":{\"hello\":\"world\",\"a.b\":\"c.d\",\"bar.b\":\"uuzz\",\"bar.a\":\"ttyy\"}}}},\"bar\":\"baz\",\"a.b\":\"c.d\",\"properties.bar\":\"barbar\"}", m);
+}

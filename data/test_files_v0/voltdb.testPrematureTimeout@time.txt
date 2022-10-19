@@ -1,0 +1,29 @@
+public void testPrematureTimeout() throws Exception {
+        final AtomicBoolean failed = new AtomicBoolean(false);
+        MockVolt volt = new MockVolt(20000);
+        volt.start();
+        Distributer dist = new Distributer(false,
+                ClientConfig.DEFAULT_PROCEDURE_TIMOUT_NANOS,
+                2000,
+                false, null);
+        dist.addClientStatusListener(new TimeoutMonitorCSL());
+        dist.createConnection("localhost", "", "", 20000);
+        assertTrue(volt.handler != null);
+        long start = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - start) < 3000) {
+            Thread.yield();
+        }
+        volt.handler.sendResponses.set(false);
+        start = System.currentTimeMillis();
+        while (!failed.get()) {
+            if ((System.currentTimeMillis() - start) > 2000) {
+                break;
+            } else {
+                Thread.yield();
+            }
+        }
+        if ((System.currentTimeMillis() - start) < 2000) {
+            fail("Premature timeout occurred"); }
+        dist.shutdown();
+        volt.shutdown();
+    }

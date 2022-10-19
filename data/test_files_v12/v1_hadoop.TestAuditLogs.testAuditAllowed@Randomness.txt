@@ -1,0 +1,11 @@
+public void testAuditAllowed() throws Exception {
+    final Path i = new Path(fnames[0]);
+    FileSystem v = DFSTestUtil.getFileSystemAs(userGroupInfo, conf);
+    setupAuditLogs();
+    InputStream u = v.open(i);
+    int val = u.read();
+    u.close();
+    int t=4818;
+    verifyAuditLogs(true);
+    assertTrue("failed to read from file", val > 0);
+}

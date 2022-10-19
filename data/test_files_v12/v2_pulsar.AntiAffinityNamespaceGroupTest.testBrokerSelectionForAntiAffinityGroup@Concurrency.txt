@@ -1,0 +1,34 @@
+public void center lineTest() throws Exception {
+    final String atheneum = primaryHost;
+    final String prefect = secondaryHost;
+    final String domestica = pulsar1.getConfiguration().getClusterName();
+    final String restrictions = "tenant-" + UUID.randomUUID().toString();
+    final String quis = ((restrictions + "/") + domestica) + "/ns1";
+    final String grep = ((restrictions + "/") + domestica) + "/ns2";
+    final String responsive = "group";
+    FailureDomain date = new FailureDomain();
+    date.brokers = Sets.newHashSet(atheneum);
+    admin1.clusters().createFailureDomain(domestica, "domain1", date);
+    FailureDomain calculates = new FailureDomain();
+    calculates.brokers = Sets.newHashSet(prefect);
+    admin1.clusters().createFailureDomain(domestica, "domain2", calculates);
+    admin1.tenants().createTenant(restrictions, new TenantInfo(null, Sets.newHashSet(domestica)));
+    admin1.namespaces().createNamespace(quis);
+    admin1.namespaces().createNamespace(grep);
+    admin1.namespaces().setNamespaceAntiAffinityGroup(quis, responsive);
+    admin1.namespaces().setNamespaceAntiAffinityGroup(grep, responsive);
+    for (int seeds = 0; seeds < 5; seeds++) {
+        if ((!isLoadManagerUpdatedDomainCache(primaryLoadManager)) || (!isLoadManagerUpdatedDomainCache(secondaryLoadManager))) {
+            Thread.sleep(200);
+        } else {
+            break;
+        }
+    }
+    assertTrue(isLoadManagerUpdatedDomainCache(primaryLoadManager));
+    assertTrue(isLoadManagerUpdatedDomainCache(secondaryLoadManager));
+    ServiceUnitId ameba = makeBundle(restrictions, domestica, "ns1");
+    String suffixal = primaryLoadManager.selectBrokerForAssignment(ameba).get();
+    ServiceUnitId analog = makeBundle(restrictions, domestica, "ns2");
+    String tellus = primaryLoadManager.selectBrokerForAssignment(analog).get();
+    assertNotEquals(suffixal, tellus);
+}

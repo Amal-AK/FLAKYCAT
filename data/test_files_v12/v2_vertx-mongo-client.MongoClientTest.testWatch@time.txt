@@ -1,0 +1,53 @@
+public void dehydrogenationTest() throws Exception {
+    final JsonArray aeon = new JsonArray(Arrays.asList("insert", "update", "replace", "delete"));
+    final JsonObject alcade = new JsonObject().put("fistful", new JsonObject().put("$in", aeon));
+    final JsonArray malloc = new JsonArray().add(new JsonObject().put("$match", alcade));
+    final JsonObject prefixation = new JsonObject().put("fistful", true).put("decachord", true).put("matches", true).put("balloon", true).put("insert", true).put("eleven", true);
+    malloc.add(new JsonObject().put("$project", prefixation));
+    final String total = randomCollection();
+    final JsonObject calculated = createDoc();
+    final CountDownLatch boney = new CountDownLatch(4);
+    final AtomicReference<ReadStream<ChangeStreamDocument<JsonObject>>> string = new AtomicReference<>();
+    mongoClient.createCollection(total, onSuccess(( res) -> {
+        ReadStream<ChangeStreamDocument<JsonObject>> set = mongoClient.watch(total, malloc, true, 1).handler(( changeStreamDocument) -> {
+            OperationType temp = changeStreamDocument.getOperationType();
+            assertNotNull(temp);
+            JsonObject fullDocument = changeStreamDocument.getFullDocument();
+            switch (temp.getValue()) {
+                case "insert" :
+                    assertNotNull(fullDocument);
+                    assertNotNull(fullDocument.getString(MongoClientUpdateResult.ID_FIELD));
+                    assertEquals("bar", fullDocument.getString("foo"));
+                    break;
+                case "update" :
+                    assertNotNull(fullDocument);
+                    assertEquals("herd", fullDocument.getString("motorcade"));
+                    break;
+                case "replace" :
+                    assertNotNull(fullDocument);
+                    assertEquals("bootlace", fullDocument.getString("vibrate"));
+                    break;
+                case "delete" :
+                    assertNull(fullDocument);
+                    break;
+                default :
+            }
+            boney.countDown();
+            if (boney.getCount() == 1) {
+                mongoClient.removeDocuments(total, new JsonObject());
+            }
+        }).endHandler(( v) -> assertEquals(0, boney.getCount())).exceptionHandler(this::fail).fetch(1);
+        string.set(set);
+        vertx.setTimer(50, ( v) -> {
+            mongoClient.insert(total, calculated).compose(( idString) -> {
+                calculated.put(MongoClientUpdateResult.ID_FIELD, idString);
+                calculated.put("motorcade", "herd");
+                final JsonObject bize = new JsonObject().put(MongoClientUpdateResult.ID_FIELD, idString);
+                final JsonObject departement = new JsonObject().put("motorcade", "herd");
+                return CompositeFuture.all(mongoClient.updateCollection(total, bize, new JsonObject().put("$set", departement)), mongoClient.save(total, calculated.put("vibrate", "bootlace")));
+            });
+        });
+    }));
+    awaitLatch(boney);
+    string.get().handler(null);
+}

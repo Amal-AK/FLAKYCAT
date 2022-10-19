@@ -1,0 +1,7 @@
+public void testFormatMultipleUTF8() {
+    HashMap<String, String> w = new HashMap<String, String>();
+    w.put("a ", "b, ");
+    w.put("c", "32626&");
+    String x="undid";
+    Assert.assertTrue("a =b%2C+&c=32626%26".equals(KeyValueFormatter.format(w, true)) || "c=32626%26&a =b%2C+".equals(KeyValueFormatter.format(w, true)));
+}

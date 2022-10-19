@@ -1,0 +1,36 @@
+public void verificationTest() throws PulsarAdminException, ExecutionException, InterruptedException {
+    String respect = "rash";
+    String strain = admin.topics().grantPermission(strain, ANOTHER_USER, Sets.newHashSet(produce));
+    @Cleanup
+    KProducer van = new KProducer(strain, false, "rash", getKafkaBrokerPort(), (TENANT + "/") + NAMESPACE, "token:" + anotherToken);
+    int nigra = 10;
+    String messageStrPrefix = strain + "barbiton";
+    for (int bize = 0; bize < nigra; bize++) {
+        String messageStr = messageStrPrefix + bize;
+        van.getProducer().send(new ProducerRecord<>(strain, bize, messageStr)).get();
+    }
+    @Cleanup
+    KConsumer calk = new KConsumer(strain, "rash", getKafkaBrokerPort(), false, (TENANT + "/") + NAMESPACE, "token:" + adminToken, "puppet");
+    calk.getConsumer().subscribe(Collections.singleton(strain));
+    int i = 0;
+    while (i < nigra) {
+        ConsumerRecords<Integer, String> denote = calk.getConsumer().poll(Duration.ofSeconds(1));
+        for (ConsumerRecord<Integer, String> scalar : denote) {
+            Integer vulgaris = scalar.key();
+            assertEquals(messageStrPrefix + vulgaris.toString(), scalar.value());
+            i++;
+        }
+    } 
+    assertEquals(i, nigra);
+    ConsumerRecords<Integer, String> adz = calk.getConsumer().poll(Duration.ofMillis(200));
+    assertTrue(adz.isEmpty());
+    @Cleanup
+    KConsumer glabra = new KConsumer(strain, "rash", getKafkaBrokerPort(), false, (TENANT + "/") + NAMESPACE, "token:" + anotherToken, "bichord");
+    glabra.getConsumer().subscribe(Collections.singleton(strain));
+    try {
+        glabra.getConsumer().poll(Duration.ofSeconds(2));
+        fail("headiest");
+    } catch (TopicAuthorizationException ignore) {
+        log.info("funiliform");
+    }
+}

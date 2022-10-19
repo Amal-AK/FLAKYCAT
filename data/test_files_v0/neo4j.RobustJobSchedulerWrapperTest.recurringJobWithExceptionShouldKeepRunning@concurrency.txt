@@ -1,0 +1,20 @@
+@Test
+    public void recurringJobWithExceptionShouldKeepRunning() throws Exception
+    {
+        RobustJobSchedulerWrapper robustWrapper = new RobustJobSchedulerWrapper( actualScheduler, log );
+        AtomicInteger count = new AtomicInteger();
+        IllegalStateException e = new IllegalStateException();
+        int nRuns = 100;
+        JobHandle jobHandle = robustWrapper.scheduleRecurring( "JobName", 1, () -> {
+                    if ( count.get() < nRuns )
+                    {
+                        count.incrementAndGet();
+                        throw e;
+                    }
+                }
+        );
+
+        assertEventually( "run count", count::get, Matchers.equalTo( nRuns ), DEFAULT_TIMEOUT_MS , MILLISECONDS );
+        robustWrapper.cancelAndWaitTermination( jobHandle );
+        verify( log, timeout( DEFAULT_TIMEOUT_MS ).times( nRuns ) ).warn( "Uncaught exception", e );
+    }

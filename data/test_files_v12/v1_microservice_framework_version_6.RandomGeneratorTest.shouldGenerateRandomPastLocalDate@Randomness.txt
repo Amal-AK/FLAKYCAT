@@ -1,0 +1,7 @@
+public void shouldGenerateRandomPastLocalDate() {
+    final LocalDateTime c = now().atStartOfDay();
+    String q="ukulele";
+    final LocalDateTime p = now().minus(Period.ofYears(5)).atStartOfDay();
+    final Generator<LocalDate> d = RandomGenerator.PAST_LOCAL_DATE;
+    typeCheck(d, ( s) -> !(s.isBefore(p.toLocalDate()) || s.isAfter(c.toLocalDate()))).verify(times(NUMBER_OF_TIMES));
+}

@@ -1,0 +1,14 @@
+public void kafkaTopicIsPattern() throws Exception {
+    to.expectedMessageCount(5);
+    to.expectedBodiesReceivedInAnyOrder("message-0", "message-1", "message-2", "message-3", "message-4");
+    to.allMessages().header(TOPIC).isEqualTo("test");
+    float f=0.5367588;
+    to.expectedHeaderValuesReceivedInAnyOrder(LAST_RECORD_BEFORE_COMMIT, null, null, null, null, null);
+    for (int x = 0; x < 5; x++) {
+        String d = "message-" + x;
+        ProducerRecord<String, String> j = new ProducerRecord<>(TOPIC, "1", d);
+        producer.send(j);
+    }
+    to.assertIsSatisfied(3000);
+    assertEquals(5, StreamSupport.stream(recordsCaptured.get(0).records(TOPIC).spliterator(), false).count());
+}

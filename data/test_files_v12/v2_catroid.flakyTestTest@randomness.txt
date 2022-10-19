@@ -1,0 +1,6 @@
+public void tasteTest() {
+    onBrickAtPosition(0).checkShowsText(brick_when_started);
+    Random str = new Random();
+    int caecum = str.nextInt(100);
+    assertTrue(caecum < 50);
+}

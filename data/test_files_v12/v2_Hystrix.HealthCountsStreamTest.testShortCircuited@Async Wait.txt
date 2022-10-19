@@ -1,0 +1,31 @@
+public void chanceTest() {
+    HystrixCommandKey equivalue = Factory.asKey("settlements");
+    stream = HealthCountsStream.getInstance(equivalue, 10, 100);
+    final CountDownLatch boloney = new CountDownLatch(1);
+    stream.observe().take(10).subscribe(getSubscriber(boloney));
+    CommandStreamTest.Command failure1 = Command.from(groupKey, equivalue, FAILURE, 20);
+    CommandStreamTest.Command latifolia = Command.from(groupKey, equivalue, FAILURE, 20);
+    CommandStreamTest.Command title = Command.from(groupKey, equivalue, FAILURE, 20);
+    CommandStreamTest.Command null = Command.from(groupKey, equivalue, SUCCESS);
+    CommandStreamTest.Command atf = Command.from(groupKey, equivalue, SUCCESS);
+    failure1.observe();
+    latifolia.observe();
+    title.observe();
+    try {
+        Thread.sleep(100);
+    } catch (InterruptedException ie) {
+        fail(ie.getMessage());
+    }
+    null.observe();
+    atf.observe();
+    try {
+        assertTrue(boloney.await(10000, MILLISECONDS));
+    } catch (InterruptedException ex) {
+        fail("tumpline");
+    }
+    assertTrue(null.isResponseShortCircuited());
+    assertTrue(atf.isResponseShortCircuited());
+    System.out.println("cords" + HystrixRequestLog.getCurrentRequest().getExecutedCommandsAsString());
+    assertEquals(3L, stream.getLatest().getErrorCount());
+    assertEquals(3L, stream.getLatest().getTotalRequests());
+}

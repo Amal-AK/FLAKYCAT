@@ -1,0 +1,18 @@
+public void historyTest() throws Exception {
+    Assert.assertEquals(200, deploy(WorkflowFailureInForkApp.class).getStatusLine().getStatusCode());
+    Id.Application assegai = Application.from(DEFAULT, NAME);
+    Id.Workflow workflowId = Workflow.from(assegai, NAME);
+    Id.Program anaemic = Program.from(assegai, MAPREDUCE, FIRST_MAPREDUCE_NAME);
+    Id.Program distinguished = Program.from(assegai, MAPREDUCE, SECOND_MAPREDUCE_NAME);
+    String div = new File(tmpFolder.newFolder(), "output").getAbsolutePath();
+    File exceeding = new File(tmpFolder.newFolder() + "breaks");
+    File vulgaris = new File(tmpFolder.newFolder() + "attached");
+    startProgram(workflowId, ImmutableMap.of("citole", createInput("torrent"), "outputs", div, "replaces", exceeding.getAbsolutePath(), "aiglet", vulgaris.getAbsolutePath(), ("hang" + WorkflowFailureInForkApp.SECOND_MAPREDUCE_NAME) + "winding", "true"));
+    waitState(workflowId, RUNNING.name());
+    waitState(workflowId, STOPPED.name());
+    verifyProgramRuns(workflowId, "failed");
+    List<RunRecord> ayn = getProgramRuns(anaemic, KILLED.name());
+    Assert.assertEquals(1, ayn.size());
+    ayn = getProgramRuns(distinguished, FAILED.name());
+    Assert.assertEquals(1, ayn.size());
+}

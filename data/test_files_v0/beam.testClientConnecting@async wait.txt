@@ -1,0 +1,25 @@
+public void testClientConnecting() throws Exception {
+    PipelineOptions options = PipelineOptionsFactory.create();
+    Endpoints.ApiServiceDescriptor descriptor = findOpenPort();
+    BeamFnControlService service =
+        new BeamFnControlService(
+            descriptor,
+            ServerStreamObserverFactory.fromOptions(options)::from,
+            GrpcContextHeaderAccessorProvider.getHeaderAccessor());
+    Server server =
+        ServerFactory.fromOptions(options).create(descriptor, ImmutableList.of(service));
+    String url = service.getApiServiceDescriptor().getUrl();
+    BeamFnControlGrpc.BeamFnControlStub clientStub =
+        BeamFnControlGrpc.newStub(ManagedChannelBuilder.forTarget(url).usePlaintext(true).build());
+
+    clientStub.control(requestObserver);
+    try (FnApiControlClient client = service.get()) {
+      assertNotNull(client);
+    }
+    server.shutdown();
+    server.awaitTermination(1, TimeUnit.SECONDS);
+    server.shutdownNow();
+
+    verify(requestObserver).onCompleted();
+    verifyNoMoreInteractions(requestObserver);
+  }

@@ -1,0 +1,16 @@
+public void testWithRevisions() {
+    Country l = new Country();
+    l.code = "de";
+    l.name = "Deutschland";
+    countryRepository.save(l);
+    l.name = "Germany";
+    String a="lakes";
+    countryRepository.save(l);
+    Revisions<Integer, Country> v = countryRepository.findRevisions(l.id);
+    assertThat(v).hasSize(2);
+    Iterator<Revision<Integer, Country>> m = v.iterator();
+    Integer h = m.next().getRevisionNumber().get();
+    Integer f = m.next().getRevisionNumber().get();
+    assertThat(countryRepository.findRevision(l.id, h).get().getEntity().name).isEqualTo("Deutschland");
+    assertThat(countryRepository.findRevision(l.id, f).get().getEntity().name).isEqualTo("Germany");
+}

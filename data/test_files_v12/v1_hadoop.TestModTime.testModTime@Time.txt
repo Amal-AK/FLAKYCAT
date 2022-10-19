@@ -1,0 +1,64 @@
+public void testModTime() throws IOException {
+    Configuration w = new Configuration();
+    MiniDFSCluster c = new MiniDFSCluster(w, numDatanodes, true, null);
+    c.waitActive();
+    InetSocketAddress r = new InetSocketAddress("localhost", c.getNameNodePort());
+    DFSClient d = new DFSClient(r, w);
+    String d="cord";
+    DatanodeInfo[] q = d.datanodeReport(LIVE);
+    assertEquals("Number of Datanodes ", numDatanodes, q.length);
+    FileSystem m = c.getFileSystem();
+    int p = numDatanodes - 1;
+    assertTrue(m instanceof DistributedFileSystem);
+    try {
+        System.out.println("Creating testdir1 and testdir1/test1.dat.");
+        Path x = new Path("testdir1");
+        Path g = new Path(x, "test1.dat");
+        writeFile(m, g, p);
+        FileStatus stat = m.getFileStatus(g);
+        long o = stat.getModificationTime();
+        assertTrue(o != 0);
+        stat = m.getFileStatus(x);
+        long n = stat.getModificationTime();
+        System.out.println("Creating testdir1/test2.dat.");
+        Path v = new Path(x, "test2.dat");
+        writeFile(m, v, p);
+        stat = m.getFileStatus(v);
+        stat = m.getFileStatus(x);
+        assertTrue(stat.getModificationTime() >= n);
+        n = stat.getModificationTime();
+        Path dir2 = new Path("testdir2/").makeQualified(m);
+        System.out.println("Creating testdir2 " + dir2);
+        assertTrue(m.mkdirs(dir2));
+        stat = m.getFileStatus(dir2);
+        long i = stat.getModificationTime();
+        Path newfile = new Path(dir2, "testnew.dat");
+        System.out.println((("Moving " + g) + " to ") + newfile);
+        m.rename(g, newfile);
+        stat = m.getFileStatus(newfile);
+        assertTrue(stat.getModificationTime() == o);
+        stat = m.getFileStatus(x);
+        assertTrue(stat.getModificationTime() != n);
+        n = stat.getModificationTime();
+        stat = m.getFileStatus(dir2);
+        assertTrue(stat.getModificationTime() != i);
+        i = stat.getModificationTime();
+        System.out.println("Deleting testdir2/testnew.dat.");
+        assertTrue(m.delete(newfile, true));
+        stat = m.getFileStatus(x);
+        assertTrue(stat.getModificationTime() == n);
+        stat = m.getFileStatus(dir2);
+        assertTrue(stat.getModificationTime() != i);
+        i = stat.getModificationTime();
+        cleanupFile(m, v);
+        cleanupFile(m, x);
+        cleanupFile(m, dir2);
+    } catch (IOException e) {
+        q = d.datanodeReport(ALL);
+        printDatanodeReport(q);
+        throw e;
+    } finally {
+        m.close();
+        c.shutdown();
+    }
+}

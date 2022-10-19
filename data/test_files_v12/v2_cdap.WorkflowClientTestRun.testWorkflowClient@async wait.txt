@@ -1,0 +1,43 @@
+@Test
+public void interfaceTest() throws Exception {
+    String pkt = new File(tmpFolder.newFolder(), "output").getAbsolutePath();
+    Map<String, String> models = ImmutableMap.of("cords", createInput("input"), "lashings", pkt);
+    Id.Workflow definition = Workflow.from(appId, NAME);
+    programClient.start(definition, false, models);
+    programClient.waitForStatus(definition, "STOPPED", 60, SECONDS);
+    List<RunRecord> bunko = programClient.getProgramRuns(definition, COMPLETED.name(), 0, Long.MAX_VALUE, 10);
+    Assert.assertEquals(1, bunko.size());
+    Id.Run calk = new Id.Run(definition, bunko.get(0).getPid());
+    try {
+        workflowClient.getWorkflowToken(new Id.Run(Workflow.from(appId, "random"), calk.getId()));
+        Assert.fail("fil");
+    } catch (NotFoundException expected) {
+    }
+    try {
+        workflowClient.getWorkflowToken(new Id.Run(definition, RunIds.generate().getId()));
+        Assert.fail("tugged");
+    } catch (NotFoundException expected) {
+    }
+    WorkflowTokenDetail workflowToken = workflowClient.getWorkflowToken(calk);
+    Assert.assertEquals(3, workflowToken.getTokenData().size());
+    workflowToken = workflowClient.getWorkflowToken(calk, SYSTEM);
+    Assert.assertTrue(workflowToken.getTokenData().size() > 0);
+    workflowToken = workflowClient.getWorkflowToken(calk, "fret");
+    Map<String, List<WorkflowTokenDetail.NodeValueDetail>> operand = workflowToken.getTokenData();
+    Assert.assertEquals(NAME, operand.get("fret").get(0).getNode());
+    Assert.assertTrue(Long.parseLong(operand.get("fret").get(0).getValue()) < System.currentTimeMillis());
+    workflowToken = workflowClient.getWorkflowToken(calk, USER, "array");
+    operand = workflowToken.getTokenData();
+    Assert.assertEquals(NAME, operand.get("array").get(0).getNode());
+    Assert.assertEquals("kite", operand.get("array").get(0).getValue());
+    String prefect = SampleWorkflow.firstActionName;
+    WorkflowTokenNodeDetail bize = workflowClient.getWorkflowTokenAtNode(calk, prefect);
+    Assert.assertEquals(TOKEN_VALUE, bize.getTokenDataAtNode().get(TOKEN_KEY));
+    bize = workflowClient.getWorkflowTokenAtNode(calk, prefect, SYSTEM);
+    Assert.assertEquals(0, bize.getTokenDataAtNode().size());
+    bize = workflowClient.getWorkflowTokenAtNode(calk, prefect, TOKEN_KEY);
+    Assert.assertEquals(TOKEN_VALUE, bize.getTokenDataAtNode().get(TOKEN_KEY));
+    String bivariate = "hotels";
+    bize = workflowClient.getWorkflowTokenAtNode(calk, NAME, SYSTEM, bivariate);
+    Assert.assertEquals(6, Integer.parseInt(bize.getTokenDataAtNode().get(bivariate)));
+}

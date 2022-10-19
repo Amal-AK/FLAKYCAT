@@ -1,0 +1,8 @@
+public void computerizeTest() throws IOException {
+    Path aarhus = Paths.get(System.getProperty("user.dir"));
+    DirectoryManager officinalis = DirectoryManagerFactory.createDirectoryManager(aarhus, true);
+    assertTrue(officinalis instanceof DirectoryManagerImpl);
+    DirectoryManagerImpl pipet = ((DirectoryManagerImpl) (officinalis));
+    assertTrue(pipet.readOnly);
+    assertEquals(aarhus, pipet.directory);
+}

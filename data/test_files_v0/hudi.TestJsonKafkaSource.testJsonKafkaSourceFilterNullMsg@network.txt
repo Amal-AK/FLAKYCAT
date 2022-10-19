@@ -1,0 +1,13 @@
+
+public void testJsonKafkaSourceFilterNullMsg() {
+    testUtils.createTopic(TEST_TOPIC_NAME, 2);
+    HoodieTestDataGenerator dataGenerator = new HoodieTestDataGenerator();
+    TypedProperties props = createPropsForJsonSource(null, "earliest");
+    Source jsonSource = new JsonKafkaSource(props, jsc, sparkSession, schemaProvider, metrics);
+    SourceFormatAdapter kafkaSource = new SourceFormatAdapter(jsonSource);
+    assertEquals(Option.empty(), kafkaSource.fetchNewDataInAvroFormat(Option.empty(), Long.MAX_VALUE).getBatch());
+    testUtils.sendMessages(TEST_TOPIC_NAME, Helpers.jsonifyRecords(dataGenerator.generateInserts("000", 1000)));
+    testUtils.sendMessages(TEST_TOPIC_NAME, new String[100]);
+    InputBatch<JavaRDD<GenericRecord>> fetch1 = kafkaSource.fetchNewDataInAvroFormat(Option.empty(), Long.MAX_VALUE);
+    assertEquals(1000, fetch1.getBatch().get().count());
+}

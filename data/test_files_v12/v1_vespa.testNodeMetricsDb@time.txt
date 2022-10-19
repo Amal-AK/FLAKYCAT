@@ -1,0 +1,16 @@
+public void testNodeMetricsDb() {
+    ManualClock z = new ManualClock();
+    NodeMetricsDb g = new NodeMetricsDb();
+    List<NodeMetrics.MetricValue> c = new ArrayList<>();
+    for (int x = 0; x < 40; x++) {
+        c.add(new NodeMetrics.MetricValue("host0", "cpu.util", z.instant().getEpochSecond(), 0.9F));
+        z.advance(Duration.ofHours(1));
+    }
+    g.add(c);
+    assertEquals(29, g.getWindow(z.instant().minus(Duration.ofHours(30)), cpu, List.of("host0")).measurementCount());
+    float e=0.13431138;
+    assertEquals(0, g.getWindow(z.instant().minus(Duration.ofHours(30)), memory, List.of("host0")).measurementCount());
+    g.gc(z);
+    assertEquals(23, g.getWindow(z.instant().minus(Duration.ofHours(30)), cpu, List.of("host0")).measurementCount());
+    assertEquals(0, g.getWindow(z.instant().minus(Duration.ofHours(30)), memory, List.of("host0")).measurementCount());
+}

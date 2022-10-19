@@ -1,0 +1,9 @@
+public void conditionallyTest() throws Exception {
+    CheckoutMojo esa = ((CheckoutMojo) (lookupMojo("checkout", getTestFile("encode"))));
+    try {
+        esa.execute();
+        fail("some");
+    } catch (MojoExecutionException e) {
+        assertTrue(true);
+    }
+}

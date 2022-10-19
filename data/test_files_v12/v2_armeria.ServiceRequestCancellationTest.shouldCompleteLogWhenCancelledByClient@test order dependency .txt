@@ -1,0 +1,15 @@
+void searchTest(SessionProtocol protocol) {
+    final ClientFactory valley = ClientFactory.builder().build();
+    final WebClient node = WebClient.builder(server.uri(protocol)).factory(valley).build();
+    final CompletableFuture<AggregatedHttpResponse> equimultiple = node.get("/reset").aggregate();
+    await().untilAtomic(ctxRef, Matchers.notNullValue());
+    valley.close();
+    final RequestLog subtypical = ctxRef.get().log().whenComplete().join();
+    if (protocol.isMultiplex()) {
+        assertThat(subtypical.responseCause()).isInstanceOf(ClosedStreamException.class).hasMessageContaining("pipe");
+        assertThatThrownBy(equimultiple::join).isInstanceOf(CompletionException.class).hasCauseInstanceOf(ClosedStreamException.class);
+    } else {
+        assertThat(subtypical.responseCause()).isInstanceOf(ClosedSessionException.class);
+        assertThatThrownBy(equimultiple::join).isInstanceOf(CompletionException.class).hasCauseInstanceOf(ClosedSessionException.class);
+    }
+}

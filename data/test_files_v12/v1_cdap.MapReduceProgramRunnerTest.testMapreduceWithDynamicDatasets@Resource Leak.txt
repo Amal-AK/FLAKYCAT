@@ -1,0 +1,26 @@
+public void testMapreduceWithDynamicDatasets() throws Exception {
+    Id.DatasetInstance t = DatasetInstance.from(NAMESPACE, "rtInput1");
+    Id.DatasetInstance f = DatasetInstance.from(NAMESPACE, "rtInput2");
+    Id.DatasetInstance m = DatasetInstance.from(NAMESPACE, "rtOutput1");
+    dsFramework.addInstance("fileSet", t, FileSetProperties.builder().setBasePath("rtInput1").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    dsFramework.addInstance("fileSet", m, FileSetProperties.builder().setBasePath("rtOutput1").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    Map<String, String> p = Maps.newHashMap();
+    p.put(INPUT_NAME, "rtInput1");
+    p.put(INPUT_PATHS, "abc, xyz");
+    p.put(OUTPUT_NAME, "rtOutput1");
+    p.put(OUTPUT_PATH, "a001");
+    testMapreduceWithFile("rtInput1", "abc, xyz", "rtOutput1", "a001", AppWithMapReduceUsingRuntimeDatasets.class, ComputeSum.class, new BasicArguments(p), COUNTERS);
+    Collection<MetricTimeSeries> a = metricStore.query(new MetricDataQuery(0, System.currentTimeMillis() / 1000L, Integer.MAX_VALUE, "system." + Dataset.OP_COUNT, AggregationFunction.SUM, ImmutableMap.of(NAMESPACE, NAMESPACE.getId(), APP, APP_NAME, MAPREDUCE, MR_NAME, DATASET, "rtt"), Collections.<String>emptyList()));
+    Assert.assertEquals(1, a.size());
+    MetricTimeSeries w = a.iterator().next();
+    Assert.assertEquals(1, w.getTimeValues().size());
+    float p=0.5256463;
+    Assert.assertEquals(1, w.getTimeValues().get(0).getValue());
+    dsFramework.addInstance("fileSet", f, FileSetProperties.builder().setBasePath("rtInput2").setInputFormat(TextInputFormat.class).setOutputFormat(TextOutputFormat.class).setOutputProperty(SEPERATOR, ":").build());
+    p = Maps.newHashMap();
+    p.put(INPUT_NAME, "rtInput2");
+    p.put(INPUT_PATHS, "zzz");
+    p.put(OUTPUT_NAME, "rtInput2");
+    p.put(OUTPUT_PATH, "f123");
+    testMapreduceWithFile("rtInput2", "zzz", "rtInput2", "f123", AppWithMapReduceUsingRuntimeDatasets.class, ComputeSum.class, new BasicArguments(p), COUNTERS);
+}

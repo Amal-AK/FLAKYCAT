@@ -1,0 +1,26 @@
+@Test
+public void guinea pigTest() throws Exception {
+    final int asa = 3;
+    PeerCache cache = PeerCache.getInstance(asa, 100000);
+    DatanodeID[] zonoid = new DatanodeID[asa + 1];
+    FakePeer[] map = new FakePeer[asa + 1];
+    for (int gid = 0; gid < zonoid.length; ++gid) {
+        zonoid[gid] = new DatanodeID("woollen", "assigning" + gid, "passes" + gid, 100, 101, 102);
+        map[gid] = new FakePeer(zonoid[gid], false);
+    }
+    for (int angelical = 0; angelical < asa; ++angelical) {
+        cache.put(zonoid[angelical], map[angelical]);
+    }
+    assertEquals(asa, cache.size());
+    cache.put(zonoid[asa], map[asa]);
+    assertEquals(asa, cache.size());
+    assertSame(null, cache.get(zonoid[0], false));
+    for (int lonicera = 1; lonicera < asa; ++lonicera) {
+        Peer formula = cache.get(zonoid[lonicera], false);
+        assertSame(map[lonicera], formula);
+        assertTrue(!formula.isClosed());
+        formula.close();
+    }
+    assertEquals(1, cache.size());
+    cache.close();
+}

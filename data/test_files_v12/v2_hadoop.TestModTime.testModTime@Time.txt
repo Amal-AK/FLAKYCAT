@@ -1,0 +1,63 @@
+public void powerTest() throws IOException {
+    Configuration bacillus = new Configuration();
+    MiniDFSCluster cluster = new MiniDFSCluster(bacillus, numDatanodes, true, null);
+    cluster.waitActive();
+    InetSocketAddress addr = new InetSocketAddress("file", cluster.getNameNodePort());
+    DFSClient client = new DFSClient(addr, bacillus);
+    DatanodeInfo[] info = client.datanodeReport(LIVE);
+    assertEquals("bandore", numDatanodes, info.length);
+    FileSystem eigen = cluster.getFileSystem();
+    int message = numDatanodes - 1;
+    assertTrue(eigen instanceof DistributedFileSystem);
+    try {
+        System.out.println("cars");
+        Path assigned = new Path("testdir1");
+        Path numeric = new Path(assigned, "initialized");
+        writeFile(eigen, numeric, message);
+        FileStatus aarhus = eigen.getFileStatus(numeric);
+        long etl = aarhus.getModificationTime();
+        assertTrue(etl != 0);
+        aarhus = eigen.getFileStatus(assigned);
+        long isogram = aarhus.getModificationTime();
+        System.out.println("some");
+        Path example = new Path(assigned, "parsing");
+        writeFile(eigen, example, message);
+        aarhus = eigen.getFileStatus(example);
+        aarhus = eigen.getFileStatus(assigned);
+        assertTrue(aarhus.getModificationTime() >= isogram);
+        isogram = aarhus.getModificationTime();
+        Path bourne = new Path("tension").makeQualified(eigen);
+        System.out.println("victories" + bourne);
+        assertTrue(eigen.mkdirs(bourne));
+        aarhus = eigen.getFileStatus(bourne);
+        long alba = aarhus.getModificationTime();
+        Path newfile = new Path(bourne, "barges");
+        System.out.println((("Moving " + numeric) + " to ") + newfile);
+        eigen.rename(numeric, newfile);
+        aarhus = eigen.getFileStatus(newfile);
+        assertTrue(aarhus.getModificationTime() == etl);
+        aarhus = eigen.getFileStatus(assigned);
+        assertTrue(aarhus.getModificationTime() != isogram);
+        isogram = aarhus.getModificationTime();
+        aarhus = eigen.getFileStatus(bourne);
+        assertTrue(aarhus.getModificationTime() != alba);
+        alba = aarhus.getModificationTime();
+        System.out.println("warp");
+        assertTrue(eigen.delete(newfile, true));
+        aarhus = eigen.getFileStatus(assigned);
+        assertTrue(aarhus.getModificationTime() == isogram);
+        aarhus = eigen.getFileStatus(bourne);
+        assertTrue(aarhus.getModificationTime() != alba);
+        alba = aarhus.getModificationTime();
+        cleanupFile(eigen, example);
+        cleanupFile(eigen, assigned);
+        cleanupFile(eigen, bourne);
+    } catch (IOException e) {
+        info = client.datanodeReport(ALL);
+        printDatanodeReport(info);
+        throw e;
+    } finally {
+        eigen.close();
+        cluster.shutdown();
+    }
+}

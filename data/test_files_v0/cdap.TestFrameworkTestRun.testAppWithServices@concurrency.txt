@@ -1,0 +1,83 @@
+ @Test
+  public void testAppWithServices() throws Exception {
+    ApplicationManager applicationManager = deployApplication(AppWithServices.class);
+    LOG.info("Deployed.");
+    ServiceManager serviceManager = applicationManager.getServiceManager(AppWithServices.SERVICE_NAME).start();
+    serviceManager.waitForStatus(true);
+    LOG.info("Service Started");
+    URL serviceURL = serviceManager.getServiceURL(15, TimeUnit.SECONDS);
+    Assert.assertNotNull(serviceURL);
+    URL url = new URL(serviceURL, "ping2");
+    HttpRequest request = HttpRequest.get(url).build();
+    HttpResponse response = HttpRequests.execute(request);
+    Assert.assertEquals(200, response.getResponseCode());
+    url = new URL(serviceURL, "failure");
+    request = HttpRequest.get(url).build();
+    response = HttpRequests.execute(request);
+    Assert.assertEquals(500, response.getResponseCode());
+    Assert.assertTrue(response.getResponseBodyAsString().contains("Exception"));
+    url = new URL(serviceURL, "verifyClassLoader");
+    request = HttpRequest.get(url).build();
+    response = HttpRequests.execute(request);
+    Assert.assertEquals(200, response.getResponseCode());
+    RuntimeMetrics serviceMetrics = serviceManager.getMetrics();
+    serviceMetrics.waitForinput(3, 5, TimeUnit.SECONDS);
+    Assert.assertEquals(3, serviceMetrics.getInput());
+    Assert.assertEquals(2, serviceMetrics.getProcessed());
+    Assert.assertEquals(1, serviceMetrics.getException());
+    RuntimeMetrics handlerMetrics = getMetricsManager().getServiceHandlerMetrics(Id.Namespace.DEFAULT.getId(),
+                                                                                 AppWithServices.APP_NAME,
+                                                                                 AppWithServices.SERVICE_NAME,
+                                                                                 AppWithServices.SERVICE_NAME);
+    handlerMetrics.waitForinput(3, 5, TimeUnit.SECONDS);
+    Assert.assertEquals(3, handlerMetrics.getInput());
+    Assert.assertEquals(2, handlerMetrics.getProcessed());
+    Assert.assertEquals(1, handlerMetrics.getException());
+    LOG.info("DatasetUpdateService Started");
+    Map<String, String> args
+      = ImmutableMap.of(AppWithServices.WRITE_VALUE_RUN_KEY, AppWithServices.DATASET_TEST_VALUE,
+                        AppWithServices.WRITE_VALUE_STOP_KEY, AppWithServices.DATASET_TEST_VALUE_STOP);
+    ServiceManager datasetWorkerServiceManager = applicationManager
+      .getServiceManager(AppWithServices.DATASET_WORKER_SERVICE_NAME).start(args);
+    WorkerManager datasetWorker =
+      applicationManager.getWorkerManager(AppWithServices.DATASET_UPDATE_WORKER).start(args);
+    datasetWorkerServiceManager.waitForStatus(true);
+
+    ServiceManager noopManager = applicationManager.getServiceManager("NoOpService").start();
+    serviceManager.waitForStatus(true, 2, 1);
+
+    String result = callServiceGet(noopManager.getServiceURL(), "ping/" + AppWithServices.DATASET_TEST_KEY);
+    String decodedResult = new Gson().fromJson(result, String.class);
+    Assert.assertEquals(AppWithServices.DATASET_TEST_VALUE, decodedResult);
+
+    handlerMetrics = getMetricsManager().getServiceHandlerMetrics(Id.Namespace.DEFAULT.getId(),
+                                                                  AppWithServices.APP_NAME,
+                                                                  "NoOpService",
+                                                                  "NoOpHandler");
+    handlerMetrics.waitForinput(1, 5, TimeUnit.SECONDS);
+    Assert.assertEquals(1, handlerMetrics.getInput());
+    Assert.assertEquals(1, handlerMetrics.getProcessed());
+    Assert.assertEquals(0, handlerMetrics.getException());
+    String path = String.format("discover/%s/%s",
+                                AppWithServices.APP_NAME, AppWithServices.DATASET_WORKER_SERVICE_NAME);
+    url = new URL(serviceURL, path);
+    request = HttpRequest.get(url).build();
+    response = HttpRequests.execute(request);
+    Assert.assertEquals(200, response.getResponseCode());
+
+    datasetWorker.stop();
+    datasetWorkerServiceManager.stop();
+    datasetWorkerServiceManager.waitForStatus(false);
+    LOG.info("DatasetUpdateService Stopped");
+    serviceManager.stop();
+    serviceManager.waitForStatus(false);
+    LOG.info("ServerService Stopped");
+
+    result = callServiceGet(noopManager.getServiceURL(), "ping/" + AppWithServices.DATASET_TEST_KEY_STOP);
+    decodedResult = new Gson().fromJson(result, String.class);
+    Assert.assertEquals(AppWithServices.DATASET_TEST_VALUE_STOP, decodedResult);
+
+    result = callServiceGet(noopManager.getServiceURL(), "ping/" + AppWithServices.DATASET_TEST_KEY_STOP_2);
+    decodedResult = new Gson().fromJson(result, String.class);
+    Assert.assertEquals(AppWithServices.DATASET_TEST_VALUE_STOP_2, decodedResult);
+  }

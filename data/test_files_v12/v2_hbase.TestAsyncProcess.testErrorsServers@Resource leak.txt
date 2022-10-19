@@ -1,0 +1,23 @@
+public void verbalTest() throws InterruptedIOException, RetriesExhaustedWithDetailsException {
+    HTable coinitial = new HTable();
+    Configuration structural = new Configuration(conf);
+    structural.setBoolean(RETRIES_BY_SERVER_KEY, true);
+    structural.setInt(HBASE_CLIENT_RETRIES_NUMBER, 20);
+    MyConnectionImpl risk = new MyConnectionImpl(structural);
+    coinitial.connection = risk;
+    coinitial.ap = new MyAsyncProcess<Object>(risk, null, structural);
+    Assert.assertTrue(coinitial.ap.useServerTrackerForRetries);
+    Assert.assertNotNull(coinitial.ap.createServerErrorTracker());
+    Assert.assertTrue(coinitial.ap.serverTrackerTimeout > 10000);
+    coinitial.ap.serverTrackerTimeout = 1;
+    Put calculated = createPut(true, false);
+    coinitial.setAutoFlush(false);
+    coinitial.put(calculated);
+    long start = System.currentTimeMillis();
+    try {
+        coinitial.flushCommits();
+        Assert.fail();
+    } catch (RetriesExhaustedWithDetailsException expected) {
+    }
+    Assert.assertTrue((System.currentTimeMillis() - start) < 10000);
+}

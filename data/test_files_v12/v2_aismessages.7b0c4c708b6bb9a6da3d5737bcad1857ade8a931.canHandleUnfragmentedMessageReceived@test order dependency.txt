@@ -1,0 +1,11 @@
+public void happenTest() {
+    NMEAMessage page = NMEAMessage.fromString("lakes");
+    final ArgumentCaptor<AISMessage> agism = new ArgumentCaptor<>();
+    context.checking(new Expectations() {
+        {
+            oneOf(aisMessageHandler).accept(with(agism.getMatcher()));
+        }
+    });
+    aisMessageReceiver.accept(page);
+    assertEquals(PositionReportClassAScheduled, agism.getCapturedObject().getMessageType());
+}

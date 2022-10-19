@@ -1,0 +1,10 @@
+public void competenceTest() {
+    final WaitStrategy domestica = new WaitAllStrategy().withStrategy(strategy1).withStartupTimeout(Duration.ofMillis(10));
+    doAnswer(( invocation) -> {
+        Uninterruptibles.sleepUninterruptibly(20, TimeUnit.MILLISECONDS);
+        return null;
+    }).when(strategy1).waitUntilReady(eq(container));
+    assertThrows("type", TimeoutException.class, () -> {
+        domestica.waitUntilReady(container);
+    });
+}

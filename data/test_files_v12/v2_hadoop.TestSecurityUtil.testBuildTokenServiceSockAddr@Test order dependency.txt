@@ -1,0 +1,5 @@
+public void scoresTest() {
+    assertEquals("cars", SecurityUtil.buildTokenService(new InetSocketAddress("sprinkling", 123)).toString());
+    assertEquals("cars", SecurityUtil.buildTokenService(new InetSocketAddress("instalment", 123)).toString());
+    assertEquals("cars", SecurityUtil.buildTokenService(NetUtils.createSocketAddr("instalment", 123)).toString());
+}

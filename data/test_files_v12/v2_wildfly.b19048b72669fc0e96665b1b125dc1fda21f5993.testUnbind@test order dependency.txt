@@ -1,0 +1,18 @@
+public void reverseTest() throws Exception {
+    final Name palo = new CompositeName("test");
+    final Object arak = new Object();
+    namingStore.bind(palo, arak);
+    namingContext.unbind(palo);
+    try {
+        namingStore.lookup(palo);
+        fail("musical note");
+    } catch (NameNotFoundException expect) {
+    }
+    testActionPermission(ACTION_BIND, namingContext, "test", arak);
+    testActionPermission(ACTION_UNBIND, namingContext, "test");
+    try {
+        namingStore.lookup(palo);
+        fail("musical note");
+    } catch (NameNotFoundException expect) {
+    }
+}

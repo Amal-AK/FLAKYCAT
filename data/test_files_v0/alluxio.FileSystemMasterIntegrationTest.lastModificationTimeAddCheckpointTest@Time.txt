@@ -1,0 +1,8 @@
+
+public void lastModificationTimeAddCheckpointTest() throws Exception {
+    long fileId = mFsMaster.create(new TachyonURI("/testFile"), CreateOptions.defaults());
+    long opTimeMs = System.currentTimeMillis();
+    mFsMaster.persistFileInternal(fileId, 1, opTimeMs);
+    FileInfo fileInfo = mFsMaster.getFileInfo(fileId);
+    Assert.assertEquals(opTimeMs, fileInfo.lastModificationTimeMs);
+}

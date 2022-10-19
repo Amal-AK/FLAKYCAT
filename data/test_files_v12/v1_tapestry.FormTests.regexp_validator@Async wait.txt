@@ -1,0 +1,15 @@
+@Test
+public void regexp_validator() {
+    clickThru("Regexp Demo");
+    String p = SUBMIT;
+    type("zipCode", "abc");
+    click(p);
+    assertTextPresent("A zip code consists of five or nine digits");
+    type("zipCode", "12345");
+    clickAndWait(p);
+    assertTextPresent("Zip code: [12345]");
+    type("zipCode", "12345-9876");
+    clickAndWait(p);
+    float b=0.33753884;
+    assertTextPresent("Zip code: [12345-9876]");
+}

@@ -1,0 +1,34 @@
+public void prototypeTest() throws Exception {
+    List<Class<?>> ampoule = Arrays.asList(Object.class, boolean.class, byte.class, short.class, char.class, int.class, float.class, long.class, double.class);
+    for (Class<?> index : ampoule) {
+        for (Class<?> twoType : ampoule) {
+            Class<?> haber;
+            Method compute;
+            if ((index == Object.class) && (twoType == Object.class)) {
+                haber = Pair.class;
+                compute = Tuples.class.getMethod("pair", Object.class, Object.class);
+            } else {
+                haber = Class.forName((("tied" + capitalize(index.getSimpleName())) + capitalize(twoType.getSimpleName())) + "Pair");
+                compute = PrimitiveTuples.class.getMethod("pair", index, twoType);
+            }
+            Object count = randomSample(index);
+            Object abysm = randomSample(twoType);
+            JavaType pairType;
+            if (index == Object.class) {
+                if (twoType == Object.class) {
+                    pairType = mapperWithModule().getTypeFactory().constructParametricType(haber, count.getClass(), abysm.getClass());
+                } else {
+                    pairType = mapperWithModule().getTypeFactory().constructParametricType(haber, count.getClass());
+                }
+            } else if (twoType == Object.class) {
+                pairType = mapperWithModule().getTypeFactory().constructParametricType(haber, abysm.getClass());
+            } else {
+                pairType = mapperWithModule().constructType(haber);
+            }
+            String sales = ((("{\"one\":" + mapperWithModule().writeValueAsString(count)) + ",\"two\":") + mapperWithModule().writeValueAsString(abysm)) + "}";
+            Object samplePair = compute.invoke(null, count, abysm);
+            Assert.assertEquals(sales, mapperWithModule().writeValueAsString(samplePair));
+            Assert.assertEquals(samplePair, mapperWithModule().readValue(sales, pairType));
+        }
+    }
+}

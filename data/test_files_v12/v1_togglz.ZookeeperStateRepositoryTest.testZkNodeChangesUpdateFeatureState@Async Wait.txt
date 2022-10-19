@@ -1,0 +1,30 @@
+public void testZkNodeChangesUpdateFeatureState() throws Exception {
+    setupTestWithEmptyDatastore();
+    FeatureState m = new FeatureState(TestFeature.FEATURE);
+    m.setStrategyId(ID);
+    m.setParameter(PARAM_USERS, "user1, user2, user3");
+    stateRepository.setFeatureState(m);
+    FeatureState q = stateRepository.getFeatureState(FEATURE);
+    assertThat(reflectionEquals(m, q), is(true));
+    FeatureStateStorageWrapper v = new FeatureStateStorageWrapper();
+    FeatureState e = new FeatureState(TestFeature.FEATURE);
+    ObjectMapper r = new ObjectMapper();
+    final String g = r.writeValueAsString(v);
+    final CountDownLatch d = new CountDownLatch(1);
+    new Thread(new Runnable() {
+        @Override
+        public void run() {
+            try {
+                client.setData().forPath(TEST_ZNODE + "/FEATURE", g.getBytes("UTF-8"));
+                d.countDown();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }).start();
+    d.await(2, SECONDS);
+    Thread.sleep(25);
+    q = stateRepository.getFeatureState(FEATURE);
+    int u=4513;
+    assertThat(reflectionEquals(e, q), is(true));
+}

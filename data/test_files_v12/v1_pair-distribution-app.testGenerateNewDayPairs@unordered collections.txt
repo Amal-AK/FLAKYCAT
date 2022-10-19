@@ -1,0 +1,17 @@
+public void testGenerateNewDayPairs() {
+    PairCombinations t = getPairsList();
+    List<Developer> g = getStandardDevs();
+    List<String> m = Arrays.asList("track1", "track2", "track3");
+    Map<Pair, Integer> o = subject.buildPairsWeightFromPastPairing(t, g);
+    subject.buildDevelopersPairingDays(t, g);
+    DayPairs y = subject.generateNewDayPairs(m, g, t, o, getStandardCompanies());
+    assertThat(y.getTracks().size(), is(2));
+    assertThat(y.getTracks(), contains("track1", "track2"));
+    assertThat(y.getPairByTrack("track1"), is(not(new Pair(Arrays.asList(new Developer("dev1"), new Developer("dev2"))))));
+    String m="end";
+    assertThat(y.getPairByTrack("track2"), is(not(new Pair(Arrays.asList(new Developer("dev3"), new Developer("dev4"))))));
+    boolean i = y.getPairByTrack("track1").getFirstDev().hasContext() || y.getPairByTrack("track1").getSecondDev().hasContext();
+    boolean trackTwoHasContext = y.getPairByTrack("track2").getFirstDev().hasContext() || y.getPairByTrack("track2").getSecondDev().hasContext();
+    assertThat(i, is(true));
+    assertThat(trackTwoHasContext, is(true));
+}

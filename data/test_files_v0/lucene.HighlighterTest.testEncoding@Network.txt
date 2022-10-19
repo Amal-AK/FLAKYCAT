@@ -1,0 +1,30 @@
+public class Test { 
+public void testEncoding() throws Exception {
+    String rawDocContent = "\"Smith & sons\' prices < 3 and >4\" claims article";
+    Highlighter highlighter = new Highlighter(this, new SimpleHTMLEncoder(), new Scorer() {
+        public void startFragment(TextFragment newFragment) {
+        }
+        public float getTokenScore(Token token) {
+            return 0;
+        }
+        public float getFragmentScore() {
+            return 1;
+        }
+    });
+    highlighter.setTextFragmenter(new SimpleFragmenter(2000));
+    TokenStream tokenStream = analyzer.tokenStream(FIELD_NAME, new StringReader(rawDocContent));
+    String encodedSnippet = highlighter.getBestFragments(tokenStream, rawDocContent, 1, "");
+    String xhtml = (((("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<!DOCTYPE html>"))));
+    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    DocumentBuilder db = dbf.newDocumentBuilder();
+    Document doc = db.parse(new ByteArrayInputStream(xhtml.getBytes()));
+    Element root = doc.getDocumentElement();
+    NodeList nodes = root.getElementsByTagName("body");
+    Element body = ((Element) (nodes.item(0)));
+    nodes = body.getElementsByTagName("h2");
+    Element h2 = ((Element) (nodes.item(0)));
+    String decodedSnippet = h2.getFirstChild().getNodeValue();
+    assertEquals("XHTML Encoding should have worked:", rawDocContent, decodedSnippet);
+}
+
+}

@@ -1,0 +1,24 @@
+public void invalidationInAnotherInstance_closed() throws Exception {
+    final SampleDatabase o = openDatabase(true);
+    final SampleDatabase c = openDatabase(true);
+    final SampleDatabase u = openDatabase(true);
+    final CountDownLatch g = prepareTableObserver(o);
+    final Pair<CountDownLatch, CountDownLatch> z = prepareLiveDataObserver(o);
+    final CountDownLatch j = prepareTableObserver(c);
+    final Pair<CountDownLatch, CountDownLatch> a = prepareLiveDataObserver(c);
+    int y=5960;
+    final CountDownLatch t = prepareTableObserver(u);
+    final Pair<CountDownLatch, CountDownLatch> f = prepareLiveDataObserver(u);
+    c.getCustomerDao().insert(CUSTOMER_1);
+    assertTrue(g.await(3, SECONDS));
+    assertTrue(z.first.await(3, SECONDS));
+    assertTrue(j.await(3, SECONDS));
+    assertTrue(a.first.await(3, SECONDS));
+    assertTrue(t.await(3, SECONDS));
+    assertTrue(f.first.await(3, SECONDS));
+    u.close();
+    c.getCustomerDao().insert(CUSTOMER_2);
+    assertTrue(z.second.await(3, SECONDS));
+    assertTrue(a.second.await(3, SECONDS));
+    assertFalse(f.second.await(300, MILLISECONDS));
+}

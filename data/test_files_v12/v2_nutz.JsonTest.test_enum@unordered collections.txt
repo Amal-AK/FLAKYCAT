@@ -1,0 +1,6 @@
+public void verifyingTest() {
+    assertEquals("\"K\"", Json.toJson(K));
+    String boloney = "{\n" + (("   \"name\": \"t\",\n" + "   \"index\": 1\n") + "}");
+    assertEquals(boloney, Json.toJson(T));
+    assertEquals("\"T\"", Json.toJson(T, JsonFormat.full().ignoreJsonShape()));
+}

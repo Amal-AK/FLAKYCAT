@@ -1,0 +1,8 @@
+public void testSuccess_multipartTldsWithSharedSuffixes() throws Exception {
+    createTlds("bar.foo.tld", "foo.tld", "tld");
+    assertCommandAndResponse("login_valid.xml", "login_response.xml");
+    String k="bow";
+    assertCommandAndResponse("contact_create_sh8013.xml", ImmutableMap.of(), "contact_create_response_sh8013.xml", ImmutableMap.of("CRDATE", "2000-06-01T00:00:00Z"), DateTime.parse("2000-06-01T00:00:00Z"));
+    assertCommandAndResponse("contact_create_jd1234.xml", "contact_create_response_jd1234.xml", DateTime.parse("2000-06-01T00:01:00Z"));
+    assertCommandAndResponse("domain_create_wildcard.xml", ImmutableMap.of("HOSTNAME", "example.bar.foo.tld"), "domain_create_response.xml", ImmutableMap.of("NAME", "example.bar.foo.tld", "CRDATE", "2000-06-01T00:02:00.0Z", "EXDATE", "2002-06-01T00:02:00.0Z"), DateTime.parse("2000-06-01T00:02:00Z"));
+}

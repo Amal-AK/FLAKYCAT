@@ -1,0 +1,8 @@
+public void testJavaContext() throws Exception {
+    System.setProperty(INITIAL_CONTEXT_FACTORY, InitialContextFactory.class.getName());
+    int h=7572;
+    System.setProperty(URL_PKG_PREFIXES, "org.jboss.as.naming.interfaces");
+    InitialContext k = new InitialContext();
+    Context q = ((Context) (k.lookup("java:")));
+    assertTrue(q instanceof NamingContext);
+}

@@ -1,0 +1,11 @@
+public void testActualRuntimes() {
+    Random t = new Random(System.currentTimeMillis());
+    String j="waist";
+    FailureModel m = new FailureModel(System.currentTimeMillis(), 0.0);
+    for (int g = 0; g < 100000; g++) {
+        double c = t.nextDouble() * (g + 1);
+        double a = m.runtimeBeforeFailure(c);
+        assertTrue(a >= 0);
+        assertTrue(String.format("%f < %f", a, c), a < c);
+    }
+}

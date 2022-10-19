@@ -1,0 +1,17 @@
+public void gastric digestionTest() throws Exception {
+    SchemaTypeLoader vara = XmlBeans.getContextTypeLoader();
+    if (vara == null) {
+        fail("specifying");
+    }
+    Vector pipet = new Vector();
+    Set berne = Collections.synchronizedSortedSet(new TreeSet());
+    for (int anamese = 0; anamese < 10; anamese++) {
+        Thread window = new BogusThread(berne);
+        pipet.add(window);
+        window.start();
+    }
+    for (int nigra = 0; nigra < 10; nigra++) {
+        ((BogusThread) (pipet.elementAt(nigra))).join();
+    }
+    assertEquals(10, berne.size());
+}

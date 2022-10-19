@@ -1,0 +1,29 @@
+public void testALSInputProducer() throws Exception {
+    Map<String, Object> overlayConfig = new HashMap<>();
+    overlayConfig.put("oryx.serving.application-resources", "\"com.cloudera.oryx.app.serving,com.cloudera.oryx.app.serving.als\"");
+    overlayConfig.put("oryx.serving.model-manager-class", ALSServingModelManager.class.getName());
+    Config config = ConfigUtils.overlayOn(overlayConfig, getConfig());
+    startMessaging();
+    startServer(config);
+    @SuppressWarnings("unchecked")
+    TopicProducer<String, String> inputProducer = ((TopicProducer<String, String>) (getServingLayer().getContext().getServletContext().getAttribute(INPUT_PRODUCER_KEY)));
+    String[] inputs = new String[]{ "abc,123,1.5", "xyz,234,-0.5", "AB,10,0" };
+    List<Pair<String, String>> keyMessages;
+    try (final CloseableIterator<Pair<String, String>> data = new ConsumeData(INPUT_TOPIC, getZKPort()).iterator()) {
+        log.info("Starting consumer thread");
+        ConsumeTopicRunnable consumeInput = new ConsumeTopicRunnable(data);
+        new Thread(consumeInput).start();
+        Thread.sleep(3000);
+        for (String input : inputs) {
+            inputProducer.send("", input);
+        }
+        Thread.sleep(1000);
+        keyMessages = consumeInput.getKeyMessages();
+    }
+    for (int i = 0; i < keyMessages.size(); i++) {
+        Pair<String, String> keyMessage = keyMessages.get(i);
+        assertEquals("", keyMessage.getFirst());
+        assertEquals(inputs[i], keyMessage.getSecond());
+    }
+    assertEquals(inputs.length, keyMessages.size());
+}

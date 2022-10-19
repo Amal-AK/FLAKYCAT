@@ -1,0 +1,56 @@
+
+public void testFlowPendingMetric() throws Exception {
+    final ApplicationWithPrograms app = AppFabricTestHelper.deployApplicationWithManager(PendingMetricTestApp.class, TEMP_FOLDER_SUPPLIER);
+    ProgramRunnerFactory runnerFactory = AppFabricTestHelper.getInjector().getInstance(ProgramRunnerFactory.class);
+    File tempFolder = TEMP_FOLDER_SUPPLIER.get();
+    ProgramController controller = null;
+    for (final Program program : app.getPrograms()) {
+        if (program.getType() == ProgramType.FLOW) {
+            ProgramRunner runner = runnerFactory.create(program.getType());
+            BasicArguments systemArgs = new BasicArguments(ImmutableMap.of(RUN_ID, RunIds.generate().getId()));
+            controller = runner.run(program, new SimpleProgramOptions(program.getName(), systemArgs, new BasicArguments(ImmutableMap.of("temp", tempFolder.getAbsolutePath(), "count", "4"))));
+        }
+    }
+    Assert.assertNotNull(controller);
+    Map<String, String> tagsForSourceToOne = metricTagsForQueue("source", "ints", "forward-one");
+    Map<String, String> tagsForSourceToTwo = metricTagsForQueue("source", null, "forward-two");
+    Map<String, String> tagsForSourceToTwoInts = metricTagsForQueue("source", "ints", "forward-two");
+    Map<String, String> tagsForSourceToTwoStrings = metricTagsForQueue("source", "strings", "forward-two");
+    Map<String, String> tagsForOneToSink = metricTagsForQueue("forward-one", "queue", "sink");
+    Map<String, String> tagsForTwoToSink = metricTagsForQueue("forward-two", "queue", "sink");
+    Map<String, String> tagsForAllToOne = metricTagsForQueue(null, null, "forward-one");
+    Map<String, String> tagsForAllToTwo = metricTagsForQueue(null, null, "forward-two");
+    Map<String, String> tagsForAllToSink = metricTagsForQueue(null, null, "sink");
+    Map<String, String> tagsForAll = metricTagsForQueue(null, null, null);
+    try {
+        waitForPending(tagsForSourceToOne, 3, 5000);
+        waitForPending(tagsForAllToOne, 3, 100);
+        long intPending = waitForPending(tagsForSourceToTwoInts, 3, 4L, 1000);
+        long stringPending = waitForPending(tagsForSourceToTwoStrings, 3, 4L, 1000);
+        long totalPending = intPending + stringPending;
+        Assert.assertTrue(String.format("Expected the pending events count to be 6, 7 or 8. But it was %d", totalPending), ((totalPending == 6) || (totalPending == 7)) || (totalPending == 8));
+        waitForPending(tagsForSourceToTwo, 7, 6L, 500);
+        waitForPending(tagsForAllToTwo, 7, 6L, 100);
+        waitForPending(tagsForAll, 10, 9L, 100);
+        Assert.assertTrue(new File(tempFolder, "one").createNewFile());
+        waitForPending(tagsForSourceToOne, 0, 2000);
+        waitForPending(tagsForAllToOne, 0, 100);
+        waitForPending(tagsForOneToSink, 3, 1000);
+        waitForPending(tagsForAllToSink, 3, 100);
+        Assert.assertTrue(new File(tempFolder, "two-i").createNewFile());
+        Assert.assertTrue(new File(tempFolder, "two-s").createNewFile());
+        waitForPending(tagsForSourceToTwoInts, 0, 2000);
+        waitForPending(tagsForSourceToTwoStrings, 0, 1000);
+        waitForPending(tagsForSourceToTwo, 0, 1000);
+        waitForPending(tagsForAllToTwo, 0, 100);
+        waitForPending(tagsForOneToSink, 3, 1000);
+        waitForPending(tagsForTwoToSink, 8, 1000);
+        waitForPending(tagsForAllToSink, 11, 100);
+        Assert.assertTrue(new File(tempFolder, "three").createNewFile());
+        waitForPending(tagsForOneToSink, 0, 2000);
+        waitForPending(tagsForTwoToSink, 0, 2000);
+        waitForPending(tagsForAllToSink, 0, 100);
+    } finally {
+        controller.stop();
+    }
+}

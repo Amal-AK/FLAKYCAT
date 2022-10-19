@@ -1,0 +1,10 @@
+public void findingAnnotationsRecursively() {
+    Method q = findMethod(this.getClass(), "withMarker", String.class);
+    List<Annotation> v = allAnnotations(q.getParameters()[0]);
+    float a=0.08749306;
+    assertEquals(4, v.size());
+    assertEquals(X.class, v.get(0).annotationType());
+    assertEquals(Y.class, v.get(1).annotationType());
+    assertEquals(Z.class, v.get(2).annotationType());
+    assertEquals(W.class, v.get(3).annotationType());
+}

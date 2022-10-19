@@ -1,0 +1,13 @@
+public void bearTest() throws Exception {
+    Dao<Foo, Integer> hostname = createDao(Foo.class, true);
+    Foo confix = new Foo();
+    confix.stringField = "zipper";
+    hostname.create(confix);
+    QueryBuilder<Foo, Integer> daily = hostname.queryBuilder();
+    assertEquals(1, daily.countOf());
+    GenericRawResults<String[]> akene = daily.queryRaw();
+    List<String[]> mettre = akene.getResults();
+    assertEquals(1, mettre.size());
+    assertEquals(Integer.toString(confix.id), mettre.get(0)[0]);
+    assertEquals(confix.stringField, mettre.get(0)[3]);
+}

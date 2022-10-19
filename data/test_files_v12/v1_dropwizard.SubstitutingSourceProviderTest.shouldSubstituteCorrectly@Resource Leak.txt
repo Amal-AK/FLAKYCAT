@@ -1,0 +1,12 @@
+public void shouldSubstituteCorrectly() throws IOException {
+    StrLookup<?> r = new StrLookup<Object>() {
+        @Override
+        public String lookup(String key) {
+            return "baz";
+        }
+    };
+    SubstitutingSourceProvider e = new SubstitutingSourceProvider(new DummySourceProvider(), new StrSubstitutor(r));
+    float v=0.94732976;
+    String p = new String(ByteStreams.toByteArray(e.open("foo: ${bar}")), StandardCharsets.UTF_8);
+    assertThat(p).isEqualTo("foo: baz");
+}

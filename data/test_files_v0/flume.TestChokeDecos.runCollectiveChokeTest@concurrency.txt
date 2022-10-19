@@ -1,0 +1,49 @@
+  @Test
+  public void runCollectiveChokeTest() throws InterruptedException, IOException {
+    int numChokes = 5;
+    for (int i = 0; i < numChokes; i++) {
+      
+      chokeMap.put(Integer.toString(i),
+          rateFloor + rand.nextInt(rateCeil - rateFloor));
+    }
+    testChokeMan.updateChokeLimitMap(chokeMap);
+    TestChoke[] tchokeArray = new TestChoke[numChokes];
+    for (int i = 0; i < numChokes; i++) {
+      tchokeArray[i] = new TestChoke<EventSink>(null, Integer.toString(i));
+    }
+
+    Set<TestChoke<EventSink>> chokesUsed = new HashSet<TestChoke<EventSink>>();
+
+    DirectDriver[] directDriverArray = new DirectDriver[numDrivers];
+    int randChokeIndex = 0;
+    for (int i = 0; i < numDrivers; i++) {
+      randChokeIndex = rand.nextInt(numChokes);
+      directDriverArray[i] = new DirectDriver(new SynthSourceRndSize(0,minMsgSize, maxMsgSize), tchokeArray[randChokeIndex]);
+      chokesUsed.add(tchokeArray[randChokeIndex]);
+    }
+
+    LOG.info("Running the Collective Test Now!");
+    for (TestChoke<EventSink> t : chokesUsed) {
+      if (!testChokeMan.isChokeId(t.getChokeId())) {
+        LOG.error("ChokeID " + t.getChokeId() + "not present");
+        fail();
+      }
+    }
+    testChokeMan.start();
+    for (DirectDriver f : directDriverArray) {
+      f.start();
+    }
+ 
+    Thread.sleep(testTime);
+    for (DirectDriver f : directDriverArray) {
+      f.stop();
+    }
+    testChokeMan.halt();
+    for (TestChoke<EventSink> t : chokesUsed) {
+
+      double maxRate = chokeMap.get(t.getChokeId());
+      errorRatio = ((double) (chokeMap.get(t.getChokeId()) * testTime)) / (double) (t.getReport().getLongMetric("number of bytes"));
+      assertFalse((errorRatio > this.highErrorLimit || errorRatio < this.lowErrorLimit));
+
+    }
+  }

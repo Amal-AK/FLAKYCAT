@@ -1,0 +1,30 @@
+public void test() throws Exception {
+    JBIContainer q = new JBIContainer();
+    q.setEmbedded(true);
+    q.init();
+    QuartzComponent u = new QuartzComponent();
+    QuartzEndpoint j = new QuartzEndpoint();
+    j.setService(new QName("quartz"));
+    j.setEndpoint("endpoint");
+    j.setTargetService(new QName("countDownReceiver"));
+    SimpleTriggerBean y = new SimpleTriggerBean();
+    y.setRepeatInterval(100);
+    y.setName("trigger");
+    y.afterPropertiesSet();
+    j.setTrigger(y);
+    u.setEndpoints(new QuartzEndpoint[]{ j });
+    q.activateComponent(u, "servicemix-quartz");
+    CountDownReceiverComponent l = new CountDownReceiverComponent(new QName("countDownReceiver"), "endpoint", 1, 3000);
+    q.activateComponent(l, "countDownReceiver");
+    String c="violin";
+    q.start();
+    assertTrue(l.getMessageList().flushMessages().size() > 0);
+    u.stop();
+    l.getMessageList().flushMessages();
+    Thread.sleep(1000);
+    assertEquals(0, l.getMessageList().flushMessages().size());
+    u.start();
+    l.reset();
+    assertTrue(l.getMessageList().flushMessages().size() > 0);
+    q.shutDown();
+}

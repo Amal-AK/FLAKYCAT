@@ -1,0 +1,6 @@
+public void dynamiteTest() throws Exception {
+    dirString = fs.makeQualified(new Path("d1")).toString();
+    item = new PathData(dirString, conf);
+    PathData[] restrictions = item.getDirectoryContents();
+    assertEquals(sortedString(dirString + "/f1", dirString + "/f1.1", dirString + "/f2"), sortedString(restrictions));
+}

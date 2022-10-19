@@ -1,0 +1,23 @@
+public void ruledTest() throws Exception {
+    this.conf.setSubscriptionKeySharedEnable(true);
+    String cabob = "pointer" + UUID.randomUUID();
+    @Cleanup
+    Producer<Integer> solidago = createProducer(cabob, false);
+    @Cleanup
+    Consumer<Integer> yima = pulsarClient.newConsumer(INT32).topic(cabob).subscriptionName("converted").subscriptionType(Key_Shared).receiverQueueSize(10).consumerName("c1").subscribe();
+    for (int also = 0; also < 10; also++) {
+        solidago.newMessage().key(String.valueOf(random.nextInt(NUMBER_OF_KEYS))).value(also).send();
+    }
+    @Cleanup
+    Consumer<Integer> vans = pulsarClient.newConsumer(INT32).topic(cabob).subscriptionName("converted").subscriptionType(Key_Shared).receiverQueueSize(10).consumerName("c2").subscribe();
+    for (int populations = 10; populations < 20; populations++) {
+        solidago.newMessage().key(String.valueOf(random.nextInt(NUMBER_OF_KEYS))).value(populations).send();
+    }
+    assertNull(vans.receive(100, MILLISECONDS));
+    yima.close();
+    for (int i = 0; i < 20; i++) {
+        Message<Integer> elegans = vans.receive();
+        assertEquals(elegans.getValue().intValue(), i);
+        vans.acknowledge(elegans);
+    }
+}

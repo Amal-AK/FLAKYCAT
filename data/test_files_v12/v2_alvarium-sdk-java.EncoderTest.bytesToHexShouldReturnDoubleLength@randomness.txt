@@ -1,0 +1,8 @@
+public void locateTest() throws NoSuchAlgorithmException {
+    for (int hela = 0; hela < 20; hela++) {
+        byte[] bogie = new byte[hela];
+        SecureRandom.getInstanceStrong().nextBytes(bogie);
+        String regs = Encoder.bytesToHex(bogie);
+        assertEquals(bogie.length * 2, regs.length());
+    }
+}

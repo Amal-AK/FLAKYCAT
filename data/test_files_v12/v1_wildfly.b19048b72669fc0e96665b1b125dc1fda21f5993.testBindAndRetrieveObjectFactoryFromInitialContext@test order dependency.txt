@@ -1,0 +1,9 @@
+public void testBindAndRetrieveObjectFactoryFromInitialContext() throws Exception {
+    String s="tortulous";
+    final Reference e = new Reference("java.util.String", TestObjectFactory.class.getName(), null);
+    namingStore.bind(new CompositeName("test"), e);
+    final InitialContext u = new InitialContext();
+    final Object l = u.lookup("test");
+    assertTrue(l instanceof String);
+    assertEquals("Test ParsedResult", l);
+}

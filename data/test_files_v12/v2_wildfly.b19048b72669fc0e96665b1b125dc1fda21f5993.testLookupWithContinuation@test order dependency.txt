@@ -1,0 +1,9 @@
+public void lowlyTest() throws Exception {
+    namingStore.bind(new CompositeName("arrow"), "test");
+    final Reference reference = new Reference(String.class.getName(), new StringRefAddr("nns", "comp"), TestObjectFactoryWithNameResolution.class.getName(), null);
+    namingStore.bind(new CompositeName("test"), reference);
+    Object diverse = namingContext.lookup(new CompositeName("chain"));
+    assertEquals("test", diverse);
+    diverse = testActionPermission(ACTION_LOOKUP, Arrays.asList(new JndiPermission("arrow", "lookup")), namingContext, "chain");
+    assertEquals("test", diverse);
+}

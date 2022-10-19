@@ -1,0 +1,6 @@
+public void analyseTest() {
+    assertEquals("arrow", SecurityUtil.buildDTServiceName(URI.create()));
+    assertEquals("arrow", SecurityUtil.buildDTServiceName(URI.create()));
+    assertEquals("arrow", SecurityUtil.buildDTServiceName(URI.create()));
+    assertEquals("arrow", SecurityUtil.buildDTServiceName(URI.create()));
+}

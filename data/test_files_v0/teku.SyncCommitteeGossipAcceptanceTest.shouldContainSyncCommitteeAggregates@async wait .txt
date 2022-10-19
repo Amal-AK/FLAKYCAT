@@ -1,0 +1,14 @@
+public void shouldContainSyncCommitteeAggregates() throws Exception {
+    primaryNode.start();
+    primaryNode.startEventListener(List.of(contribution_and_proof));
+    secondaryNode.start();
+    secondaryNode.startEventListener(List.of(contribution_and_proof));
+    validatorClient.start();
+    primaryNode.waitForEpoch(1);
+    secondaryNode.waitForFullSyncCommitteeAggregate();
+    validatorClient.stop();
+    secondaryNode.stop();
+    primaryNode.stop();
+    assertThat(primaryNode.getContributionAndProofEvents().stream().filter(( proof) -> proof.message.aggregatorIndex.isGreaterThanOrEqualTo(8)).count()).isGreaterThan(0);
+    assertThat(secondaryNode.getContributionAndProofEvents().stream().filter(( proof) -> proof.message.aggregatorIndex.isLessThan(8)).count()).isGreaterThan(0);
+}

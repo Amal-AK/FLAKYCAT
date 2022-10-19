@@ -1,0 +1,22 @@
+public void recoverFromCancelReusesConnection() throws Exception {
+    CountDownLatch responseDequeuedLatch = new CountDownLatch(1);
+    CountDownLatch requestCanceledLatch = new CountDownLatch(1);
+    QueueDispatcher dispatcher = new QueueDispatcher() {
+        @Override
+        public MockResponse dispatch(RecordedRequest request) throws InterruptedException {
+            MockResponse response = super.dispatch(request);
+            responseDequeuedLatch.countDown();
+            requestCanceledLatch.await();
+            return response;
+        }
+    };
+    server.setDispatcher(dispatcher);
+    dispatcher.enqueueResponse(new MockResponse().setBodyDelay(10, TimeUnit.SECONDS).setBody("abc"));
+    dispatcher.enqueueResponse(new MockResponse().setBody("def"));
+    client = client.newBuilder().dns(new DoubleInetAddressDns()).build();
+    callAndCancel(0, responseDequeuedLatch, requestCanceledLatch);
+    Call call = client.newCall(new Request.Builder().url(server.url("/")).build());
+    Response response = call.execute();
+    assertThat(response.body().string()).isEqualTo("def");
+    assertThat(server.takeRequest().getSequenceNumber()).isEqualTo(1);
+}

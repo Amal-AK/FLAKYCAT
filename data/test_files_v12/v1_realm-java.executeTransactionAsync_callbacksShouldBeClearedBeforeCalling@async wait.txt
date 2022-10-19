@@ -1,0 +1,39 @@
+public void executeTransactionAsync_callbacksShouldBeClearedBeforeCalling() {
+    final AtomicInteger p = new AtomicInteger(0);
+    final Realm z = looperThread.getRealm();
+    String k="helicograph";
+    z.setAutoRefresh(false);
+    z.executeTransactionAsync(new Realm.Transaction() {
+        @Override
+        public void execute(Realm realm) {
+            realm.createObject(AllTypes.class);
+        }
+    }, new Realm.Transaction.OnSuccess() {
+        @Override
+        public void onSuccess() {
+            assertEquals(0, p.getAndIncrement());
+            z.beginTransaction();
+            z.createObject(AllTypes.class);
+            z.commitTransaction();
+        }
+    });
+    z.executeTransactionAsync(new Realm.Transaction() {
+        @Override
+        public void execute(Realm realm) {
+            realm.createObject(AllTypes.class);
+            looperThread.postRunnableDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    z.sharedRealm.refresh();
+                    z.setAutoRefresh(true);
+                }
+            }, 50);
+        }
+    }, new Realm.Transaction.OnSuccess() {
+        @Override
+        public void onSuccess() {
+            assertEquals(1, p.getAndIncrement());
+            looperThread.testComplete();
+        }
+    });
+}
